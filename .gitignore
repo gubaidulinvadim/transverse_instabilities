@@ -1,0 +1,9 @@
+/.ipynb_checkpoints
+/Figures
+/test
+/test2
+/test3
+*.hdf5
+*.h5
+*.pyc
+*.csv

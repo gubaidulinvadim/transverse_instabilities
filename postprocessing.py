@@ -8,14 +8,13 @@ from FITX import fit_risetime
 from machine_data.TDR2 import *
 from SOLEILII_parameters.SOLEILII_TDR_parameters import *
 
-FOLDER = '/home/gubaidulin/scripts/tracking/Results/IDsclose/chroma_scan/'
-FOLDER_FIG = 'Figures/IDsclose/chroma_scan/'
+FOLDER = '/home/gubaidulin/scripts/tracking/Results/IDsopen/chroma_scan200x32/'
+FOLDER_FIG = '/home/gubaidulin/scripts/tracking/Figures/IDsopen/chroma_scan200x32/'
 #    Qmin=0.01, Qmax,=5.0, n_points=50, plane='y'
 #         if plane=='y':
 #         Qp_y = np.linspace(Qmin, Qmax, n_points)
 #     elif plane=='x':
-#         Qp_x = np.linspace(Qmin, Qmax, n_points)
-    
+#         Qp_x = np.linspace(Qmin, Qmax, n_points)    
     
 def plot_Q_s(m, n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y):
     fftz = np.abs(np.fft.rfft(m[4,:]))
@@ -40,7 +39,7 @@ def plot_offset(m, std, n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Q
     ax.plot(m[2,:]/std[2, 0])
     min_level = 0.05
     signal = np.sqrt(m[2,:]**2+(BETA_Y_SMOOTH*m[3,:])**2)/std[2,0]
-    smoothing_window_size = 200
+    smoothing_window_size = 50
     risetime = fit_risetime(signal,
                           min_level=min_level, 
                           smoothing_window_size=smoothing_window_size,
@@ -126,6 +125,8 @@ def post_single(n_macroparticles=1e6, n_turns=5e4, n_bin=100, bunch_current=1.2e
         tau_y = f['WakePotentialData_0']['tau_Wydip'][:]
     plot_intrabunch(dip_y, tau_y, profile_y,  n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y)
     return risetime
+def plot_tmci(n_macroparticles=1e6, n_turns=5e4, n_bin=100, bunch_current=1.2e-3):
+    
 if __name__=="__main__":
     n_macroparticles = 1e6
     

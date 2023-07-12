@@ -15,6 +15,7 @@ from aps_figures.aps_one_column import *
 from PyHEADTAIL.trackers.detuners import Chromaticity
 from SOLEILII_parameters.SOLEILII_TDR_parameters import *
 from PyHEADTAIL.radiation.radiation import SynchrotronRadiationTransverse, SynchrotronRadiationLongitudinal
+from PyHEADTAIL.trackers.transverse_tracking import TransverseMap
 
 def run_ht():
     np.random.seed(42)                            
@@ -77,7 +78,6 @@ def run_ht():
                                                 beta_y=BETA_Y_SMOOTH)
     synchr_rad_long = SynchrotronRadiationLongitudinal(eq_sig_dp=SIGMA_DP, damping_time_z_turns=TAU_Z*OMEGA_REV/(2*np.pi), E_loss_eV=e*U_LOSS )
     
-    from PyHEADTAIL.trackers.transverse_tracking import TransverseMap
     chromaticity = 0
     n_turns = 50000
     slice_monitor = SliceMonitor(filename='htmonitor', n_steps=n_turns, slicer=wake_slicer, parameters_dict=None,
@@ -86,7 +86,7 @@ def run_ht():
     trans_map = TransverseMap(s, alpha_x, beta_x, D_x,
                               alpha_y, beta_y, D_y, Q_X, Q_Y, [chroma])
     trans_one_turn = [m for m in trans_map]
-    map_ = trans_one_turn + [long_map, wake_field, synchr_rad, synchr_rad_long]
+    map_ = trans_one_turn + [long_map, wake_field, synchr_rad_long]
     for turn in tqdm(range(n_turns)):
         for m_ in map_:
             m_.track(bunch)

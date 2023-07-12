@@ -15,7 +15,7 @@ from machine_data.soleil import v2366
 from SOLEILII_parameters.SOLEILII_TDR_parameters import *
 FOLDER = '/home/dockeruser/mbtrack2_transverse_instabilities/'
 
-def run_mbtrack2(n_turns=50000, n_macroparticles=int(1e5), n_bin=100, bunch_current=1e-3, Qp_x=1.6, Qp_y=1.6, ID_state='open'):
+def run_mbtrack2(n_turns=50000, n_macroparticles=int(1e5), n_bin=100, bunch_current=1e-3, Qp_x=1.6, Qp_y=1.6, ID_state='open', include_Zlong=False):
     ring2 = v2366(IDs=ID_state, load_lattice=False)
     particle = Electron()
     chro = [Qp_x, Qp_y]
@@ -32,21 +32,24 @@ def run_mbtrack2(n_turns=50000, n_macroparticles=int(1e5), n_bin=100, bunch_curr
     bunch_monitor = BunchMonitor(0, save_every=1, buffer_size=10, total_size=n_turns, file_name=monitor_filename, mpi_mode=False)
     long_map = LongitudinalMap(ring)
     rf = RFCavity(ring, m=1, Vc=V_RF, theta=np.arccos(ring.U0/V_RF))
-    sr = SynchrotronRadiation(ring)
+    sr = SynchrotronRadiation(ring, switch=[1, 0, 0])
     trans_map = TransverseMap(ring)
     wakemodel = load_TDR2_wf(version=('TDR2.1_ID'+ID_state))
-    wakemodel.drop(['Wlong', 'Zlong', 'Zxdip', 'Zydip', 'Wxdip'])
+    wakemodel.drop(['Zlong', 'Zxdip', 'Zydip', 'Wxdip'])
+    if not include_Zlong: 
+        wakemodel.drop(['Wlong'])
     wakefield = WakePotential(ring, wakemodel, n_bin=n_bin)
     wakepotential_monitor = WakePotentialMonitor(bunch_number=0, wake_types='Wydip', n_bin=n_bin, save_every=1, 
-                    buffer_size=100, total_size=n_turns, file_name=None, mpi_mode=False)
+                    buffer_size=100, total_size=2500, file_name=None, mpi_mode=False)
     for i in tqdm(range(n_turns)):
         trans_map.track(mybunch)
         long_map.track(mybunch)
         rf.track(mybunch)
         wakefield.track(mybunch)
-        wakepotential_monitor.track(mybunch, wakefield)
-        # sr.track(mybunch)
+        sr.track(mybunch)
         bunch_monitor.track(mybunch)
+        if i > (n_turns - 2500):
+            wakepotential_monitor.track(mybunch, wakefield)
 if __name__=='__main__':
     parser = get_parser_for_single_bunch()
     args = parser.parse_args()
@@ -56,4 +59,5 @@ if __name__=='__main__':
                 bunch_current=args.bunch_current,
                 Qp_x=args.Qp_x,
                 Qp_y=args.Qp_y,
-                ID_state=args.ID_state)
+                ID_state=args.ID_state,
+                include_Zlong=args.include_Zlong)

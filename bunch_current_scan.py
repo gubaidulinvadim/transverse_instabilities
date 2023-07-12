@@ -32,7 +32,8 @@ if __name__ == "__main__":
                                 I_b,
                                 args.Qp_x,
                                 args.Qp_y,
-                                args.ID_state)
+                                args.ID_state,
+                                args.include_Zlong)
             os.system('ccc_msub {:}'.format(job))
             os.system('rm -r {:}'.format(job))
 

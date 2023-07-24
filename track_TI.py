@@ -19,7 +19,6 @@ def run_mbtrack2(n_turns=50000, n_macroparticles=int(1e5), n_bin=100, bunch_curr
     ring2 = v2366(IDs=ID_state, load_lattice=False)
     particle = Electron()
     chro = [Qp_x, Qp_y]
-    n_turns=50000
     ring = Synchrotron(h=ring2.h, optics=ring2.optics, particle=particle, L=ring2.L, E0=ring2.E0, ac=ring2.ac, 
                     U0=ring2.U0, tau=ring2.tau, emit=ring2.emit, tune=ring2.tune, 
                     sigma_delta=ring2.sigma_delta, sigma_0=ring2.sigma_0, chro=chro)
@@ -40,7 +39,7 @@ def run_mbtrack2(n_turns=50000, n_macroparticles=int(1e5), n_bin=100, bunch_curr
         wakemodel.drop(['Wlong'])
     wakefield = WakePotential(ring, wakemodel, n_bin=n_bin)
     wakepotential_monitor = WakePotentialMonitor(bunch_number=0, wake_types='Wydip', n_bin=n_bin, save_every=1, 
-                    buffer_size=100, total_size=2500, file_name=None, mpi_mode=False)
+                    buffer_size=100, total_size=2400, file_name=None, mpi_mode=False)
     for i in tqdm(range(n_turns)):
         trans_map.track(mybunch)
         long_map.track(mybunch)

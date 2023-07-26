@@ -19,7 +19,9 @@ from PyHEADTAIL.trackers.transverse_tracking import TransverseMap
 
 def run_ht():
     np.random.seed(42)                            
-    n_turns = 2049                               
+    n_turns = 2049
+    chromaticity = 0
+    n_turns = 50000
     n_turns_slicemonitor = 2048                   
     n_macroparticles = int(1e5)                  
     n_segments = 1             
@@ -50,7 +52,6 @@ def run_ht():
                                             alpha_y=alpha_y, beta_y=beta_y,
                                             limit_n_rms_x=3.5, limit_n_rms_y=3.5,
                                             distribution_z=generators.gaussian2D_asymmetrical(SIGMA_Z, SIGMA_DP),
-                                             # distribution_z=generators.gaussian2D(emittance_z)
                                             ).generate()
 
     n_wake_slices = 500                                     
@@ -78,10 +79,13 @@ def run_ht():
                                                 beta_y=BETA_Y_SMOOTH)
     synchr_rad_long = SynchrotronRadiationLongitudinal(eq_sig_dp=SIGMA_DP, damping_time_z_turns=TAU_Z*OMEGA_REV/(2*np.pi), E_loss_eV=e*U_LOSS )
     
-    chromaticity = 0
-    n_turns = 50000
-    slice_monitor = SliceMonitor(filename='htmonitor', n_steps=n_turns, slicer=wake_slicer, parameters_dict=None,
-                     write_buffer_every=512, buffer_size=4096,)
+
+    slice_monitor = SliceMonitor(filename='htmonitor',
+                                 n_steps=n_turns,
+                                 slicer=wake_slicer,
+                                 parameters_dict=None,
+                                 write_buffer_every=512,
+                                 buffer_size=4096,)
     chroma = Chromaticity(Qp_x=[0], Qp_y=[0])
     trans_map = TransverseMap(s, alpha_x, beta_x, D_x,
                               alpha_y, beta_y, D_y, Q_X, Q_Y, [chroma])
@@ -91,3 +95,6 @@ def run_ht():
         for m_ in map_:
             m_.track(bunch)
         slice_monitor.dump(bunch)
+        
+if __name__ == "__main__":
+    

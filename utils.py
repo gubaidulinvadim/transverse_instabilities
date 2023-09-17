@@ -17,6 +17,7 @@ def get_parser_for_single_bunch():
     parser.add_argument('--ID_state', action='store', help='A flag for open or closed IDs',
                         type=str, default='open',)
     parser.add_argument('--include_Zlong', action='store', help='A flag to include longitudinal wakefield into tracking (for bunch lenghtening)',
-                        type=bool, default=False)
+                        type=str, default='False')
+    parser.add_argument('--harmonic_cavity', action='store', help='A flag for harmonic cavity.', default='False', type=str)
     return parser
                         

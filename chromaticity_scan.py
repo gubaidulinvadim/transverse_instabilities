@@ -33,7 +33,8 @@ if __name__ == "__main__":
                                 args.Qp_x,
                                 Qp_y,
                                 args.ID_state,
-                                args.include_Zlong)
+                                args.include_Zlong,
+                                args.harmonic_cavity)
             os.system('ccc_msub {:}'.format(job))
             os.system('rm -r {:}'.format(job))
     else: 

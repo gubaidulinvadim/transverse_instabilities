@@ -11,8 +11,8 @@ from scipy.signal import find_peaks
 import PyNAFF as pnf
 import pandas as pd
 
-FOLDER = '/home/gubaidulin/scripts/tracking/Results/IDsopen/tmci_scan/'
-FOLDER_FIG = '/home/gubaidulin/scripts/tracking/Figures/IDsopen/no_Wlong/tmci_scan/'
+FOLDER = '/home/gubaidulin/scripts/tracking/Results/new/'
+FOLDER_FIG = '/home/gubaidulin/scripts/tracking/Figures/'
 #    Qmin=0.01, Qmax,=5.0, n_points=50, plane='y'
 #         if plane=='y':
 #         Qp_y = np.linspace(Qmin, Qmax, n_points)
@@ -41,8 +41,8 @@ def plot_offset(m, std, n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Q
     fig, ax = plt.subplots(1, 1)
     ax.plot(m[2,:]/std[2, 0])
     min_level = 0.05
-    signal = np.sqrt(m[2,:]**2+(BETA_Y_SMOOTH*m[3,:])**2)/std[2,0]
-    smoothing_window_size = 50
+    signal = np.sqrt(np.trim_zeros(m[2,:], trim='b')**2+(BETA_Y_SMOOTH*np.trim_zeros(m[3,:], trim='b'))**2)/std[2,0]
+    smoothing_window_size = 100
     risetime = fit_risetime(signal,
                           min_level=min_level, 
                           smoothing_window_size=smoothing_window_size,
@@ -76,9 +76,9 @@ def post_mwi(m, std, n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y
                                                                                                                         Qp_x,
                                                                                                                         Qp_y))
     plt.close()
-    final_energy_offset = np.nanmean(std[5,-20000:])
-    max_energy_offset = np.nanmax(std[5,-20000:])
-    min_energy_offset = np.nanmin(std[5,-20000:])
+    final_energy_offset = np.nanmean(np.trim_zeros(std[5,:], trim='b')[-5000:])
+    max_energy_offset = np.nanmax(np.trim_zeros(std[5,:], trim='b')[-5000:])
+    min_energy_offset = np.nanmin(np.trim_zeros(std[5,:], trim='b')[-5000:])
     return final_energy_offset, max_energy_offset, min_energy_offset
 def post_bunch_length(m, std, n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y): 
     fig, ax = plt.subplots(1, 1)
@@ -93,7 +93,7 @@ def post_bunch_length(m, std, n_macroparticles, n_turns, n_bin, bunch_current, Q
                                                                                                                         Qp_x,
                                                                                                                         Qp_y))
     plt.close()
-    final_bunch_length = np.nanmean(std[4,-5000:])
+    final_bunch_length = np.nanmean(np.trim_zeros(std[4,:], trim='b')[-10000:])
     return final_bunch_length
 def plot_Qb(m, n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y):
     fig, ax = plt.subplots(1, 1)
@@ -135,14 +135,29 @@ def plot_intrabunch(dip_y, tau_y, profile_y,  n_macroparticles, n_turns, n_bin, 
     ax.title.set_text('Intrabunch motion for last {:} turns, N_m={:.1e}'.format(linenumber, n_macroparticles))
     plt.savefig(FOLDER_FIG+'intrabunch_motion(n_mp={:.1e},n_turns={:.1e},n_bin={:},bunch_current={:.1e},Qp_x={:.2f},Qp_y={:.2f}).pdf'.format(n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y))
     plt.close()
-def post_single(n_macroparticles=1e6, n_turns=5e4, n_bin=100, bunch_current=1.2e-3, Qp_x = 1.6, Qp_y=1.6, ):
-    filename = FOLDER+'monitors(n_mp={:.1e},n_turns={:.1e},n_bin={:},bunch_current={:.1e},Qp_x={:.2f},Qp_y={:.2f})'.format(
+def post_single(n_macroparticles=1e6, n_turns=5e4, n_bin=100, bunch_current=1.2e-3, Qp_x = 1.6, Qp_y=1.6, ID_state='open', Zlong='False', cavity='False'):
+    filename = FOLDER+'monitors(n_mp={:.1e},n_turns={:.1e},n_bin={:},bunch_current={:.1e},Qp_x={:.2f},Qp_y={:.2f},ID_state={},Zlong={},cavity={:})'.format(
                                                                                                                         n_macroparticles,
                                                                                                                         n_turns, 
                                                                                                                         n_bin,
                                                                                                                         bunch_current, 
                                                                                                                         Qp_x,
-                                                                                                                        Qp_y)
+                                                                                                                        Qp_y, 
+                                                                                                                        ID_state,
+                                                                                                                        Zlong,
+                                                                                                                        cavity
+    )
+    # filename = FOLDER+'monitors(n_mp={:.1e},n_turns={:.1e},n_bin={:},bunch_current={:.1e},Qp_x={:.2f},Qp_y={:.2f})'.format(
+    #                                                                                                                     n_macroparticles,
+    #                                                                                                                     n_turns, 
+    #                                                                                                                     n_bin,
+    #                                                                                                                     bunch_current, 
+    #                                                                                                                     Qp_x,
+    #                                                                                                                     Qp_y, 
+    #                                                                                                                     # ID_state,
+    #                                                                                                                     # Zlong,
+    #                                                                                                                     # cavity
+    # )
     with hp.File(filename+'.hdf5') as f:
         m = f['BunchData_0']['mean'][:]
         std = f['BunchData_0']['std'][:]
@@ -158,7 +173,6 @@ def post_single(n_macroparticles=1e6, n_turns=5e4, n_bin=100, bunch_current=1.2e
     final_bunch_length = post_bunch_length(m, std, n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y)
     with hp.File(filename+'.hdf5') as f:
         dip_y = f['WakePotentialData_0']['dipole_Wydip'][:]
-
         profile_y = f['WakePotentialData_0']['profile_Wydip'][:]
         tau_y = f['WakePotentialData_0']['tau_Wydip'][:]
     plot_intrabunch(dip_y, tau_y, profile_y,  n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y)
@@ -178,7 +192,6 @@ def post_tmci_mwi_bunch_length(n_macroparticles=1e6, n_turns=5e4, n_bin=100, bun
             )
         except:
             risetime, peak_freqs, peak_amps, final_energy_offset, max_energy_offset, min_energy_offset, final_bunch_length = np.NAN, [np.NAN], [np.NAN], np.NAN, np.NAN, np.NAN, np.NAN
-        # dfs = []
         result = pd.DataFrame({
             'BunchCurrent': bunch_current,
             'Risetime': risetime,
@@ -190,7 +203,6 @@ def post_tmci_mwi_bunch_length(n_macroparticles=1e6, n_turns=5e4, n_bin=100, bun
             'FinalBunchLength': final_bunch_length
         }, index=[0])
 
-        # dfs.append(result)
         results = pd.concat([results, result], ignore_index=True)
         
     fig, ax = plt.subplots(1, 1)
@@ -199,6 +211,62 @@ def post_tmci_mwi_bunch_length(n_macroparticles=1e6, n_turns=5e4, n_bin=100, bun
     ax.set_xlim(0, )
     ax.set_ylim(0, )
     ax.title.set_text('TMCI growth rate')
+    ax.set_xlabel('Bunch current, $I_b$ (mA)')
+    ax.set_ylabel('Instability growth rate, $\mathrm{Im}\Delta Q/Q_s$')
+    plt.savefig(FOLDER_FIG + 'tmci.pdf')
+    plt.close()
+    
+    fig, ax = plt.subplots(1, 1)
+    ax.plot(bunch_currents*1e3, results['FinalBunchLength'][:]/1e-12, marker='.')
+    ax.set_xlabel('Bunch current, $I_b$ (mA)')
+    ax.set_ylabel('Bunch length, $\sigma_z$ (ps)')
+    ax.title.set_text('Bunch lengthening')
+    plt.savefig(FOLDER_FIG + 'bunch_lengthening.pdf')
+    plt.close()
+    
+    fig, ax = plt.subplots(1, 1)
+    sigmas_dp = results['FinalEnergyOffset'][:]
+    ax.plot(bunch_currents*1e3, np.array(sigmas_dp)*1e2, marker='.')
+    ax.title.set_text('MWI threshold')
+    ax.set_xlabel('Bunch current, $I_b$ (mA)')
+    ax.set_ylabel('Energy offset, $\sigma_\delta$ (\%)')
+    plt.savefig(FOLDER_FIG + 'mwi.pdf')
+    plt.close()
+    return results
+def post_bunch_current_scan(n_macroparticles=1e6, n_turns=5e4, n_bin=100, bunch_current_min=.1e-3, bunch_current_max=5e-3, n_points=50):
+    bunch_currents = np.linspace(bunch_current_min, bunch_current_max, n_points)
+    results = pd.DataFrame(columns=['BunchCurrent', 'Risetime', 'PeakFreqs', 'PeakAmps', 'FinalEnergyOffset', 'MaxEnergyOffset', 'MinEnergyOffset', 'FinalBunchLength'])
+    for bunch_current in bunch_currents:
+        try:
+            risetime, peak_freqs, peak_amps, final_energy_offset, max_energy_offset, min_energy_offset, final_bunch_length = post_single(
+                n_macroparticles=n_macroparticles,
+                n_turns=n_turns,
+                n_bin=n_bin,
+                bunch_current=bunch_current,
+                Qp_x=1.2,
+                Qp_y=1.2
+            )
+        except:
+            risetime, peak_freqs, peak_amps, final_energy_offset, max_energy_offset, min_energy_offset, final_bunch_length = np.NAN, [np.NAN], [np.NAN], np.NAN, np.NAN, np.NAN, np.NAN
+        result = pd.DataFrame({
+            'BunchCurrent': bunch_current,
+            'Risetime': risetime,
+            'PeakFreqs': peak_freqs[0],
+            'PeakAmps': peak_amps[0],
+            'FinalEnergyOffset': final_energy_offset,
+            'MaxEnergyOffset': max_energy_offset,
+            'MinEnergyOffset': min_energy_offset,
+            'FinalBunchLength': final_bunch_length
+        }, index=[0])
+
+        results = pd.concat([results, result], ignore_index=True)
+        
+    fig, ax = plt.subplots(1, 1)
+    ax.plot(bunch_currents/1e-3, 2*pi/results['Risetime'][:]/Q_S, marker='.', linewidth=0)
+    # ax.axhline(2*pi/(ring.tau[2]*ring.f0)/Q_S, color='gray', linestyle='solid', label='Radiation damping')
+    ax.set_xlim(0, )
+    ax.set_ylim(0, )
+    ax.title.set_text('Head-tail growth rate')
     ax.set_xlabel('Bunch current, $I_b$ (mA)')
     ax.set_ylabel('Instability growth rate, $\mathrm{Im}\Delta Q/Q_s$')
     plt.savefig(FOLDER_FIG + 'tmci.pdf')

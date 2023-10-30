@@ -15,27 +15,28 @@ if __name__ == "__main__":
                         help='Timelimit as a str for jobs on ccrt or slurm. Defaults to "100000"')
     parser.add_argument('--sub_mode', action='store', metavar='SUB_MODE', type=str, default='ccrt',
                         help='Submission mode. Accepted values are ["local", "ccrt", "slurm"], defaults to "ccrt"')
-    parser.add_argument('--max_current', action='store', metavar='MAX_CHROM', type=float, default = 3.0, 
-                        help="Maximal current value for bunch current scan. Defaults to 10.0." )
-    parser.add_argument('--min_current', action='store', metavar='MIN_CHROM', type=float, default = 0.5, 
-                        help="Maximal current value for bunch current scan. Defaults to 0.01." )
-    parser.add_argument('--n_scan_points', action='store', metavar='N_SCAN_POINTS', type=int, default = 30,
+    parser.add_argument('--max_current', action='store', metavar='MAX_CHROM', type=float, default=3.0,
+                        help="Maximal current value for bunch current scan. Defaults to 10.0.")
+    parser.add_argument('--min_current', action='store', metavar='MIN_CHROM', type=float, default=0.5,
+                        help="Maximal current value for bunch current scan. Defaults to 0.01.")
+    parser.add_argument('--n_scan_points', action='store', metavar='N_SCAN_POINTS', type=int, default=30,
                         help='Number of bunch current value to be scanned. Each point is a separate job! Defaults to 30.')
     args = parser.parse_args()
     if args.sub_mode == 'ccrt':
-        for  i, I_b  in enumerate(1e-3*np.linspace(args.min_current, args.max_current, args.n_scan_points)):
+        for i, I_b in enumerate(1e-3*np.linspace(args.min_current, args.max_current, args.n_scan_points)):
             job = write_submission_script_ccrt(args.job_name+''.format(i),
-                                args.job_time,
-                                args.n_macroparticles,
-                                args.n_turns,
-                                args.n_bin,
-                                I_b,
-                                args.Qp_x,
-                                args.Qp_y,
-                                args.ID_state,
-                                args.include_Zlong)
+                                               args.job_time,
+                                               args.n_macroparticles,
+                                               args.n_turns,
+                                               args.n_bin,
+                                               I_b,
+                                               args.Qp_x,
+                                               args.Qp_y,
+                                               args.ID_state,
+                                               args.include_Zlong,
+                                               args.harmonic_cavity)
             os.system('ccc_msub {:}'.format(job))
             os.system('rm -r {:}'.format(job))
 
-    else: 
+    else:
         pass

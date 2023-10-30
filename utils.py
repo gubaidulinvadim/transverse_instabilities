@@ -1,4 +1,10 @@
 import argparse
+from scipy.special import genlaguerre
+from scipy.optimize import curve_fit
+from sklearn.metrics import r2_score
+import numpy as np
+
+
 def get_parser_for_single_bunch():
     parser = argparse.ArgumentParser(
         description="A script to track transverse instabilities in a light source storage ring.")
@@ -16,8 +22,28 @@ def get_parser_for_single_bunch():
                         default=1.6, help='Vertical chromaticity (absolute)')
     parser.add_argument('--ID_state', action='store', help='A flag for open or closed IDs',
                         type=str, default='open',)
-    parser.add_argument('--include_Zlong', action='store', help='A flag to include longitudinal wakefield into tracking (for bunch lenghtening)',
+    parser.add_argument('--include_Zlong', action='store', help='A flag to include longitudinal wakefield into tracking (for bunch lenghtening).',
                         type=str, default='False')
-    parser.add_argument('--harmonic_cavity', action='store', help='A flag for harmonic cavity.', default='False', type=str)
+    parser.add_argument('--harmonic_cavity', action='store',
+                        help='A flag for harmonic cavity. Defaults to "False".', default='False', type=str)
     return parser
-                        
+
+
+def laguerre_fit(x, *coeffs):
+    a = coeffs[0]
+    b = coeffs[1]
+    c = coeffs[2]
+    orders = np.linspace(0, len(coeffs)-4, len(coeffs)-3, dtype=np.int64)
+    laguerres = np.array([coeffs[3+order]*genlaguerre(order, 0)(b*(x+c)**2) for order in orders])
+    return np.exp(-a*(x+c)**2)*np.sum(laguerres, axis=0)
+
+def fit_loop(t0, data):
+    order = 4
+    r2=0
+    while (r2 < 0.998 and order!=20):
+        p0 = np.zeros(shape=(order, ))
+        p0[0:3] = 0.5, 0.5, 1
+        popt, pcov = curve_fit(laguerre_fit, t0, data, p0=p0)
+        r2 = r2_score(data, laguerre_fit(t0, *popt))
+        order+=1
+    return r2, popt

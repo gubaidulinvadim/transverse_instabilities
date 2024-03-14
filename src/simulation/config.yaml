@@ -1,0 +1,36 @@
+machine:
+  circumference: 353.74
+  energy: 2.75e9
+  epsilon_x: 83e-12
+  epsilon_y: .3*83e-12
+  sigma_dp: 0.09e-2
+  sigma_z: 2.7e-3
+  h_rf: 416
+  f_rf: 352.56e9
+  U_loss: 490e3
+  V_rf: 1.8e6
+  alpha_0: 9.1e-5
+  # gamma_t: 1. / sqrt(ALPHA_0)
+  f_s: 1.4e3
+  # Q_s: 2*pi*F_S/OMEGA_REV
+  tau_x: 7.3e-3
+  tau_y: 13.1e-3
+  tau_z: 11.7e-3
+  Q_x: 54.2
+  Q_y: 18.3
+  Qp_X: 1.6
+  Qp_Y: 1.6
+  PRESSURE: 1e-7
+  BETA_X_SMOOTH: 5.58  
+  BETA_Y_SMOOTH: 3.92 
+  ALPHA_X_SMOOTH: 0
+  ALPHA_Y_SMOOTH: 0
+  I: 500e-3
+  # INTENSITY_PER_BUNCH = I/H_RF/e/OMEGA_REV*2*pi
+slurm: 
+  job_name: 'job'
+  job_time: 10000
+  sub_mode: 'ccrt'
+script:
+  n_macroparticles:
+  n_turns: 

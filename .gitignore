@@ -9,3 +9,6 @@
 *.csv
 *.svg
 *.npy
+*.pdf
+*.png
+*-checkpoint*

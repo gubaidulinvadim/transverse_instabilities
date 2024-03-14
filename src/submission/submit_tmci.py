@@ -34,7 +34,7 @@ print(bunch_current)
 for Ib in bunch_current:
     s = command_string(script_name = 'src/submission/submission.py',
     n_macropaticles=int(1e6),
-    n_turns=int(5e4),
+    n_turns=int(6e4),
     n_bin=100,
     bunch_current=Ib,
     Qp_x=0.0,

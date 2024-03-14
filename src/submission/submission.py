@@ -114,107 +114,107 @@ def write_submission_script(
     return job_name
 
 
-def write_submission_script_ccrt(
-    job_name,
-    job_time,
-    n_macroparticles=int(1e6),
-    n_turns=int(5e4),
-    n_bin=100,
-    bunch_current=1e-3,
-    Qp_x=1.6,
-    Qp_y=1.6,
-    id_state="open",
-    include_Zlong="False",
-    harmonic_cavity="False",
-    max_kick=1.6e-6
-):
-    mount_folder = "/ccc/work/cont003/soleil/gubaiduv/transverse_instabilities"
-    script_name = "/home/dockeruser/transverse_instabilities/src/simulation/track_TI.py"
+# def write_submission_script_ccrt(
+#     job_name,
+#     job_time,
+#     n_macroparticles=int(1e6),
+#     n_turns=int(5e4),
+#     n_bin=100,
+#     bunch_current=1e-3,
+#     Qp_x=1.6,
+#     Qp_y=1.6,
+#     id_state="open",
+#     include_Zlong="False",
+#     harmonic_cavity="False",
+#     max_kick=1.6e-6
+# ):
+#     mount_folder = "/ccc/work/cont003/soleil/gubaiduv/transverse_instabilities"
+#     script_name = "/home/dockeruser/transverse_instabilities/src/simulation/track_TI.py"
 
-    with open(job_name, "w") as f:
-        f.write("#!/bin/bash\n")
-        f.write("#MSUB -m work,scratch\n")
-        f.write("#MSUB -q milan\n")
-        # f.write("#MSUB -Q long\n")
-        f.write("#MSUB -n 1\n")
-        f.write("#MSUB -c 8\n")
-        f.write("#MSUB -T {:}\n".format(job_time))
-        f.write("#MSUB -A soleil\n")
-        f.write("#MSUB -@ gubaidulinvadim@gmail.com:begin,end,requeue\n")
-        f.write(
-            "#MSUB -o /ccc/cont003/home/soleil/gubaiduv/{0:}_%I.err\n".format(job_name)
-        )
-        f.write(
-            "#MSUB -e /ccc/cont003/home/soleil/gubaiduv/{0:}_%I.out\n".format(job_name)
-        )
-        f.write(
-            "ccc_mprun -C {1:} -E'--ctr-mount src={0:},dst=/home/dockeruser/transverse_instabilities' -- python {2:} --n_macroparticles {3:} --n_turns {4:} --n_bin {5:} --bunch_current {6:} --Qp_x {7:} --Qp_y {8:} --id_state {9:} --include_Zlong {10:} --harmonic_cavity {11:} --max_kick {12:}\n".format(
-                mount_folder,
-                image_name,
-                script_name,
-                n_macroparticles,
-                n_turns,
-                n_bin,
-                bunch_current,
-                Qp_x,
-                Qp_y,
-                id_state,
-                include_Zlong,
-                harmonic_cavity,
-                max_kick
-            )
-        )
-    return job_name
+#     with open(job_name, "w") as f:
+#         f.write("#!/bin/bash\n")
+#         f.write("#MSUB -m work,scratch\n")
+#         f.write("#MSUB -q milan\n")
+#         # f.write("#MSUB -Q long\n")
+#         f.write("#MSUB -n 1\n")
+#         f.write("#MSUB -c 8\n")
+#         f.write("#MSUB -T {:}\n".format(job_time))
+#         f.write("#MSUB -A soleil\n")
+#         f.write("#MSUB -@ gubaidulinvadim@gmail.com:begin,end,requeue\n")
+#         f.write(
+#             "#MSUB -o /ccc/cont003/home/soleil/gubaiduv/{0:}_%I.err\n".format(job_name)
+#         )
+#         f.write(
+#             "#MSUB -e /ccc/cont003/home/soleil/gubaiduv/{0:}_%I.out\n".format(job_name)
+#         )
+#         f.write(
+#             "ccc_mprun -C {1:} -E'--ctr-mount src={0:},dst=/home/dockeruser/transverse_instabilities' -- python {2:} --n_macroparticles {3:} --n_turns {4:} --n_bin {5:} --bunch_current {6:} --Qp_x {7:} --Qp_y {8:} --id_state {9:} --include_Zlong {10:} --harmonic_cavity {11:} --max_kick {12:}\n".format(
+#                 mount_folder,
+#                 image_name,
+#                 script_name,
+#                 n_macroparticles,
+#                 n_turns,
+#                 n_bin,
+#                 bunch_current,
+#                 Qp_x,
+#                 Qp_y,
+#                 id_state,
+#                 include_Zlong,
+#                 harmonic_cavity,
+#                 max_kick
+#             )
+#         )
+#     return job_name
 
 
-def write_submission_script_slurm(
-    job_name,
-    job_time,
-    n_macroparticles=int(1e6),
-    n_turns=int(5e4),
-    n_bin=100,
-    bunch_current=1e-3,
-    Qp_x=1.6,
-    Qp_y=1.6,
-    id_state="open",
-    include_Zlong="False",
-    harmonic_cavity="False",
-    max_kick=1.6e-6
-):
-    script_name = "/home/dockeruser/transverse_instabilities/src/simulation/track_TI.py"
-    mount_folder = "/scratch/sources/physmach/gubaidulin/transverse_instabilities:/home/dockeruser/transverse_instabilities"
-    with open(job_name, "w") as f:
-        f.write("#!/bin/bash\n")
-        f.write("#SBATCH --partition sumo\n")
-        f.write("#SBATCH -n 8\n")
-        f.write("#SBATCH --time={:}\n".format(job_time))
-        f.write("#SBATCH --export=ALL\n")
-        f.write("#SBATCH --mail-user='gubaidulinvadim@gmail.com'\n")
-        f.write("#SBATCH --mail-type=begin,end,requeue\n")
-        f.write(
-            "#SBATCH --error=/home/sources/physmach/gubaidulin/err/{0:}_%I.err\n".format(
-                job_name
-            )
-        )
-        f.write("module load tools/singularity/current\n")
-        f.write(
-            "singularity exec --no-home --B {0:} {1:} python {2:} --n_macroparticles {3:} --n_turns {4:} --n_bin {5:} --bunch_current {6:} --Qp_x {7:} --Qp_y {8:} --id_state {9:} --include_Zlong {10:} --harmonic_cavity {11:} --max_kick {12:}\n".format(
-                mount_folder,
-                image_name,
-                script_name,
-                n_macroparticles,
-                n_turns,
-                n_bin,
-                bunch_current,
-                Qp_x,
-                Qp_y,
-                id_state,
-                include_Zlong,
-                harmonic_cavity,
-                max_kick
-            )
-        )
-    return job_name
+# def write_submission_script_slurm(
+#     job_name,
+#     job_time,
+#     n_macroparticles=int(1e6),
+#     n_turns=int(5e4),
+#     n_bin=100,
+#     bunch_current=1e-3,
+#     Qp_x=1.6,
+#     Qp_y=1.6,
+#     id_state="open",
+#     include_Zlong="False",
+#     harmonic_cavity="False",
+#     max_kick=1.6e-6
+# ):
+#     script_name = "/home/dockeruser/transverse_instabilities/src/simulation/track_TI.py"
+#     mount_folder = "/scratch/sources/physmach/gubaidulin/transverse_instabilities:/home/dockeruser/transverse_instabilities"
+#     with open(job_name, "w") as f:
+#         f.write("#!/bin/bash\n")
+#         f.write("#SBATCH --partition sumo\n")
+#         f.write("#SBATCH -n 8\n")
+#         f.write("#SBATCH --time={:}\n".format(job_time))
+#         f.write("#SBATCH --export=ALL\n")
+#         f.write("#SBATCH --mail-user='gubaidulinvadim@gmail.com'\n")
+#         f.write("#SBATCH --mail-type=begin,end,requeue\n")
+#         f.write(
+#             "#SBATCH --error=/home/sources/physmach/gubaidulin/err/{0:}_%I.err\n".format(
+#                 job_name
+#             )
+#         )
+#         f.write("module load tools/singularity/current\n")
+#         f.write(
+#             "singularity exec --no-home --B {0:} {1:} python {2:} --n_macroparticles {3:} --n_turns {4:} --n_bin {5:} --bunch_current {6:} --Qp_x {7:} --Qp_y {8:} --id_state {9:} --include_Zlong {10:} --harmonic_cavity {11:} --max_kick {12:}\n".format(
+#                 mount_folder,
+#                 image_name,
+#                 script_name,
+#                 n_macroparticles,
+#                 n_turns,
+#                 n_bin,
+#                 bunch_current,
+#                 Qp_x,
+#                 Qp_y,
+#                 id_state,
+#                 include_Zlong,
+#                 harmonic_cavity,
+#                 max_kick
+#             )
+#         )
+#     return job_name
 
 
 if __name__ == "__main__":

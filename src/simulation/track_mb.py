@@ -23,10 +23,8 @@ from scipy.constants import c
 from tqdm import tqdm
 from utils import get_parser_for_single_bunch
 
-FOLDER = "/home/dockeruser/transverse_instabilities/data/raw/tcbi/"
-
-
-def run_mbtrack2(n_turns=50_000,
+def run_mbtrack2(folder,
+                 n_turns=50_000,
                  n_macroparticles=int(1e5),
                  n_bin=100,
                  bunch_current=1.2e-3,
@@ -39,7 +37,6 @@ def run_mbtrack2(n_turns=50_000,
                  max_kick=1.6e-6):
     Vc = 1.7e6
     ring = v2366_v2(IDs=id_state, V_RF=Vc)
-    particle = Electron()
     ring.chro = [Qp_x, Qp_y]
     ring.emit[1] = 0.3 * ring.emit[0]
     np.random.seed(42)
@@ -53,7 +50,7 @@ def run_mbtrack2(n_turns=50_000,
         mpi=is_mpi,
     )
     monitor_filename = (
-        FOLDER +
+        folder +
         "monitors(n_mp={:.1e},n_turns={:.1e},n_bin={:},bunch_current={:.1e},Qp_x={:.2f},Qp_y={:.2f},ID_state={:},include_Zlong={:},harmonic_cavity={:},n_turns_wake={:},max_kick={:.1e})"
         .format(n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y,
                 id_state, include_Zlong, harmonic_cavity, n_turns_wake,
@@ -242,7 +239,9 @@ if __name__ == "__main__":
         "Number of turns for long range wakefield calculation. Defaults to 1",
     )
     args = parser.parse_args()
-    run_mbtrack2(n_turns=args.n_turns,
+    folder = "/home/dockeruser/transverse_instabilities/data/raw/tcbi/"
+    run_mbtrack2(folder=folder,
+                 n_turns=args.n_turns,
                  n_macroparticles=args.n_macroparticles,
                  n_bin=args.n_bin,
                  bunch_current=args.bunch_current,

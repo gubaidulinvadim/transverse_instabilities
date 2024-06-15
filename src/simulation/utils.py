@@ -1,12 +1,8 @@
 import argparse
 
 import matplotlib.pyplot as plt
-# from scipy.optimize import curve_fit
-# from sklearn.metrics import r2_score
 import numpy as np
-from machine_data import v2366_v3
 from mbtrack2 import BeamLoadingEquilibrium, CavityResonator
-from scipy.special import genlaguerre
 
 
 def get_active_cavity_params(ring):
@@ -148,6 +144,7 @@ def get_parser_for_single_bunch():
 
 
 def laguerre_fit(x, *coeffs):
+    from scipy.special import genlaguerre
     a = coeffs[0]
     b = coeffs[1]
     c = coeffs[2]
@@ -160,6 +157,8 @@ def laguerre_fit(x, *coeffs):
 
 
 def fit_loop(t0, data):
+    # from scipy.optimize import curve_fit
+    # from sklearn.metrics import r2_score
     order = 4
     r2 = 0
     while r2 < 0.998 and order != 20:

@@ -20,10 +20,77 @@ from scipy.constants import c
 from tqdm import tqdm
 from utils import get_active_cavity_params, get_parser_for_single_bunch
 
-FOLDER = "/home/dockeruser/transverse_instabilities/data/raw/sbi/"
 
 
-def run_mbtrack2(n_turns=100_000,
+def setup_rf(ring, harmonic_cavity, Vc):
+    if harmonic_cavity == "False":
+        main_rf = RFCavity(ring, m=1, Vc=Vc, theta=np.arccos(ring.U0 / Vc))
+        harmonic_rf = None
+    if harmonic_cavity == "True":
+        V_main, theta_main, V_harmonic, theta_harmonic = get_active_cavity_params(
+            ring)
+        main_rf = RFCavity(ring, m=1, Vc=V_main, theta=theta_main)
+        harmonic_rf = RFCavity(ring,
+                               m=4,
+                               Vc=V_harmonic,
+                               theta=theta_harmonic)
+    return main_rf, harmonic_rf
+
+
+def setup_wakes(ring, id_state, include_Zlong, n_bin):
+    wakemodel = load_TDR2_wf(version=("TDR2.1_ID" + id_state))
+    
+    if include_Zlong == 'True':
+        wakefield_tr = WakePotential(ring,
+                                     wakefield=WakeField(
+                                         [wakemodel.Wydip, wakemodel.Wlong]),
+                                     n_bin=n_bin)
+    else:
+        wakefield_tr = WakePotential(ring,
+                                     wakefield=WakeField([wakemodel.Wydip]),
+                                     n_bin=n_bin)
+    
+    wakefield_long = WakePotential(ring,
+                                   wakefield=WakeField([wakemodel.Wlong]),
+                                   n_bin=n_bin)
+    return wakefield_tr, wakefield_long
+
+
+def setup_fbt(ring, max_kick, kind='exp'):
+    if kind == 'exp':
+        feedback_tau = max_kick / 1.8e-6 * 50
+        fbty = ExponentialDamper(ring,
+                                plane='y',
+                                damping_time=ring.T0 * feedback_tau,
+                                phase_diff=np.pi / 2)
+        fbtx = ExponentialDamper(ring,
+                                plane='x',
+                                damping_time=ring.T0 * feedback_tau,
+                                phase_diff=np.pi / 2)
+    else:
+        fbty = FIRDamper(ring,
+                        plane='y',
+                        tune=ring.tune[1],
+                        turn_delay=1,
+                        tap_number=7,
+                        gain=1,
+                        phase=90,
+                        bpm_error=None,
+                        max_kick=max_kick)
+        fbtx = FIRDamper(ring,
+                        plane='x',
+                        tune=ring.tune[0],
+                        turn_delay=1,
+                        tap_number=7,
+                        gain=1,
+                        phase=90,
+                        bpm_error=None,
+                        max_kick=max_kick)
+    return fbtx, fbty
+
+
+def run_mbtrack2(folder,
+                 n_turns=100_000,
                  n_macroparticles=int(1e5),
                  n_bin=100,
                  bunch_current=1e-3,
@@ -34,7 +101,8 @@ def run_mbtrack2(n_turns=100_000,
                  harmonic_cavity="False",
                  max_kick=1.6e-6,
                  sc='False'):
-    ring = v2366_v3(IDs=id_state, HC_power=50e3)
+    Vc = 1.7e6
+    ring = v2366_v3(IDs=id_state, HC_power=50e3, V_RF=Vc)
     ring.chro = [Qp_x, Qp_y]
     ring.emit[1] = 0.3 * ring.emit[0]
     mybunch = Bunch(ring,
@@ -44,9 +112,17 @@ def run_mbtrack2(n_turns=100_000,
     np.random.seed(42)
     mybunch.init_gaussian()
     stdx, stdy = np.std(mybunch['x']), np.std(mybunch['y'])
-    monitor_filename = FOLDER + "monitors(n_mp={:.1e},n_turns={:.1e},n_bin={:},bunch_current={:.1e},Qp_x={:.2f},Qp_y={:.2f},id_state={:},Zlong={:},cavity={:},max_kick={:.1e},sc={:})".format(
-        n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y, id_state,
-        include_Zlong, harmonic_cavity, max_kick, sc)
+    monitor_filename = folder + f"monitors(n_mp={n_macroparticles:.1e}," + \
+        f"n_turns={n_turns:.1e}," +\
+        f"n_bin={n_bin:},"+\
+        f"bunch_current={bunch_current:.1e},"+\
+        f"Qp_x={Qp_x:.2f},"+\
+        f"Qp_y={Qp_y:.2f},"+\
+        f"id_state={id_state:},"+\
+        f"Zlong={include_Zlong:},"+\
+        f"cavity={harmonic_cavity:},"+\
+        f"max_kick={max_kick:.1e},"+\
+        f"sc={sc:})"
     bunch_monitor = BunchMonitor(
         0,
         save_every=1,
@@ -56,74 +132,22 @@ def run_mbtrack2(n_turns=100_000,
         mpi_mode=False,
     )
     long_map = LongitudinalMap(ring)
-    if harmonic_cavity == "False":
-        rf = RFCavity(ring, m=1, Vc=V_RF, theta=np.arccos(ring.U0 / V_RF))
-    if harmonic_cavity == "True":
-        V_RF_main, theta_main, V_RF_harmonic, theta_harmonic = get_active_cavity_params(
-            ring)
-        main_rf = RFCavity(ring, m=1, Vc=V_RF_main, theta=theta_main)
-        harmonic_rf = RFCavity(ring,
-                               m=4,
-                               Vc=V_RF_harmonic,
-                               theta=theta_harmonic)
+    main_rf, harmonic_rf = setup_rf(ring, harmonic_cavity, Vc)
     sr = SynchrotronRadiation(ring, switch=[1, 1, 1])
     trans_map = TransverseMap(ring)
-    wakemodel = load_TDR2_wf(version=("TDR2.1_ID" + id_state))
-
-    if include_Zlong == 'True':
-        wakefield_tr = WakePotential(ring,
-                                     wakefield=WakeField(
-                                         [wakemodel.Wydip, wakemodel.Wlong]),
-                                     n_bin=n_bin)
-    else:
-        wakefield_tr = WakePotential(ring,
-                                     wakefield=WakeField([wakemodel.Wydip]),
-                                     n_bin=n_bin)
-
-    wakefield_long = WakePotential(ring,
-                                   wakefield=WakeField([wakemodel.Wlong]),
-                                   n_bin=n_bin)
-
+    
+    wakefield_tr, wakefield_long = setup_wakes(version, id_state, include_Zlong, ring, n_bin)
     wakepotential_monitor = WakePotentialMonitor(
         bunch_number=0,
         wake_types="Wydip",
         n_bin=n_bin,
         save_every=1,
-        buffer_size=600,
-        total_size=2400,
+        buffer_size=500,
+        total_size=2500,
         file_name=None,
         mpi_mode=False,
     )
-
-    # fbty = FIRDamper(ring,
-    #                 plane='y',
-    #                 tune=ring.tune[1],
-    #                 turn_delay=1,
-    #                 tap_number=7,
-    #                 gain=1,
-    #                 phase=90,
-    #                 bpm_error=None,
-    #                 max_kick=max_kick)
-    # fbtx = FIRDamper(ring,
-    #                 plane='x',
-    #                 tune=ring.tune[0],
-    #                 turn_delay=1,
-    #                 tap_number=7,
-    #                 gain=1,
-    #                 phase=90,
-    #                 bpm_error=None,
-    #                 max_kick=max_kick)
-    feedback_tau = max_kick / 1.8e-6 * 50
-
-    fbty = ExponentialDamper(ring,
-                             plane='y',
-                             damping_time=ring.T0 * feedback_tau,
-                             phase_diff=np.pi / 2)
-    fbtx = ExponentialDamper(ring,
-                             plane='x',
-                             damping_time=ring.T0 * feedback_tau,
-                             phase_diff=np.pi / 2)
-
+    fbtx, fbty = setup_fbt(ring, max_kick)
     tracking_elements = [trans_map, long_map, bunch_monitor]
     if include_Zlong == 'True':
         tracking_elements.append(sr)
@@ -140,7 +164,7 @@ def run_mbtrack2(n_turns=100_000,
         tracking_elements.append(harmonic_rf)
     else:
         print("Harmonic cavity is off.")
-        tracking_elements.append(rf)
+        tracking_elements.append(main_rf)
     if max_kick != 0:
         tracking_elements.append(fbtx)
         tracking_elements.append(fbty)
@@ -164,7 +188,9 @@ def run_mbtrack2(n_turns=100_000,
 if __name__ == "__main__":
     parser = get_parser_for_single_bunch()
     args = parser.parse_args()
-    run_mbtrack2(n_turns=args.n_turns,
+    folder = "/home/dockeruser/transverse_instabilities/data/raw/sbi/"
+    run_mbtrack2(folder=folder,
+                 n_turns=args.n_turns,
                  n_macroparticles=args.n_macroparticles,
                  n_bin=args.n_bin,
                  bunch_current=args.bunch_current,

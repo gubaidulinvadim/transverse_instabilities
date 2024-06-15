@@ -25,17 +25,17 @@ id_state = 'close'
 # hc='True'
 for Ib in bunch_current:
     for Zlong, hc in [('False', 'False'), ('True', 'False'), ('True', 'True')]:
-        # for Zlong, hc in [('False', 'False')]:
-        s = get_command_string(script_name='submission.py',
-                               n_macroparticles=int(1e6),
-                               n_turns=50_000,
-                               n_bin=100,
-                               bunch_current=Ib,
-                               Qp_x=1.6,
-                               Qp_y=1.6,
-                               id_state=id_state,
-                               include_Zlong=Zlong,
-                               harmonic_cavity=hc,
-                               max_kick=0,
-                               sc='False')
+        for sc in ['True', 'False']:
+            s = get_command_string(script_name='submission.py',
+                n_macroparticles=int(1e6),
+                n_turns=50_000,
+                n_bin=100,
+                bunch_current=Ib,
+                Qp_x=1.6,
+                Qp_y=1.6,
+                id_state=id_state,
+                include_Zlong=Zlong,
+                harmonic_cavity=hc,
+                max_kick=0,
+                sc=sc)
         os.system(s)

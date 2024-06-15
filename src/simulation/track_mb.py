@@ -3,25 +3,18 @@ import os
 pypath = os.getenv('PYTHONPATH')
 pypath = pypath + ':/home/dockeruser/machine_data'
 os.environ['PYTHONPATH'] = pypath
-import h5py as hp
-import matplotlib.pyplot as plt
-# os.system('echo ${PYTHONPATH}')
-# os.system('pip list')
 import numpy as np
-from machine_data.soleil import v2366, v2366_v2
-from machine_data.TDR2 import *
+from machine_data.soleil import v2366_v3
 from mbtrack2 import DirectFeedback
-from mbtrack2.impedance.wakefield import WakeField
 from mbtrack2.tracking import (Beam, Bunch, CavityResonator, LongitudinalMap,
                                LongRangeResistiveWall, RFCavity,
                                SynchrotronRadiation, TransverseMap,
                                WakePotential)
-from mbtrack2.tracking.feedback import ExponentialDamper, FIRDamper
 from mbtrack2.tracking.monitors import BeamMonitor
-from mbtrack2.utilities import Optics
-from scipy.constants import c
 from tqdm import tqdm
 from utils import get_parser_for_single_bunch
+from setup_tracking import setup_fbt, setup_wakes, setup_dual_rf
+
 
 def run_mbtrack2(folder,
                  n_turns=50_000,
@@ -36,7 +29,7 @@ def run_mbtrack2(folder,
                  n_turns_wake=1,
                  max_kick=1.6e-6):
     Vc = 1.7e6
-    ring = v2366_v2(IDs=id_state, V_RF=Vc)
+    ring = v2366_v3(IDs=id_state, V_RF=Vc)
     ring.chro = [Qp_x, Qp_y]
     ring.emit[1] = 0.3 * ring.emit[0]
     np.random.seed(42)
@@ -64,24 +57,9 @@ def run_mbtrack2(folder,
         mpi_mode=is_mpi,
     )
     long_map = LongitudinalMap(ring)
-    rf = RFCavity(ring, m=1, Vc=Vc, theta=np.arccos(ring.U0 / Vc))
     sr = SynchrotronRadiation(ring, switch=[1, 1, 1])
     trans_map = TransverseMap(ring)
-    wakemodel = load_TDR2_wf(version=("TDR2.1_ID" + id_state))
-
-    if include_Zlong == 'True':
-        wakefield_tr = WakePotential(ring,
-                                     wakefield=WakeField(
-                                         [wakemodel.Wydip, wakemodel.Wlong]),
-                                     n_bin=n_bin)
-    else:
-        wakefield_tr = WakePotential(ring,
-                                     wakefield=WakeField([wakemodel.Wydip]),
-                                     n_bin=n_bin)
-
-    wakefield_long = WakePotential(ring,
-                                   wakefield=WakeField([wakemodel.Wlong]),
-                                   n_bin=n_bin)
+    wakefield_tr, wakefield_long, wakemodel = setup_wakes(ring, id_state, include_Zlong, n_bin)
 
     x3 = 6.38e-3
     if id_state == "open":
@@ -100,104 +78,8 @@ def run_mbtrack2(folder,
         y3=y3,
     )
 
-    if harmonic_cavity == "True":
-        Vc = 1.7e6
-        Itot = ring.h * bunch_current  # Use for fixed detuning or CT
-        HC_det = 110e3  # Use for fixed detuning or CT
-        HC_det_end = 3e3
-        MC_det = -35e3
-        xi_start = 1.15
-        xi_end = 1.2
-        estimated_bunch_length = 40e-12
-
-        # FB Settings
-        fb_gain = [0.01, 1000]  # fb Gain for IQ components of Vc
-        fb_sample_num = (
-            208  # 2*2*2*2*3*3*3, mean Vc value of this number is used for Vg control
-        )
-        fb_every = 208  # 192ns (assumption),corresponding to process speed of the Feedback system
-        fb_delay = 704  # int(2e-6/ring.T1)
-        directFB_gain = 0.1
-        directFB_phaseShift = 0 / 180 * np.pi
-        tuner_gain = 0.01
-        PFB_gainA = 0.01
-        PFB_gainP = 0.01
-        PFB_delay = 1
-        m = 1
-        Rs = 5e6
-        Q = 35.7e3
-        QL = 6e3
-        detune = MC_det
-        Ncav = 4
-        rf = CavityResonator(ring, m, Rs, Q, QL, detune, Ncav=Ncav)
-
-        m = 4
-        Rs = 2.358e6
-        Q = 36e3
-        QL = 36e3
-        Ncav = 1
-        hrf = CavityResonator(ring, m, Rs, Q, QL, detune, Ncav=Ncav)
-        hrf.Vg = 0
-        hrf.theta_g = 0
-        hrf.detune = HC_det
-
-        HC_det = Itot * hrf.Rs / hrf.Q * ring.f1 / Vc * hrf.m**2 / xi_start
-        hrf.detune = HC_det
-        HC_det_end = Itot * hrf.Rs / hrf.Q * ring.f1 / Vc * hrf.m**2 / xi_end
-
-        delta = 0
-        delta += hrf.Vb(Itot) * np.cos(hrf.psi)
-        delta += beam[0].charge * wakemodel.Wlong.loss_factor(
-            estimated_bunch_length)
-
-        rf.Vc = Vc
-        rf.theta = np.arccos((ring.U0 + delta) / Vc)
-        # rf.set_optimal_detune(Itot)
-        rf.set_generator(Itot)
-
-        dfb = DirectFeedback(
-            ring=ring,
-            cav_res=rf,
-            gain=fb_gain,
-            sample_num=fb_sample_num,
-            every=fb_every,
-            delay=fb_delay,
-            DFB_gain=directFB_gain,
-            DFB_phase_shift=directFB_phaseShift,
-        )
-        rf.feedback.append(dfb)
-        rf.init_phasor(beam)
-        hrf.init_phasor(beam)
-
-    # fbty = FIRDamper(ring,
-    #                 plane='y',
-    #                 tune=ring.tune[1],
-    #                 turn_delay=1,
-    #                 tap_number=7,
-    #                 gain=1,
-    #                 phase=90,
-    #                 bpm_error=None,
-    #                 max_kick=max_kick)
-    # fbtx = FIRDamper(ring,
-    #                 plane='x',
-    #                 tune=ring.tune[0],
-    #                 turn_delay=1,
-    #                 tap_number=7,
-    #                 gain=1,
-    #                 phase=90,
-    #                 bpm_error=None,
-    #                 max_kick=max_kick)
-
-    feedback_tau = max_kick / 1.8e-6 * 50
-    fbty = ExponentialDamper(ring,
-                             plane='y',
-                             damping_time=ring.T0 * feedback_tau,
-                             phase_diff=np.pi / 2)
-    fbtx = ExponentialDamper(ring,
-                             plane='x',
-                             damping_time=ring.T0 * feedback_tau,
-                             phase_diff=np.pi / 2)
-
+    rf, hrf = setup_dual_rf(ring, beam, harmonic_cavity, bunch_current,  wakemodel)
+    fbtx, fbty = setup_fbt(ring, max_kick)
     tracking_elements = [trans_map, long_map, sr, beam_monitor, rf]
 
     if harmonic_cavity == 'True':

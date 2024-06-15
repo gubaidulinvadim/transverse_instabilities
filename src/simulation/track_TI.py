@@ -3,91 +3,17 @@ import os
 pypath = os.getenv('PYTHONPATH')
 pypath = pypath + ':/home/dockeruser/machine_data'
 os.environ['PYTHONPATH'] = pypath
-import h5py as hp
-import matplotlib.pyplot as plt
 import numpy as np
 from machine_data.soleil import v2366_v3
-from machine_data.TDR2 import *
 from mbtrack2.impedance.wakefield import WakeField
 from mbtrack2.tracking import (Beam, Bunch, LongitudinalMap, RFCavity,
                                SynchrotronRadiation, TransverseMap,
                                WakePotential)
-from mbtrack2.tracking.feedback import ExponentialDamper, FIRDamper
 from mbtrack2.tracking.monitors import BunchMonitor, WakePotentialMonitor
 from mbtrack2.tracking.spacecharge import TransverseSpaceCharge
-from mbtrack2.utilities import Optics
-from scipy.constants import c
 from tqdm import tqdm
-from utils import get_active_cavity_params, get_parser_for_single_bunch
-
-
-
-def setup_rf(ring, harmonic_cavity, Vc):
-    if harmonic_cavity == "False":
-        main_rf = RFCavity(ring, m=1, Vc=Vc, theta=np.arccos(ring.U0 / Vc))
-        harmonic_rf = None
-    if harmonic_cavity == "True":
-        V_main, theta_main, V_harmonic, theta_harmonic = get_active_cavity_params(
-            ring)
-        main_rf = RFCavity(ring, m=1, Vc=V_main, theta=theta_main)
-        harmonic_rf = RFCavity(ring,
-                               m=4,
-                               Vc=V_harmonic,
-                               theta=theta_harmonic)
-    return main_rf, harmonic_rf
-
-
-def setup_wakes(ring, id_state, include_Zlong, n_bin):
-    wakemodel = load_TDR2_wf(version=("TDR2.1_ID" + id_state))
-    
-    if include_Zlong == 'True':
-        wakefield_tr = WakePotential(ring,
-                                     wakefield=WakeField(
-                                         [wakemodel.Wydip, wakemodel.Wlong]),
-                                     n_bin=n_bin)
-    else:
-        wakefield_tr = WakePotential(ring,
-                                     wakefield=WakeField([wakemodel.Wydip]),
-                                     n_bin=n_bin)
-    
-    wakefield_long = WakePotential(ring,
-                                   wakefield=WakeField([wakemodel.Wlong]),
-                                   n_bin=n_bin)
-    return wakefield_tr, wakefield_long
-
-
-def setup_fbt(ring, max_kick, kind='exp'):
-    if kind == 'exp':
-        feedback_tau = max_kick / 1.8e-6 * 50
-        fbty = ExponentialDamper(ring,
-                                plane='y',
-                                damping_time=ring.T0 * feedback_tau,
-                                phase_diff=np.pi / 2)
-        fbtx = ExponentialDamper(ring,
-                                plane='x',
-                                damping_time=ring.T0 * feedback_tau,
-                                phase_diff=np.pi / 2)
-    else:
-        fbty = FIRDamper(ring,
-                        plane='y',
-                        tune=ring.tune[1],
-                        turn_delay=1,
-                        tap_number=7,
-                        gain=1,
-                        phase=90,
-                        bpm_error=None,
-                        max_kick=max_kick)
-        fbtx = FIRDamper(ring,
-                        plane='x',
-                        tune=ring.tune[0],
-                        turn_delay=1,
-                        tap_number=7,
-                        gain=1,
-                        phase=90,
-                        bpm_error=None,
-                        max_kick=max_kick)
-    return fbtx, fbty
-
+from utils import get_parser_for_single_bunch
+from setup_tracking import get_active_cavity_params, setup_fbt, setup_wakes, setup_rf
 
 def run_mbtrack2(folder,
                  n_turns=100_000,
@@ -136,7 +62,7 @@ def run_mbtrack2(folder,
     sr = SynchrotronRadiation(ring, switch=[1, 1, 1])
     trans_map = TransverseMap(ring)
     
-    wakefield_tr, wakefield_long = setup_wakes(version, id_state, include_Zlong, ring, n_bin)
+    wakefield_tr, wakefield_long, _ = setup_wakes(ring, id_state, include_Zlong, n_bin)
     wakepotential_monitor = WakePotentialMonitor(
         bunch_number=0,
         wake_types="Wydip",

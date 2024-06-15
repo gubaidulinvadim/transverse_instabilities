@@ -1,57 +1,47 @@
-import numpy as np
-from utils import get_parser_for_single_bunch
-from scipy.constants import c
-from tqdm import tqdm
+import os
+
+pypath = os.getenv('PYTHONPATH')
+pypath = pypath + ':/home/dockeruser/machine_data'
+os.environ['PYTHONPATH'] = pypath
 import h5py as hp
 import matplotlib.pyplot as plt
-from mbtrack2 import Synchrotron, Electron
-from mbtrack2.utilities import Optics
-from mbtrack2.tracking import LongitudinalMap, SynchrotronRadiation, TransverseMap
-from mbtrack2.tracking import Beam, Bunch, WakePotential, CavityResonator
-from mbtrack2.tracking import RFCavity, SynchrotronRadiation
-from mbtrack2.tracking import LongRangeResistiveWall
-from mbtrack2.tracking.feedback import FIRDamper, ExponentialDamper
-from mbtrack2.tracking.monitors import WakePotentialMonitor, BeamMonitor
-from machine_data.TDR2 import *
+# os.system('echo ${PYTHONPATH}')
+# os.system('pip list')
+import numpy as np
 from machine_data.soleil import v2366, v2366_v2
+from machine_data.TDR2 import *
 from mbtrack2 import DirectFeedback
-from SOLEILII_parameters.SOLEILII_TDR_parameters import *
+from mbtrack2.impedance.wakefield import WakeField
+from mbtrack2.tracking import (Beam, Bunch, CavityResonator, LongitudinalMap,
+                               LongRangeResistiveWall, RFCavity,
+                               SynchrotronRadiation, TransverseMap,
+                               WakePotential)
+from mbtrack2.tracking.feedback import ExponentialDamper, FIRDamper
+from mbtrack2.tracking.monitors import BeamMonitor
+from mbtrack2.utilities import Optics
+from scipy.constants import c
+from tqdm import tqdm
+from utils import get_parser_for_single_bunch
 
-FOLDER = "/home/dockeruser/transverse_instabilities/data/raw/"
+FOLDER = "/home/dockeruser/transverse_instabilities/data/raw/tcbi/"
 
 
-def run_mbtrack2(
-    n_turns=50_000,
-    n_macroparticles=int(1e5),
-    n_bin=100,
-    bunch_current=1.2e-3,
-    Qp_x=1.6,
-    Qp_y=1.6,
-    id_state="open",
-    include_Zlong=False,
-    harmonic_cavity="False",
-    n_turns_wake=1,
-    max_kick = 1.6e-6
-):
+def run_mbtrack2(n_turns=50_000,
+                 n_macroparticles=int(1e5),
+                 n_bin=100,
+                 bunch_current=1.2e-3,
+                 Qp_x=1.6,
+                 Qp_y=1.6,
+                 id_state="open",
+                 include_Zlong="False",
+                 harmonic_cavity="False",
+                 n_turns_wake=1,
+                 max_kick=1.6e-6):
     Vc = 1.7e6
-    ring2 = v2366_v2(IDs=id_state, V_RF=Vc)
+    ring = v2366_v2(IDs=id_state, V_RF=Vc)
     particle = Electron()
-    chro = [Qp_x, Qp_y]
-    ring = Synchrotron(
-        h=ring2.h,
-        optics=ring2.optics,
-        particle=particle,
-        L=ring2.L,
-        E0=ring2.E0,
-        ac=ring2.ac,
-        U0=ring2.U0,
-        tau=ring2.tau,
-        emit=ring2.emit,
-        tune=ring2.tune,
-        sigma_delta=ring2.sigma_delta,
-        sigma_0=ring2.sigma_0,
-        chro=chro,
-    )
+    ring.chro = [Qp_x, Qp_y]
+    ring.emit[1] = 0.3 * ring.emit[0]
     np.random.seed(42)
     beam = Beam(ring)
     is_mpi = True
@@ -63,38 +53,39 @@ def run_mbtrack2(
         mpi=is_mpi,
     )
     monitor_filename = (
-        FOLDER
-        + "monitors(n_mp={:.1e},n_turns={:.1e},n_bin={:},bunch_current={:.1e},Qp_x={:.2f},Qp_y={:.2f},ID_state={:},include_Zlong={:},harmonic_cavity={:},n_turns_wake={:},max_kick={:.1e})".format(
-            n_macroparticles,
-            n_turns,
-            n_bin,
-            bunch_current,
-            Qp_x,
-            Qp_y,
-            id_state,
-            include_Zlong,
-            harmonic_cavity,
-            n_turns_wake,
-            max_kick
-        )
-    )
+        FOLDER +
+        "monitors(n_mp={:.1e},n_turns={:.1e},n_bin={:},bunch_current={:.1e},Qp_x={:.2f},Qp_y={:.2f},ID_state={:},include_Zlong={:},harmonic_cavity={:},n_turns_wake={:},max_kick={:.1e})"
+        .format(n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y,
+                id_state, include_Zlong, harmonic_cavity, n_turns_wake,
+                max_kick))
     beam_monitor = BeamMonitor(
         ring.h,
-        save_every=1,
-        buffer_size=2000,
+        save_every=100,
+        buffer_size=500,
         file_name=monitor_filename,
         total_size=n_turns,
         mpi_mode=is_mpi,
     )
     long_map = LongitudinalMap(ring)
     rf = RFCavity(ring, m=1, Vc=Vc, theta=np.arccos(ring.U0 / Vc))
-    sr = SynchrotronRadiation(ring, switch=[1, 0, 0])
+    sr = SynchrotronRadiation(ring, switch=[1, 1, 1])
     trans_map = TransverseMap(ring)
     wakemodel = load_TDR2_wf(version=("TDR2.1_ID" + id_state))
-    wakemodel.drop(["Zlong", "Zxdip", "Zydip", "Wxdip"])
-    if not include_Zlong:
-        wakemodel.drop(["Wlong"])
-    wakefield = WakePotential(ring, wakemodel, n_bin=n_bin)
+
+    if include_Zlong == 'True':
+        wakefield_tr = WakePotential(ring,
+                                     wakefield=WakeField(
+                                         [wakemodel.Wydip, wakemodel.Wlong]),
+                                     n_bin=n_bin)
+    else:
+        wakefield_tr = WakePotential(ring,
+                                     wakefield=WakeField([wakemodel.Wydip]),
+                                     n_bin=n_bin)
+
+    wakefield_long = WakePotential(ring,
+                                   wakefield=WakeField([wakemodel.Wlong]),
+                                   n_bin=n_bin)
+
     x3 = 6.38e-3
     if id_state == "open":
         y3 = 6.73e-3
@@ -105,7 +96,7 @@ def run_mbtrack2(
         beam=beam,
         length=350.749,
         rho=2.135e-8,
-        radius=5e-3,
+        radius=8e-3,
         types=["Wydip"],
         nt=n_turns_wake,
         x3=x3,
@@ -159,7 +150,8 @@ def run_mbtrack2(
 
         delta = 0
         delta += hrf.Vb(Itot) * np.cos(hrf.psi)
-        delta += beam[0].charge * wakemodel.Wlong.loss_factor(estimated_bunch_length)
+        delta += beam[0].charge * wakemodel.Wlong.loss_factor(
+            estimated_bunch_length)
 
         rf.Vc = Vc
         rf.theta = np.arccos((ring.U0 + delta) / Vc)
@@ -179,40 +171,43 @@ def run_mbtrack2(
         rf.feedback.append(dfb)
         rf.init_phasor(beam)
         hrf.init_phasor(beam)
-    # wakepotential_monitor = WakePotentialMonitor(bunch_number=0, wake_types='Wydip', n_bin=n_bin, save_every=1,
-    #  buffer_size=100, total_size=2400, file_name=None, mpi_mode=False)
 
+    # fbty = FIRDamper(ring,
+    #                 plane='y',
+    #                 tune=ring.tune[1],
+    #                 turn_delay=1,
+    #                 tap_number=7,
+    #                 gain=1,
+    #                 phase=90,
+    #                 bpm_error=None,
+    #                 max_kick=max_kick)
+    # fbtx = FIRDamper(ring,
+    #                 plane='x',
+    #                 tune=ring.tune[0],
+    #                 turn_delay=1,
+    #                 tap_number=7,
+    #                 gain=1,
+    #                 phase=90,
+    #                 bpm_error=None,
+    #                 max_kick=max_kick)
 
-    fbty = FIRDamper(ring,
-                    plane='y',
-                    tune=ring.tune[1],
-                    turn_delay=1,
-                    tap_number=7,
-                    gain=1,
-                    phase=90,
-                    bpm_error=None,
-                    max_kick=max_kick)
-    fbtx = FIRDamper(ring,
-                    plane='x',
-                    tune=ring.tune[0],
-                    turn_delay=1,
-                    tap_number=7,
-                    gain=1,
-                    phase=90,
-                    bpm_error=None,
-                    max_kick=max_kick)
-    
-    # feedback_tau = max_kick/1.6e-6*500
-    # fbty = ExponentialDamper(ring, plane='y', damping_time=ring.T0*feedback_tau, phase_diff=np.pi/2)
-    # fbtx = ExponentialDamper(ring, plane='x', damping_time=ring.T0*feedback_tau, phase_diff=np.pi/2)
+    feedback_tau = max_kick / 1.8e-6 * 50
+    fbty = ExponentialDamper(ring,
+                             plane='y',
+                             damping_time=ring.T0 * feedback_tau,
+                             phase_diff=np.pi / 2)
+    fbtx = ExponentialDamper(ring,
+                             plane='x',
+                             damping_time=ring.T0 * feedback_tau,
+                             phase_diff=np.pi / 2)
 
-
-    tracking_elements = [trans_map, long_map, wakefield, long_wakefield, sr, beam_monitor, rf]
+    tracking_elements = [trans_map, long_map, sr, beam_monitor, rf]
 
     if harmonic_cavity == 'True':
-        trackin_elements.append(hrf)
+        tracking_elements.append(hrf)
     if max_kick != 0:
-        tracking_elements.append([fbtx, fbty])
+        tracking_elements.append(fbtx)
+        tracking_elements.append(fbty)
 
     for i in range(n_turns):
         if i % 1000 == 0:
@@ -228,6 +223,12 @@ def run_mbtrack2(
         for el in tracking_elements:
             el.track(beam)
 
+        if i > 25_000:
+            wakefield_tr.track(beam)
+            long_wakefield.track(beam)
+        elif include_Zlong == 'True':
+            wakefield_long.track(beam)
+
 
 if __name__ == "__main__":
     parser = get_parser_for_single_bunch()
@@ -237,19 +238,18 @@ if __name__ == "__main__":
         metavar="N_TURNS_WAKE",
         type=int,
         default=1,
-        help="Number of turns for long range wakefield calculation. Defaults to 1",
+        help=
+        "Number of turns for long range wakefield calculation. Defaults to 1",
     )
     args = parser.parse_args()
-    run_mbtrack2(
-        n_turns=args.n_turns,
-        n_macroparticles=args.n_macroparticles,
-        n_bin=args.n_bin,
-        bunch_current=args.bunch_current,
-        Qp_x=args.Qp_x,
-        Qp_y=args.Qp_y,
-        id_state=args.id_state,
-        include_Zlong=args.include_Zlong,
-        harmonic_cavity=args.harmonic_cavity,
-        n_turns_wake=args.n_turns_wake,
-        max_kick=args.max_kick
-    )
+    run_mbtrack2(n_turns=args.n_turns,
+                 n_macroparticles=args.n_macroparticles,
+                 n_bin=args.n_bin,
+                 bunch_current=args.bunch_current,
+                 Qp_x=args.Qp_x,
+                 Qp_y=args.Qp_y,
+                 id_state=args.id_state,
+                 include_Zlong=args.include_Zlong,
+                 harmonic_cavity=args.harmonic_cavity,
+                 n_turns_wake=args.n_turns_wake,
+                 max_kick=args.max_kick)

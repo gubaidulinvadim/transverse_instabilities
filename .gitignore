@@ -12,3 +12,4 @@
 *.pdf
 *.png
 *-checkpoint*
+parallel_hdf5_test.py

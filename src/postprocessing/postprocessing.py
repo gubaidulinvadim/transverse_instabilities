@@ -7,18 +7,12 @@ from aps_figures.aps_one_column import *
 from FITX import fit_risetime
 from machine_data.TDR2 import *
 from scipy.constants import c
-from scipy.signal import find_peaks
+from scipy.signal import find_peaks, periodogram
 from SOLEILII_parameters.SOLEILII_TDR_parameters import *
 from tqdm.notebook import tqdm
 
 FOLDER = '/home/gubaidulin/scripts/tracking/transverse_instabilities/data/raw/sbi/'
 FOLDER_FIG = '/home/gubaidulin/scripts/tracking/transverse_instabilities/data/processed/'
-
-#    Qmin=0.01, Qmax,=5.0, n_points=50, plane='y'
-#         if plane=='y':
-#         Qp_y = np.linspace(Qmin, Qmax, n_points)
-#     elif plane=='x':
-#         Qp_x = np.linspace(Qmin, Qmax, n_points)
 
 
 def plot_Q_s(m, n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y):
@@ -37,7 +31,6 @@ def plot_Q_s(m, n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y):
         .format(n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y))
     plt.close()
 
-
 def plot_offset(ax,
                 m,
                 mp,
@@ -53,10 +46,17 @@ def plot_offset(ax,
                 **matplotlib_kwargs):
     turns = np.linspace(0, len(m) / n_bunches * n_sampling, len(m))
     ax.plot(turns, m / std, **matplotlib_kwargs)
-    min_level = 0.1
+    min_level = 0.15
+    m = np.trim_zeros(m, trim='b')
+    mp = np.trim_zeros(mp, trim='b')
+    # m = m[:50_000]
+    # mp = mp[:50_000]
+    
+    # m = m[abs(m) < 10000]
+    # mp = mp[abs(m) < 10000]
     signal = np.sqrt(
-        np.trim_zeros(m, trim='b')**2 +
-        (BETA_Y_SMOOTH * np.trim_zeros(mp, trim='b'))**2) / std
+        m**2 +
+        (BETA_Y_SMOOTH * mp)**2) / std
     smoothing_window_size = 100
     risetime = fit_risetime(
         signal,
@@ -121,8 +121,7 @@ def post_bunch_length(m, std, n_macroparticles, n_turns, n_bin, bunch_current,
 
 def plot_Qb(m, n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y):
     fig, ax = plt.subplots(1, 1)
-    ffty = np.abs(np.fft.rfft(m[2, :]))
-    fftfreqy = np.fft.rfftfreq(m[2, :].shape[0])
+    fftfreqy, ffty = periodogram(m[2, :], )
     ax.plot(fftfreqy, ffty)
     multiple_of = 5
     ax.set_xlabel('Coherent frequency, $\omega/\omega_0$')
@@ -145,9 +144,10 @@ def plot_Qb(m, n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y):
         'coherent_betatron_tune(n_mp={:.1e},n_turns={:.1e},n_bin={:},bunch_current={:.1e},Qp_x={:.2f},Qp_y={:.2f}).pdf'
         .format(n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y))
     plt.close()
-    peaks = find_peaks(ffty / np.max(ffty), height=0.1, distance=20)[0]
+    # peaks = find_peaks(ffty / np.max(ffty), height=0.1, distance=20)[0]
     # naff_res = pnf.naff(m[2,:], turns=m[2,:].shape[0], nterms=50, skipTurns=0, getFullSpectrum=False, window=1)
-    return fftfreqy[peaks], ffty[peaks] / np.max(ffty)
+    return fftfreqy, ffty #fftfreqy[peaks], ffty[peaks] / np.max(ffty)
+
 
 
 def plot_intrabunch(dip_y, tau_y, profile_y, n_macroparticles, n_turns, n_bin,
@@ -188,17 +188,6 @@ def post_single(n_macroparticles=1e6,
     filename = FOLDER + 'monitors(n_mp={:.1e},n_turns={:.1e},n_bin={:},bunch_current={:.1e},Qp_x={:.2f},Qp_y={:.2f},id_state={},Zlong={},cavity={:},max_kick={:.1e},sc={:})'.format(
         n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y, ID_state,
         Zlong, cavity, max_kick, sc)
-    # filename = FOLDER+'monitors(n_mp={:.1e},n_turns={:.1e},n_bin={:},bunch_current={:.1e},Qp_x={:.2f},Qp_y={:.2f})'.format(
-    #                                                                                                                     n_macroparticles,
-    #                                                                                                                     n_turns,
-    #                                                                                                                     n_bin,
-    #                                                                                                                     bunch_current,
-    #                                                                                                                     Qp_x,
-    #                                                                                                                     Qp_y,
-    #                                                                                                                     # ID_state,
-    #                                                                                                                     # Zlong,
-    #                                                                                                                     # cavity
-    # )
     with hp.File(filename + '.hdf5') as f:
         m = f['BunchData_0']['mean'][:]
         std = f['BunchData_0']['std'][:]

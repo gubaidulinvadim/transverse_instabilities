@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from mbtrack2 import BeamLoadingEquilibrium, CavityResonator
 from mbtrack2.tracking.feedback import ExponentialDamper, FIRDamper
+from mbtrack2.impedance.wakefield import WakeField
 from machine_data.TDR2 import *
 from mbtrack2.tracking import (RFCavity, WakePotential)
 

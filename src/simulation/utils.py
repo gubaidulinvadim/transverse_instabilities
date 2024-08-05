@@ -90,6 +90,18 @@ def get_parser_for_single_bunch():
         type=str)
     return parser
 
+def get_parser_for_multibunch():
+    parser = get_parser_for_single_bunch()
+    parser.add_argument(
+        "--n_turns_wake",
+        action="store",
+        metavar="N_TURNS_WAKE",
+        type=int,
+        default=1,
+        help=
+        "Number of turns for long range wakefield calculation. Defaults to 1",
+    )
+    return parser
 
 def laguerre_fit(x, *coeffs):
     from scipy.special import genlaguerre

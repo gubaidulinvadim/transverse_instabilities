@@ -1,23 +1,24 @@
 import os
-
-pypath = os.getenv('PYTHONPATH')
-pypath = pypath + ':/home/dockeruser/machine_data'
-os.environ['PYTHONPATH'] = pypath
 import numpy as np
-from machine_data.soleil import v2366_v3
 from mbtrack2 import DirectFeedback
 from mbtrack2.tracking import (Beam, Bunch, CavityResonator, LongitudinalMap,
                                LongRangeResistiveWall, RFCavity,
                                SynchrotronRadiation, TransverseMap,
                                WakePotential)
-from mbtrack2.tracking.monitors import BeamMonitor
+from mbtrack2.tracking.monitors import BeamMonitor, WakePotentialMonitor
 from tqdm import tqdm
-from utils import get_parser_for_single_bunch
+from utils import get_parser_for_multibunch
 from setup_tracking import setup_fbt, setup_wakes, setup_dual_rf
+from mbtrack2.tracking.spacecharge import TransverseSpaceCharge
+
+pypath = os.getenv('PYTHONPATH', '')
+pypath = f"{pypath}{os.pathsep}/home/dockeruser/machine_data" if pypath else '/home/dockeruser/machine_data'
+os.environ['PYTHONPATH'] = pypath
+from machine_data.soleil import v2366_v3
 
 
 def run_mbtrack2(folder,
-                 n_turns=50_000,
+                 n_turns=100_000,
                  n_macroparticles=int(1e5),
                  n_bin=100,
                  bunch_current=1.2e-3,
@@ -27,7 +28,8 @@ def run_mbtrack2(folder,
                  include_Zlong="False",
                  harmonic_cavity="False",
                  n_turns_wake=1,
-                 max_kick=1.6e-6):
+                 max_kick=1.6e-6,
+                 sc="False"):
     Vc = 1.7e6
     ring = v2366_v3(IDs=id_state, V_RF=Vc)
     ring.chro = [Qp_x, Qp_y]
@@ -44,16 +46,35 @@ def run_mbtrack2(folder,
     )
     monitor_filename = (
         folder +
-        "monitors(n_mp={:.1e},n_turns={:.1e},n_bin={:},bunch_current={:.1e},Qp_x={:.2f},Qp_y={:.2f},ID_state={:},include_Zlong={:},harmonic_cavity={:},n_turns_wake={:},max_kick={:.1e})"
-        .format(n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y,
-                id_state, include_Zlong, harmonic_cavity, n_turns_wake,
-                max_kick))
+        f"monitors(n_mp={n_macroparticles:.1e}"+
+        f",n_turns={n_turns:.1e}"+
+        f",n_bin={n_bin}"+
+        f",bunch_current={bunch_current:.1e}"+
+        f",Qp_x={Qp_x:.2f}"+
+        f",Qp_y={Qp_y:.2f}"+
+        f",ID_state={id_state:}"+
+        f",include_Zlong={include_Zlong:}"+
+        f",harmonic_cavity={harmonic_cavity:}"+
+        f",n_turns_wake={n_turns_wake:}"
+        f",max_kick={max_kick:.1e}"+
+        f",sc={sc:}"+
+        ")")
     beam_monitor = BeamMonitor(
         ring.h,
-        save_every=100,
-        buffer_size=500,
+        save_every=10,
+        buffer_size=1000,
         file_name=monitor_filename,
-        total_size=n_turns,
+        total_size=n_turns//10,
+        mpi_mode=is_mpi,
+    )
+    wakepotential_monitor = WakePotentialMonitor(
+        bunch_number=0,
+        wake_types="Wydip",
+        n_bin=n_bin,
+        save_every=1,
+        buffer_size=600,
+        total_size=2400,
+        file_name=None,
         mpi_mode=is_mpi,
     )
     long_map = LongitudinalMap(ring)
@@ -81,45 +102,53 @@ def run_mbtrack2(folder,
     rf, hrf = setup_dual_rf(ring, beam, harmonic_cavity, bunch_current,  wakemodel)
     fbtx, fbty = setup_fbt(ring, max_kick)
     tracking_elements = [trans_map, long_map, sr, beam_monitor, rf]
+    besc = TransverseSpaceCharge(ring=ring,
+                                interaction_length=ring.L,
+                                n_bins=n_bin)
 
+    if sc == 'True':
+        print('space charge included')
+        tracking_elements.append(besc)
     if harmonic_cavity == 'True':
         tracking_elements.append(hrf)
     if max_kick != 0:
         tracking_elements.append(fbtx)
         tracking_elements.append(fbty)
 
-    for i in range(n_turns):
-        if i % 1000 == 0:
-            if is_mpi:
-                if beam.mpi.rank == 0:
+    stdx, stdy = np.mean(beam.bunch_std[0]), np.mean(beam.bunch_std[2])
+    track_wake_monitor = False
+    try:
+        for i in range(n_turns):
+            if i % 1000 == 0:
+                if is_mpi and beam.mpi.rank == 0:
                     print(f"mpi Turn {i:}")
-            else:
-                print(f"Turn {i:}")
-        if is_mpi:
-            beam.mpi.share_distributions(beam, n_bin=n_bin)
-            beam.mpi.share_means(beam)
-            beam.mpi.share_stds(beam)
-        for el in tracking_elements:
-            el.track(beam)
+                elif not is_mpi:
+                    print(f"Turn {i:}")
+            if is_mpi:
+                beam.mpi.share_distributions(beam, n_bin=n_bin)
+                beam.mpi.share_means(beam)
+                beam.mpi.share_stds(beam)
+            for el in tracking_elements:
+                el.track(beam)
 
-        if i > 25_000:
-            wakefield_tr.track(beam)
-            long_wakefield.track(beam)
-        elif include_Zlong == 'True':
-            wakefield_long.track(beam)
+            if i > 25_000:
+                wakefield_tr.track(beam)
+                long_wakefield.track(beam)
+            elif include_Zlong == 'True':
+                wakefield_long.track(beam)
+                
+            if (np.mean(beam.bunch_mean[:][0]) > 0.1 * stdx or np.mean(beam.bunch_mean[:][2]) > 0.1 * stdy and monitor_count < 2500):
+                    track_wake_monitor=True
+            if (i > (n_turns - 2500) or track_wake_monitor) and monitor_count < 2500:
+                wakepotential_monitor.track(mybunch, wakefield_tr)
+                monitor_count += 1
+        
+    finally:
+        beam_monitor.close()
 
 
 if __name__ == "__main__":
-    parser = get_parser_for_single_bunch()
-    parser.add_argument(
-        "--n_turns_wake",
-        action="store",
-        metavar="N_TURNS_WAKE",
-        type=int,
-        default=1,
-        help=
-        "Number of turns for long range wakefield calculation. Defaults to 1",
-    )
+    parser = get_parser_for_multibunch()
     args = parser.parse_args()
     folder = "/home/dockeruser/transverse_instabilities/data/raw/tcbi/"
     run_mbtrack2(folder=folder,
@@ -133,4 +162,5 @@ if __name__ == "__main__":
                  include_Zlong=args.include_Zlong,
                  harmonic_cavity=args.harmonic_cavity,
                  n_turns_wake=args.n_turns_wake,
-                 max_kick=args.max_kick)
+                 max_kick=args.max_kick,
+                 sc=args.sc,)

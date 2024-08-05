@@ -41,7 +41,7 @@ def run_mbtrack2(folder,
     monitor_filename = folder + f"monitors(n_mp={n_macroparticles:.1e}," + \
         f"n_turns={n_turns:.1e}," +\
         f"n_bin={n_bin:},"+\
-        f"bunch_current={bunch_current:.1e},"+\
+        f"bunch_current={bunch_current:.2e},"+\
         f"Qp_x={Qp_x:.2f},"+\
         f"Qp_y={Qp_y:.2f},"+\
         f"id_state={id_state:},"+\
@@ -68,8 +68,8 @@ def run_mbtrack2(folder,
         wake_types="Wydip",
         n_bin=n_bin,
         save_every=1,
-        buffer_size=500,
-        total_size=2500,
+        buffer_size=600,
+        total_size=2400,
         file_name=None,
         mpi_mode=False,
     )
@@ -77,9 +77,9 @@ def run_mbtrack2(folder,
     tracking_elements = [trans_map, long_map, bunch_monitor]
     if include_Zlong == 'True':
         tracking_elements.append(sr)
-    besc = TransverseSpaceCharge(interaction_length=ring.L,
-                                 energy=ring.E0,
-                                 n_bins=100)
+    besc = TransverseSpaceCharge(ring=ring,
+                                interaction_length=ring.L,
+                                n_bins=100)
 
     if sc == 'True':
         print('space charge included')
@@ -96,19 +96,25 @@ def run_mbtrack2(folder,
         tracking_elements.append(fbty)
 
     monitor_count = 0
-    for i in tqdm(range(n_turns)):
-        for el in tracking_elements:
-            el.track(mybunch)
-        if i > 25_000:
-            wakefield_tr.track(mybunch)
-            if ((i > (n_turns - 2500)
-                 or np.mean(mybunch.particles["x"]) > 0.1 * stdx
-                 or np.mean(mybunch.particles["y"]) > 0.1 * stdy)
-                    and monitor_count < 2500):
-                wakepotential_monitor.track(mybunch, wakefield_tr)
-                monitor_count += 1
-        elif include_Zlong == 'True':
-            wakefield_long.track(mybunch)
+    track_wake_monitor = False
+    try:
+        for i in tqdm(range(n_turns)):
+            for el in tracking_elements:
+                el.track(mybunch)
+            if i > 25_000:
+                wakefield_tr.track(mybunch)
+                if (np.mean(beam.bunch_mean[:][0]) > 0.1 * stdx
+                    or np.mean(beam.bunch_mean[:][2]) > 0.1 * stdy and monitor_count < 2500):
+                    track_wake_monitor=True
+                if ((i > (n_turns - 2500)
+                    or track_wake_monitor)
+                        and monitor_count < 2500):
+                    wakepotential_monitor.track(mybunch, wakefield_tr)
+                    monitor_count += 1
+            elif include_Zlong == 'True':
+                wakefield_long.track(mybunch)
+    finally:
+        bunch_monitor.close()
 
 
 if __name__ == "__main__":

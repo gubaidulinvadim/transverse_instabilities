@@ -1,8 +1,6 @@
 /.ipynb_checkpoints
 /Figures
-/test
-/test2
-/test3
+/__pycache__
 *.hdf5
 *.h5
 *.pyc
@@ -12,4 +10,6 @@
 *.pdf
 *.png
 *-checkpoint*
+*.ipynb
+*.ipynb_checkpoints
 parallel_hdf5_test.py

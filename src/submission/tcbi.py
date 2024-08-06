@@ -9,7 +9,7 @@ def get_command_string(script_name, n_macroparticles, n_turns, n_bin,
         f"python {script_name} --sub_mode ccrt"
         f" --is_longqueue True"
         f" --job_name TBCIchroma{Qp_y:.1f}_current_{bunch_current:.1e}_sc_{sc}"
-        f" --job_time 86000"
+        f" --job_time 259000"
         f" --n_macroparticles {n_macroparticles}"
         f" --n_turns {n_turns}"
         f" --n_bin {n_bin}"

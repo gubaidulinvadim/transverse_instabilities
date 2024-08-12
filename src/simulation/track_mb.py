@@ -37,7 +37,12 @@ def run_mbtrack2(folder,
     np.random.seed(42)
     beam = Beam(ring)
     is_mpi = True
-    filling_pattern = np.ones(ring.h) * bunch_current
+    filling_pattern = np.zeros(ring.h) * bunch_current
+    filling_pattern[0] = bunch_current
+    filling_pattern[103] = bunch_current
+    filling_pattern[207] = bunch_current
+    filling_pattern[311] = bunch_current
+    
     beam.init_beam(
         filling_pattern,
         mp_per_bunch=n_macroparticles,

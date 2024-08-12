@@ -39,7 +39,7 @@ def write_submission_script(sub_mode,
                             id_state="open",
                             include_Zlong="False",
                             harmonic_cavity="False",
-                            n_tasks=416,
+                            n_tasks=4,
                             n_turns_wake=50,
                             max_kick=1.6e-6,
                             sc="False"):

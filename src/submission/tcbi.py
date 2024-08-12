@@ -7,7 +7,6 @@ def get_command_string(script_name, n_macroparticles, n_turns, n_bin,
                        harmonic_cavity, max_kick, n_turns_wake, sc):
     return (
         f"python {script_name} --sub_mode ccrt"
-        f" --is_longqueue True"
         f" --job_name TBCIchroma{Qp_y:.1f}_current_{bunch_current:.1e}_sc_{sc}"
         f" --job_time 1800"
         f" --n_macroparticles {n_macroparticles}"

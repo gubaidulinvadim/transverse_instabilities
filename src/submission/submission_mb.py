@@ -60,12 +60,12 @@ def write_submission_script(sub_mode,
         if sub_mode == "ccrt":
             f.write("#MSUB -m work,scratch\n")
             if int(job_time) >= 86400:
-                f.write("#MSUB -q long\n")
+                f.write("#MSUB -Q long\n")
             elif int(job_time) <= 1800:
-                f.write("#MSUB -q test\n")
+                f.write("#MSUB -Q test\n")
             else:
-                f.write("#MSUB -q normal\n")
-            f.write("#MSUB -p milan\n")
+                f.write("#MSUB -Q normal\n")
+            f.write("#MSUB -q milan\n")
             f.write(f"#MSUB -n {n_tasks}\n")
             f.write(f"#MSUB -c 1\n")
             f.write(f"#MSUB -T {job_time}\n")

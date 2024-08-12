@@ -9,7 +9,7 @@ def get_command_string(script_name, n_macroparticles, n_turns, n_bin,
         f"python {script_name} --sub_mode ccrt"
         f" --is_longqueue True"
         f" --job_name TBCIchroma{Qp_y:.1f}_current_{bunch_current:.1e}_sc_{sc}"
-        f" --job_time 259000"
+        f" --job_time 1800"
         f" --n_macroparticles {n_macroparticles}"
         f" --n_turns {n_turns}"
         f" --n_bin {n_bin}"
@@ -28,7 +28,7 @@ def run_simulation(script_name, n_macroparticles, n_turns, n_bin, chromaticity_l
     for chromaticity in chromaticity_list:
         for bunch_current in bunch_current_list:
             combinations = product(zlong_hc_pairs, sc_list)
-            for (include_Zlong, harmonic_cavity), sc in combinations:
+            for (include_Zlong, harmonic_cavity, sc) in combinations:
                 command = get_command_string(
                     script_name=script_name,
                     n_macroparticles=n_macroparticles,
@@ -59,7 +59,7 @@ def main():
     max_kick = 0
     id_state = 'close'
     
-    chromaticity_list_1 = [1.2, 1.4, 1.6] #np.linspace(0.2, 3.0, 15)
+    chromaticity_list_1 = [1.0] #np.linspace(0.2, 3.0, 15)
     bunch_current_list_1 = [1.2e-3]
     
     # chromaticity_list_2 = [1.6]

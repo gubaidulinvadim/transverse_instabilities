@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import PyNAFF as pnf
-from aps_figures.aps_one_column import *
 from FITX import fit_risetime
 from machine_data.TDR2 import *
 from scipy.constants import c

@@ -28,7 +28,6 @@ def get_command_string(script_name, n_macroparticles, n_turns, n_bin,
 
 
 def write_submission_script(sub_mode,
-                            is_longqueue,
                             job_name,
                             job_time,
                             n_macroparticles=int(1e6),
@@ -60,9 +59,12 @@ def write_submission_script(sub_mode,
         f.write("#!/bin/bash\n")
         if sub_mode == "ccrt":
             f.write("#MSUB -m work,scratch\n")
-            f.write("#MSUB -q milan\n")
-            if is_longqueue == "True":
-                f.write("#MSUB -Q long\n")
+            if int(job_time) >= 86400:
+                f.write("#MSUB -q long\n")
+            elif int(job_time) <= 1800:
+                f.write("#MSUB -q test\n")
+            else:
+                f.write("#MSUB -q milan\n")
             f.write(f"#MSUB -n {n_tasks}\n")
             f.write(f"#MSUB -c 1\n")
             f.write(f"#MSUB -T {job_time}\n")
@@ -137,16 +139,9 @@ if __name__ == "__main__":
         help=
         "Number of tasks assigned for mpi, should be larger than number of bunches. Defaults to 500.",
     )
-    parser.add_argument(
-        "--is_longqueue",
-        action="store",
-        metavar="IS_LONGQUEUE",
-        type=str,
-        default="False",
-        help="Whether to use the long queue on ccrt. Defaults to False.")
     args = parser.parse_args()
     job = write_submission_script(
-        args.sub_mode, args.is_longqueue, args.job_name, args.job_time,
+        args.sub_mode, args.job_name, args.job_time,
         args.n_macroparticles, args.n_turns, args.n_bin, args.bunch_current,
         args.Qp_x, args.Qp_y, args.id_state, args.include_Zlong,
         args.harmonic_cavity, args.n_tasks, args.n_turns_wake, args.max_kick, args.sc)

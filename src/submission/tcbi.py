@@ -51,15 +51,15 @@ def run_simulation(script_name, n_macroparticles, n_turns, n_bin, chromaticity_l
 
 def main():
     script_name = 'submission_mb.py'
-    n_macroparticles = int(1e5)
-    n_turns = 100_000
+    n_macroparticles = int(1e4)
+    n_turns = 50_000
     n_bin = 100
     n_turns_wake = 50
     max_kick = 0
     id_state = 'close'
     
     chromaticity_list_1 = [1.4] #np.linspace(0.2, 3.0, 15)
-    bunch_current_list_1 = [1.2e-3]
+    bunch_current_list_1 = [2e-3]
     
     # chromaticity_list_2 = [1.6]
     # bunch_current_list_2 = np.linspace(1.2e-3, 3.6e-3, 13)

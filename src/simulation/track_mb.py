@@ -146,7 +146,7 @@ def run_mbtrack2(folder,
             if (monitor_count < 2500 and (np.mean(beam.bunch_mean[:][0]) > 0.1 * stdx or np.mean(beam.bunch_mean[:][2]) > 0.1 * stdy)):
                 track_wake_monitor=True
             if monitor_count < 2500 and (i > (n_turns - 2500) or track_wake_monitor):
-                wakepotential_monitor.track(mybunch, wakefield_tr)
+                wakepotential_monitor.track(beam, wakefield_tr)
                 monitor_count += 1
         
     finally:

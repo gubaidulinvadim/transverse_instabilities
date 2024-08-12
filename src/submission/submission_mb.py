@@ -64,7 +64,8 @@ def write_submission_script(sub_mode,
             elif int(job_time) <= 1800:
                 f.write("#MSUB -q test\n")
             else:
-                f.write("#MSUB -q milan\n")
+                f.write("#MSUB -q normal\n")
+            f.write("#MSUB -p milan\n")
             f.write(f"#MSUB -n {n_tasks}\n")
             f.write(f"#MSUB -c 1\n")
             f.write(f"#MSUB -T {job_time}\n")

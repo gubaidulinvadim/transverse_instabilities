@@ -20,7 +20,6 @@ def get_command_string(script_name, n_macroparticles, n_turns, n_bin,
 
 
 def write_submission_script(sub_mode,
-                            is_longqueue,
                             job_name,
                             job_time,
                             n_macroparticles=int(1e6),
@@ -46,11 +45,13 @@ def write_submission_script(sub_mode,
         f.write("#!/bin/bash\n")
         if sub_mode == "ccrt":
             f.write("#MSUB -m work,scratch\n")
-            f.write("#MSUB -q milan\n")
-            if is_longqueue == 'True':
+            if int(job_time) >= 86400:
                 f.write("#MSUB -Q long\n")
+            elif int(job_time) <= 1800:
+                f.write("#MSUB -Q test\n")
             else:
-                pass
+                f.write("#MSUB -Q normal\n")
+            f.write("#MSUB -q milan\n")
             f.write("#MSUB -n 1\n")
             f.write("#MSUB -c 8\n")
             f.write("#MSUB -T {:}\n".format(job_time))
@@ -118,13 +119,6 @@ if __name__ == "__main__":
         help=
         'Submission mode. Accepted values are ["local", "ccrt", "slurm"], defaults to "ccrt"',
     )
-    parser.add_argument(
-        "--is_longqueue",
-        action="store",
-        metavar="IS_LONGQUEUE",
-        type=str,
-        default="False",
-        help="Whether to use the long queue on ccrt. Defaults to False.")
     args = parser.parse_args()
     job = write_submission_script(args.sub_mode, args.is_longqueue,
                                   args.job_name, args.job_time,

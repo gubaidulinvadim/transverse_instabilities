@@ -27,7 +27,7 @@ def run_simulation(script_name, n_macroparticles, n_turns, n_bin, chromaticity_l
     for chromaticity in chromaticity_list:
         for bunch_current in bunch_current_list:
             combinations = product(zlong_hc_pairs, sc_list)
-            for (include_Zlong, harmonic_cavity, sc) in combinations:
+            for (include_Zlong, harmonic_cavit), sc in combinations:
                 command = get_command_string(
                     script_name=script_name,
                     n_macroparticles=n_macroparticles,

@@ -115,8 +115,9 @@ def run_mbtrack2(folder,
         tracking_elements.append(fbtx)
         tracking_elements.append(fbty)
 
-    stdx, stdy = np.mean(beam.bunch_std[0]), np.mean(beam.bunch_std[2])
+    stdx, stdy = np.mean(beam.bunch_std[:][0]), np.mean(beam.bunch_std[:][2])
     track_wake_monitor = False
+    monitor_count = 0
     try:
         for i in range(n_turns):
             if i % 1000 == 0:

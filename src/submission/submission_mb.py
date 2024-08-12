@@ -44,7 +44,7 @@ def write_submission_script(sub_mode,
                             max_kick=1.6e-6,
                             sc="False"):
     script_name = "/home/dockeruser/transverse_instabilities/src/simulation/track_mb.py"
-    image_name = "soleil-pa:mbtrack2dev"
+    image_name = "soleil-pa:mbtrack2-develop"
     mount_folder = "/ccc/work/cont003/soleil/gubaiduv/transverse_instabilities"
     machine_data_folder = "/ccc/work/cont003/soleil/gubaiduv/machine_data"
     

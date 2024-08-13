@@ -90,7 +90,6 @@ def write_submission_script(sub_mode,
 
 
 if __name__ == "__main__":
-    os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
     parser = get_parser_for_single_bunch()
     parser.add_argument(
         "--job_name",

@@ -39,7 +39,7 @@ def write_submission_script(sub_mode,
                             id_state="open",
                             include_Zlong="False",
                             harmonic_cavity="False",
-                            n_tasks=4,
+                            n_tasks=416,
                             n_turns_wake=50,
                             max_kick=1.6e-6,
                             sc="False"):
@@ -102,7 +102,6 @@ def write_submission_script(sub_mode,
     return submission_script_path
 
 if __name__ == "__main__":
-    os.environ['KMP_DUPLICATE_LIB_OK']='True'
     parser = get_parser_for_multibunch()
     parser.add_argument(
         "--job_name",
@@ -136,7 +135,7 @@ if __name__ == "__main__":
         action="store",
         metavar="N_TASKS",
         type=int,
-        default=4,
+        default=416,
         help=
         "Number of tasks assigned for mpi, should be larger than number of bunches. Defaults to 500.",
     )

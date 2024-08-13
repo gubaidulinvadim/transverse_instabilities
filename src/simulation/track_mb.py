@@ -37,12 +37,7 @@ def run_mbtrack2(folder,
     np.random.seed(42)
     beam = Beam(ring)
     is_mpi = True
-    filling_pattern = np.zeros(ring.h) * bunch_current
-    filling_pattern[0] = bunch_current
-    filling_pattern[103] = bunch_current
-    filling_pattern[207] = bunch_current
-    filling_pattern[311] = bunch_current
-    
+    filling_pattern = np.ones(ring.h) * bunch_current
     beam.init_beam(
         filling_pattern,
         mp_per_bunch=n_macroparticles,
@@ -112,7 +107,8 @@ def run_mbtrack2(folder,
                                 n_bins=n_bin)
 
     if sc == 'True':
-        print('space charge included')
+        if is_mpi and beam.mpi.rank == 0:
+            print('space charge included')
         tracking_elements.append(besc)
     if harmonic_cavity == 'True':
         tracking_elements.append(hrf)

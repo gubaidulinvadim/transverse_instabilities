@@ -119,7 +119,7 @@ if __name__ == "__main__":
         'Submission mode. Accepted values are ["local", "ccrt", "slurm"], defaults to "ccrt"',
     )
     args = parser.parse_args()
-    job = write_submission_script(args.sub_mode, args.is_longqueue,
+    job = write_submission_script(args.sub_mode,
                                   args.job_name, args.job_time,
                                   args.n_macroparticles, args.n_turns,
                                   args.n_bin, args.bunch_current, args.Qp_x,

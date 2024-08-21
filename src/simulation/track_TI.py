@@ -29,6 +29,7 @@ def run_mbtrack2(folder,
                  sc='False'):
     Vc = 1.7e6
     ring = v2366_v3(IDs=id_state, HC_power=50e3, V_RF=Vc)
+    ring.tune = np.array([54.2, 18.24])
     ring.chro = [Qp_x, Qp_y]
     ring.emit[1] = 0.3 * ring.emit[0]
     mybunch = Bunch(ring,

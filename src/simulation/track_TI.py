@@ -98,7 +98,7 @@ def run_mbtrack2(folder,
 
     monitor_count = 0
     track_wake_monitor = False
-    stdx, stdy = bunch.std[0], bunch.std[2]
+    stdx, stdy = mybunch.std[0], mybunch.std[2]
     try:
         for i in tqdm(range(n_turns)):
             for el in tracking_elements:

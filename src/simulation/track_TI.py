@@ -29,7 +29,7 @@ def run_mbtrack2(folder,
                  sc='False'):
     Vc = 1.7e6
     ring = v2366_v3(IDs=id_state, HC_power=50e3, V_RF=Vc)
-    ring.tune = np.array([54.2, 18.24])
+    ring.tune = np.array([54.23, 18.21])
     ring.chro = [Qp_x, Qp_y]
     ring.emit[1] = 0.3 * ring.emit[0]
     mybunch = Bunch(ring,
@@ -98,14 +98,15 @@ def run_mbtrack2(folder,
 
     monitor_count = 0
     track_wake_monitor = False
+    stdx, stdy = bunch.std[0], bunch.std[2]
     try:
         for i in tqdm(range(n_turns)):
             for el in tracking_elements:
                 el.track(mybunch)
             if i > 25_000:
                 wakefield_tr.track(mybunch)
-                if (np.mean(beam.bunch_mean[:][0]) > 0.1 * stdx
-                    or np.mean(beam.bunch_mean[:][2]) > 0.1 * stdy and monitor_count < 2500):
+                if (np.mean(mybunch.mean[:][0]) > 0.1 * stdx
+                    or np.mean(mybunch.mean[:][2]) > 0.1 * stdy and monitor_count < 2500):
                     track_wake_monitor=True
                 if ((i > (n_turns - 2500)
                     or track_wake_monitor)

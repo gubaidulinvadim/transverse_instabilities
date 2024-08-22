@@ -24,7 +24,7 @@ def get_command_string(script_name, n_macroparticles, n_turns, n_bin,
     )
 
 def main():
-    bunch_current = 1e-3 * np.linspace(12, 25, 14)
+    bunch_current = 1e-3 * np.linspace(0.2, 12, 60)
     id_state = 'close'
     Zlong = ['True']
     hc = ['False', 'True']

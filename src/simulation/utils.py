@@ -88,6 +88,12 @@ def get_parser_for_single_bunch():
         help="Flag to include space-charge force. Defaults to 'False'.",
         default='False',
         type=str)
+    parser.add_argument(
+        "--ibs",
+        action="store",
+        help="Flag to include intrabeam scattering. Defaults to 'False'.",
+        default='False',
+        type=str)
     return parser
 
 def get_parser_for_multibunch():

@@ -11,6 +11,7 @@ from mbtrack2.tracking import (Beam, Bunch, LongitudinalMap, RFCavity,
                                WakePotential)
 from mbtrack2.tracking.monitors import BunchMonitor, WakePotentialMonitor
 from mbtrack2.tracking.spacecharge import TransverseSpaceCharge
+from mbtrack2.tracking.ibs import IntrabeamScattering
 from tqdm import tqdm
 from utils import get_parser_for_single_bunch
 from setup_tracking import get_active_cavity_params, setup_fbt, setup_wakes, setup_rf
@@ -26,11 +27,12 @@ def run_mbtrack2(folder,
                  include_Zlong="False",
                  harmonic_cavity="False",
                  max_kick=1.6e-6,
-                 sc='False'):
+                 sc='False',
+                 ibs='False'):
     Vc = 1.7e6
     ring = v2366_v3(IDs=id_state, HC_power=50e3, V_RF=Vc)
     ring.tune = np.array([54.23, 18.21])
-    ring.chro = [Qp_x, Qp_y]
+    ring.chro = np.array([Qp_x, Qp_y])
     ring.emit[1] = 0.3 * ring.emit[0]
     mybunch = Bunch(ring,
                     mp_number=n_macroparticles,
@@ -49,7 +51,8 @@ def run_mbtrack2(folder,
         f"Zlong={include_Zlong:},"+\
         f"cavity={harmonic_cavity:},"+\
         f"max_kick={max_kick:.1e},"+\
-        f"sc={sc:})"
+        f"sc={sc:}\n"+\
+        f"ibs={ibs:}"+")"
     bunch_monitor = BunchMonitor(
         0,
         save_every=1,
@@ -81,7 +84,10 @@ def run_mbtrack2(folder,
     besc = TransverseSpaceCharge(ring=ring,
                                 interaction_length=ring.L,
                                 n_bins=100)
-
+    ibs_cimp = IntrabeamScattering(ring, mybunch, model="CIMP", n_points=100, n_bin=100)
+    if ibs == 'True':
+        print('IBS included')
+        tracking_elements.append(ibs_cimp)
     if sc == 'True':
         print('space charge included')
         tracking_elements.append(besc)
@@ -134,4 +140,5 @@ if __name__ == "__main__":
                  include_Zlong=args.include_Zlong,
                  harmonic_cavity=args.harmonic_cavity,
                  max_kick=args.max_kick,
-                 sc=args.sc)
+                 sc=args.sc, 
+                 ibs=args.ibs)

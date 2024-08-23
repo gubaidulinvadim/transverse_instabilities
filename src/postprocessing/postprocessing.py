@@ -26,7 +26,7 @@ def plot_Q_s(m, n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y):
     ax.set_xlabel('Synchrotron tune, $Q_s$')
     plt.savefig(
         FOLDER_FIG +
-        'synchrotron_tune(n_mp={:.1e},n_turns={:.1e},n_bin={:},bunch_current={:.1e},Qp_x={:.2f},Qp_y={:.2f}).pdf'
+        'synchrotron_tune(n_mp={:.1e},n_turns={:.1e},n_bin={:},bunch_current={:.2e},Qp_x={:.2f},Qp_y={:.2f}).pdf'
         .format(n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y))
     plt.close()
 
@@ -184,7 +184,7 @@ def post_single(n_macroparticles=1e6,
                 cavity='False',
                 max_kick=0.0,
                 sc='False'):
-    filename = FOLDER + 'monitors(n_mp={:.1e},n_turns={:.1e},n_bin={:},bunch_current={:.1e},Qp_x={:.2f},Qp_y={:.2f},id_state={},Zlong={},cavity={:},max_kick={:.1e},sc={:})'.format(
+    filename = FOLDER + 'monitors(n_mp={:.1e},n_turns={:.1e},n_bin={:},bunch_current={:.2e},Qp_x={:.2f},Qp_y={:.2f},id_state={},Zlong={},cavity={:},max_kick={:.1e},sc={:})'.format(
         n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y, ID_state,
         Zlong, cavity, max_kick, sc)
     with hp.File(filename + '.hdf5') as f:

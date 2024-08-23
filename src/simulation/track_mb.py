@@ -10,6 +10,7 @@ from tqdm import tqdm
 from utils import get_parser_for_multibunch
 from setup_tracking import setup_fbt, setup_wakes, setup_dual_rf
 from mbtrack2.tracking.spacecharge import TransverseSpaceCharge
+from mbtrack2.tracking.ibs import IntrabeamScattering
 
 pypath = os.getenv('PYTHONPATH', '')
 pypath = f"{pypath}{os.pathsep}/home/dockeruser/machine_data" if pypath else '/home/dockeruser/machine_data'
@@ -29,7 +30,8 @@ def run_mbtrack2(folder,
                  harmonic_cavity="False",
                  n_turns_wake=1,
                  max_kick=1.6e-6,
-                 sc="False"):
+                 sc="False",
+                 ibs='False'):
     Vc = 1.7e6
     ring = v2366_v3(IDs=id_state, V_RF=Vc)
     ring.tune = np.array([54.23, 18.21])
@@ -58,8 +60,8 @@ def run_mbtrack2(folder,
         f",harmonic_cavity={harmonic_cavity:}"+
         f",n_turns_wake={n_turns_wake:}"
         f",max_kick={max_kick:.1e}"+
-        f",sc={sc:}"+
-        ")")
+        f"sc={sc:}\n"+\
+        f"ibs={ibs:}"+")")
     beam_monitor = BeamMonitor(
         ring.h,
         save_every=10,
@@ -106,7 +108,10 @@ def run_mbtrack2(folder,
     besc = TransverseSpaceCharge(ring=ring,
                                 interaction_length=ring.L,
                                 n_bins=n_bin)
-
+    ibs_cimp = IntrabeamScattering(ring, mybunch, model="CIMP", n_points=100, n_bin=100)
+    if ibs == 'True':
+        print('IBS included')
+        tracking_elements.append(ibs_cimp)
     if sc == 'True':
         if is_mpi and beam.mpi.rank == 0:
             print('space charge included')
@@ -166,4 +171,5 @@ if __name__ == "__main__":
                  harmonic_cavity=args.harmonic_cavity,
                  n_turns_wake=args.n_turns_wake,
                  max_kick=args.max_kick,
-                 sc=args.sc,)
+                 sc=args.sc,
+                 ibs=args.ibs)

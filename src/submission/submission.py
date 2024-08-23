@@ -124,7 +124,7 @@ if __name__ == "__main__":
                                   args.n_macroparticles, args.n_turns,
                                   args.n_bin, args.bunch_current, args.Qp_x,
                                   args.Qp_y, args.id_state, args.include_Zlong,
-                                  args.harmonic_cavity, args.max_kick, args.sc)
+                                  args.harmonic_cavity, args.max_kick, args.sc, args.ibs)
     print(args)
     if args.sub_mode == "ccrt":
         os.system("ccc_msub {:}".format(job))

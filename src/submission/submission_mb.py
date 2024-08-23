@@ -6,7 +6,7 @@ from utils import get_parser_for_single_bunch, get_parser_for_multibunch
 
 def get_command_string(script_name, n_macroparticles, n_turns, n_bin,
                        bunch_current, Qp_x, Qp_y, id_state, include_Zlong,
-                       harmonic_cavity, n_turns_wake, max_kick, sc):
+                       harmonic_cavity, n_turns_wake, max_kick, sc, ibs):
     """
     Generate the command string to execute the simulation script with given parameters.
     """
@@ -23,7 +23,7 @@ def get_command_string(script_name, n_macroparticles, n_turns, n_bin,
         f"--harmonic_cavity {harmonic_cavity} "
         f"--n_turns_wake {n_turns_wake} "
         f"--max_kick {max_kick} "
-        f"--sc {sc}\n"
+        f"--sc {sc}"+ f" --ibs {ibs}\n"
     )
 
 
@@ -42,7 +42,8 @@ def write_submission_script(sub_mode,
                             n_tasks=416,
                             n_turns_wake=50,
                             max_kick=1.6e-6,
-                            sc="False"):
+                            sc="False",
+                            ibs='False'):
     script_name = "/home/dockeruser/transverse_instabilities/src/simulation/track_mb.py"
     image_name = "soleil-pa:mbtrack2dev"
     mount_folder = "/ccc/work/cont003/soleil/gubaiduv/transverse_instabilities"
@@ -52,7 +53,7 @@ def write_submission_script(sub_mode,
                                         n_bin, bunch_current, Qp_x, Qp_y,
                                         id_state, include_Zlong,
                                         harmonic_cavity, n_turns_wake,
-                                        max_kick, sc)
+                                        max_kick, sc, ibs)
     submission_script_path = f"{job_name}.sh"
     
     with open(submission_script_path, "w") as f:

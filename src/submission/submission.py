@@ -6,7 +6,7 @@ from utils import get_parser_for_single_bunch
 
 def get_command_string(script_name, n_macroparticles, n_turns, n_bin,
                        bunch_current, Qp_x, Qp_y, id_state, include_Zlong,
-                       harmonic_cavity, max_kick, sc):
+                       harmonic_cavity, max_kick, sc, ibs):
     command_string = (f"python {script_name:}" +
                       f" --n_macroparticles {n_macroparticles:}" +
                       f" --n_turns {n_turns:}" + f" --n_bin {n_bin:}" +
@@ -15,7 +15,7 @@ def get_command_string(script_name, n_macroparticles, n_turns, n_bin,
                       f" --id_state {id_state:}" +
                       f" --include_Zlong {include_Zlong:}" +
                       f" --harmonic_cavity {harmonic_cavity:}" +
-                      f" --max_kick {max_kick}" + f" --sc {sc:}" + "\n")
+                      f" --max_kick {max_kick}" + f" --sc {sc:}" + f" --ibs {ibs:}" +"\n")
     return command_string
 
 
@@ -32,13 +32,14 @@ def write_submission_script(sub_mode,
                             include_Zlong="False",
                             harmonic_cavity="False",
                             max_kick=1.6e-6,
-                            sc='False'):
+                            sc='False',
+                            ibs='False'):
     image_name = "soleil-pa:mbtrack2dev"
     script_name = "/home/dockeruser/transverse_instabilities/src/simulation/track_TI.py"
     command_string = get_command_string(script_name, n_macroparticles, n_turns,
                                         n_bin, bunch_current, Qp_x, Qp_y,
                                         id_state, include_Zlong,
-                                        harmonic_cavity, max_kick, sc)
+                                        harmonic_cavity, max_kick, sc, ibs)
     mount_folder = "/ccc/work/cont003/soleil/gubaiduv/transverse_instabilities"
     machine_data_folder = "/ccc/work/cont003/soleil/gubaiduv/machine_data"
     with open(job_name, "w") as f:

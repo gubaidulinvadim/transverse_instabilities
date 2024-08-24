@@ -64,6 +64,7 @@ def write_submission_script(sub_mode,
             f.write(
                 f"#MSUB -e /ccc/cont003/home/soleil/gubaiduv/{job_name:}.out\n"
             )
+            f.write(f"module purge\n")
             f.write(
                 f"ccc_mprun -C {image_name:} -E'--ctr-mount src={mount_folder:},dst=/home/dockeruser/transverse_instabilities:src={machine_data_folder},dst=/home/dockeruser/machine_data' -- "
                 + command_string)

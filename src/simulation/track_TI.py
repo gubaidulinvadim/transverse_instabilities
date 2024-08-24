@@ -3,6 +3,8 @@ import os
 pypath = os.getenv('PYTHONPATH', '')
 pypath = f"{pypath}{os.pathsep}/home/dockeruser/machine_data:/home/dockeruser" if pypath else '/home/dockeruser/machine_data:/home/dockeruser'
 os.environ['PYTHONPATH'] = pypath
+pypath = os.getenv('PYTHONPATH', '')
+print(f'PYPATH is {pypath}')
 import numpy as np
 from machine_data.soleil import v2366_v3
 from mbtrack2.impedance.wakefield import WakeField

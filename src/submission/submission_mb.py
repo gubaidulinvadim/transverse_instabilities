@@ -11,7 +11,7 @@ def get_command_string(script_name, n_macroparticles, n_turns, n_bin,
     Generate the command string to execute the simulation script with given parameters.
     """
     return (
-        f"python3 -u {script_name} "
+        f"python -u {script_name} "
         f"--n_macroparticles {n_macroparticles} "
         f"--n_turns {n_turns} "
         f"--n_bin {n_bin} "

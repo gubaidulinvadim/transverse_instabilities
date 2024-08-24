@@ -7,7 +7,7 @@ def get_command_string(script_name, n_macroparticles, n_turns, n_bin,
                        bunch_current, Qp_x, Qp_y, id_state, include_Zlong,
                        harmonic_cavity, max_kick, sc, ibs):
     return (
-        f"python3 {script_name} --sub_mode ccrt"
+        f"python {script_name} --sub_mode ccrt"
         f" --job_name tmci_{bunch_current:.1e}_sc={sc}_hc={harmonic_cavity}_Z={include_Zlong}_ibs={ibs}"
         f" --job_time 85000"
         f" --n_macroparticles {n_macroparticles}"

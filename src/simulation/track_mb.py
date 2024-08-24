@@ -13,7 +13,7 @@ from mbtrack2.tracking.spacecharge import TransverseSpaceCharge
 from mbtrack2.tracking.ibs import IntrabeamScattering
 
 pypath = os.getenv('PYTHONPATH', '')
-pypath = f"{pypath}{os.pathsep}/home/dockeruser/machine_data" if pypath else '/home/dockeruser/machine_data'
+pypath = f"{pypath}{os.pathsep}/home/dockeruser/machine_data:/home/dockeruser" if pypath else '/home/dockeruser/machine_data:/home/dockeruser'
 os.environ['PYTHONPATH'] = pypath
 from machine_data.soleil import v2366_v3
 

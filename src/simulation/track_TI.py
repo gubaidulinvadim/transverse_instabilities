@@ -1,7 +1,7 @@
 import os
 
-pypath = os.getenv('PYTHONPATH')
-pypath = pypath + ':/home/dockeruser/machine_data'
+pypath = os.getenv('PYTHONPATH', '')
+pypath = f"{pypath}{os.pathsep}/home/dockeruser/machine_data" if pypath else '/home/dockeruser/machine_data'
 os.environ['PYTHONPATH'] = pypath
 import numpy as np
 from machine_data.soleil import v2366_v3

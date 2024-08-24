@@ -66,9 +66,9 @@ def main():
     # chromaticity_list_2 = [1.6]
     # bunch_current_list_2 = np.linspace(1.2e-3, 3.6e-3, 13)
 
-    zlong_hc_pairs = [('True', 'False')]
+    zlong_hc_pairs = [('True', 'False'), ('True', 'True')]
     sc_list = ['True']
-    ibs_list = ['True']
+    ibs_list = ['False', 'True']
     run_simulation(
         script_name=script_name,
         n_macroparticles=n_macroparticles,

@@ -47,7 +47,7 @@ def run_mbtrack2(folder,
         f"Zlong={include_Zlong:},"+\
         f"cavity={harmonic_cavity:},"+\
         f"max_kick={max_kick:.1e},"+\
-        f"sc={sc:}\n"+\
+        f"sc={sc:},"+\
         f"ibs={ibs:}"+")"
     bunch_monitor = BunchMonitor(
         0,

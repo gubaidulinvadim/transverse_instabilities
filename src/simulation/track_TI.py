@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from machine_data.soleil import v2366_v3
+from machine_data.soleil import v2366_v3, v3588
 from mbtrack2.impedance.wakefield import WakeField
 from mbtrack2.tracking import (Beam, Bunch, LongitudinalMap, RFCavity,
                                SynchrotronRadiation, TransverseMap,
@@ -26,7 +26,7 @@ def run_mbtrack2(folder,
                  sc='False',
                  ibs='False'):
     Vc = 1.7e6
-    ring = v2366_v3(IDs=id_state, HC_power=50e3, V_RF=Vc)
+    ring = v3588(IDs=id_state, HC_power=50e3, V_RF=Vc, load_lattice=True)
     ring.tune = np.array([54.23, 18.21])
     ring.chro = np.array([Qp_x, Qp_y])
     ring.emit[1] = 0.3 * ring.emit[0]

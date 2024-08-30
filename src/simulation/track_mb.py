@@ -11,7 +11,7 @@ from utils import get_parser_for_multibunch
 from setup_tracking import setup_fbt, setup_wakes, setup_dual_rf
 from mbtrack2.tracking.spacecharge import TransverseSpaceCharge
 from mbtrack2.tracking.ibs import IntrabeamScattering
-from machine_data.soleil import v2366_v3
+from machine_data.soleil import v2366_v3, v3588
 
 
 def run_mbtrack2(folder,
@@ -29,7 +29,7 @@ def run_mbtrack2(folder,
                  sc="False",
                  ibs='False'):
     Vc = 1.7e6
-    ring = v2366_v3(IDs=id_state, V_RF=Vc)
+    ring = v3588(IDs=id_state, V_RF=Vc, load_lattice=True)
     ring.tune = np.array([54.23, 18.21])
     ring.chro = [Qp_x, Qp_y]
     ring.emit[1] = 0.3 * ring.emit[0]

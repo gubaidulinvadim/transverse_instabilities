@@ -31,7 +31,7 @@ def main():
     hc = ['False', 'True']
     sc = ['True']
     ibs= ['True']
-    Qp = [1.6]
+    Qp = [0.0]
     combinations = product(bunch_current, Zlong, hc, sc, Qp, ibs)
     for (Ib, Zlong, hc, sc, Qp, ibs) in combinations:
         s = get_command_string(script_name='submission.py',

@@ -56,8 +56,8 @@ def run_mbtrack2(folder,
         f",harmonic_cavity={harmonic_cavity:}"+
         f",n_turns_wake={n_turns_wake:}"
         f",max_kick={max_kick:.1e}"+
-        f"sc={sc:}\n"+\
-        f"ibs={ibs:}"+")")
+        f",sc={sc:}"+\
+        f",ibs={ibs:}"+")")
     beam_monitor = BeamMonitor(
         ring.h,
         save_every=10,

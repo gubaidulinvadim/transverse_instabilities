@@ -67,8 +67,8 @@ def main():
     # bunch_current_list_2 = np.linspace(1.2e-3, 3.6e-3, 13)
 
     zlong_hc_pairs = [('True', 'False'), ('True', 'True')]
-    sc_list = ['True']
-    ibs_list = ['False', 'True']
+    sc_list = ['True', 'False']
+    ibs_list = ['True']
     run_simulation(
         script_name=script_name,
         n_macroparticles=n_macroparticles,

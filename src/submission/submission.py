@@ -40,7 +40,8 @@ def write_submission_script(sub_mode,
                                         n_bin, bunch_current, Qp_x, Qp_y,
                                         id_state, include_Zlong,
                                         harmonic_cavity, max_kick, sc, ibs)
-    mount_folder = "/ccc/work/cont003/soleil/gubaiduv/transverse_instabilities"
+    src_folder = "/ccc/work/cont003/soleil/gubaiduv/transverse_instabilities/"
+    data_folder = "/ccc/scratch/cont003/soleil/gubaiduv/transverse_instabilities/data/"
     machine_data_folder = "/ccc/work/cont003/soleil/gubaiduv/machine_data"
     with open(job_name, "w") as f:
         f.write("#!/bin/bash\n")
@@ -66,7 +67,7 @@ def write_submission_script(sub_mode,
             )
             f.write(f"module purge\n")
             f.write(
-                f"ccc_mprun -C {image_name:} -E'--ctr-mount src={mount_folder:},dst=/home/dockeruser/transverse_instabilities:src={machine_data_folder},dst=/home/dockeruser/machine_data' -- "
+                f"ccc_mprun -C {image_name:} -E'--ctr-mount src={src_folder:},dst=/home/dockeruser/transverse_instabilities/src/:src={machine_data_folder},dst=/home/dockeruser/machine_data:src={data_folder},dst=/home/dockeruser/transverse_instabilities/data/' -- "
                 + command_string)
         elif sub_mode == "slurm":
             f.write("#SBATCH --partition sumo\n")

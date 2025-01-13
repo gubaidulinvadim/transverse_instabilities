@@ -1,16 +1,13 @@
-import os
 import numpy as np
-from machine_data.soleil import v2366_v3, v3588
 from mbtrack2.impedance.wakefield import WakeField
 from mbtrack2.tracking import (Beam, Bunch, LongitudinalMap, RFCavity,
                                SynchrotronRadiation, TransverseMap,
-                               WakePotential)
+                               WakePotential, WakeFunction)
 from mbtrack2.tracking.monitors import BunchMonitor, WakePotentialMonitor
 from mbtrack2.tracking.spacecharge import TransverseSpaceCharge
 from mbtrack2.tracking.ibs import IntrabeamScattering
 from tqdm import tqdm
 from utils import get_parser_for_single_bunch
-from setup_tracking import get_active_cavity_params, setup_fbt, setup_wakes, setup_rf
 
 def run_mbtrack2(folder,
                  n_turns=100_000,
@@ -19,10 +16,6 @@ def run_mbtrack2(folder,
                  bunch_current=1e-3,
                  Qp_x=1.6,
                  Qp_y=1.6,
-                 id_state="open",
-                 include_Zlong="False",
-                 harmonic_cavity="False",
-                 max_kick=1.6e-6,
                  sc='False',
                  ibs='False'):
     Vc = 1.7e6
@@ -43,10 +36,6 @@ def run_mbtrack2(folder,
         f"bunch_current={bunch_current:.2e},"+\
         f"Qp_x={Qp_x:.2f},"+\
         f"Qp_y={Qp_y:.2f},"+\
-        f"id_state={id_state:},"+\
-        f"Zlong={include_Zlong:},"+\
-        f"cavity={harmonic_cavity:},"+\
-        f"max_kick={max_kick:.1e},"+\
         f"sc={sc:},"+\
         f"ibs={ibs:}"+")"
     bunch_monitor = BunchMonitor(
@@ -58,11 +47,11 @@ def run_mbtrack2(folder,
         mpi_mode=False,
     )
     long_map = LongitudinalMap(ring)
-    main_rf, harmonic_rf = setup_rf(ring, harmonic_cavity, Vc)
+    # main_rf, harmonic_rf = setup_rf(ring, harmonic_cavity, Vc)
     sr = SynchrotronRadiation(ring, switch=[1, 1, 1])
     trans_map = TransverseMap(ring)
     
-    wakefield_tr, wakefield_long, _ = setup_wakes(ring, id_state, include_Zlong, n_bin)
+    # wakefield_tr, wakefield_long, _ = setup_wakes(ring, id_state, include_Zlong, n_bin)
     wakepotential_monitor = WakePotentialMonitor(
         bunch_number=0,
         wake_types="Wydip",
@@ -73,7 +62,6 @@ def run_mbtrack2(folder,
         file_name=None,
         mpi_mode=False,
     )
-    fbtx, fbty = setup_fbt(ring, max_kick)
     tracking_elements = [trans_map, long_map, bunch_monitor]
     if include_Zlong == 'True':
         tracking_elements.append(sr)
@@ -87,16 +75,8 @@ def run_mbtrack2(folder,
     if sc == 'True':
         print('space charge included')
         tracking_elements.append(besc)
-    if harmonic_cavity == "True":
-        print("Harmonic cavity is on.")
-        tracking_elements.append(main_rf)
-        tracking_elements.append(harmonic_rf)
-    else:
-        print("Harmonic cavity is off.")
-        tracking_elements.append(main_rf)
-    if max_kick != 0:
-        tracking_elements.append(fbtx)
-        tracking_elements.append(fbty)
+    print("Harmonic cavity is off.")
+    tracking_elements.append(main_rf)
 
     monitor_count = 0
     track_wake_monitor = False
@@ -132,9 +112,5 @@ if __name__ == "__main__":
                  bunch_current=args.bunch_current,
                  Qp_x=args.Qp_x,
                  Qp_y=args.Qp_y,
-                 id_state=args.id_state,
-                 include_Zlong=args.include_Zlong,
-                 harmonic_cavity=args.harmonic_cavity,
-                 max_kick=args.max_kick,
                  sc=args.sc, 
                  ibs=args.ibs)

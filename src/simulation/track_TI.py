@@ -93,18 +93,18 @@ def run_mbtrack2(folder,
     print("Harmonic cavity is off.")
     tracking_elements.append(main_rf)
 
-    monitor_count = 0
-    track_wake_monitor = False
-    stdx, stdy = mybunch.std[0], mybunch.std[2]
+    # monitor_count = 0
+    # track_wake_monitor = False
+    # stdx, stdy = mybunch.std[0], mybunch.std[2]
     try:
         for i in tqdm(range(n_turns)):
             for el in tracking_elements:
                 el.track(mybunch)
             if i > 25_000:
                 wakefield_tr.track(mybunch)
-                if (np.mean(mybunch.mean[:][0]) > 0.1 * stdx
-                    or np.mean(mybunch.mean[:][2]) > 0.1 * stdy and monitor_count < 2500):
-                    track_wake_monitor=True
+                # if (np.mean(mybunch.mean[:][0]) > 0.1 * stdx
+                #     or np.mean(mybunch.mean[:][2]) > 0.1 * stdy and monitor_count < 2500):
+                #     track_wake_monitor=True
                 # if ((i > (n_turns - 2500)
                 #     or track_wake_monitor)
                 #         and monitor_count < 2500):
@@ -113,7 +113,8 @@ def run_mbtrack2(folder,
             else:
                 wakefield_long.track(mybunch)
     finally:
-        bunch_monitor.close()
+        print('F')
+        # bunch_monitor.close()
 
 
 if __name__ == "__main__":

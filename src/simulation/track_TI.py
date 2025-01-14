@@ -64,16 +64,16 @@ def run_mbtrack2(folder,
     wakefield_long = WakePotential(ring, WakeField([Wz]))
                             
 
-    wakepotential_monitor = WakePotentialMonitor(
-        bunch_number=0,
-        wake_types="Wydip",
-        n_bin=n_bin,
-        save_every=1,
-        buffer_size=600,
-        total_size=2400,
-        file_name=None,
-        mpi_mode=False,
-    )
+    # wakepotential_monitor = WakePotentialMonitor(
+    #     bunch_number=0,
+    #     wake_types="Wydip",
+    #     n_bin=n_bin,
+    #     save_every=1,
+    #     buffer_size=600,
+    #     total_size=2400,
+    #     file_name=None,
+    #     mpi_mode=False,
+    # )
     tracking_elements = [trans_map, long_map] #, bunch_monitor]
     tracking_elements.append(sr)
     if sc == 'True':
@@ -105,11 +105,11 @@ def run_mbtrack2(folder,
                 if (np.mean(mybunch.mean[:][0]) > 0.1 * stdx
                     or np.mean(mybunch.mean[:][2]) > 0.1 * stdy and monitor_count < 2500):
                     track_wake_monitor=True
-                if ((i > (n_turns - 2500)
-                    or track_wake_monitor)
-                        and monitor_count < 2500):
-                    wakepotential_monitor.track(mybunch, wakefield_tr)
-                    monitor_count += 1
+                # if ((i > (n_turns - 2500)
+                #     or track_wake_monitor)
+                #         and monitor_count < 2500):
+                #     wakepotential_monitor.track(mybunch, wakefield_tr)
+                #     monitor_count += 1
             else:
                 wakefield_long.track(mybunch)
     finally:

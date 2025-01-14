@@ -1,4 +1,3 @@
-import argparse
 import os
 
 from utils import get_parser_for_single_bunch
@@ -28,18 +27,12 @@ def write_submission_script(sub_mode,
                             bunch_current=1e-3,
                             Qp_x=1.6,
                             Qp_y=1.6,
-                            id_state="open",
-                            include_Zlong="False",
-                            harmonic_cavity="False",
-                            max_kick=1.6e-6,
                             sc='False',
-                            ibs='False'):
+                            ):
     image_name = "soleil-pa:mbtrack2dev"
     script_name = "/home/dockeruser/transverse_instabilities/src/simulation/track_TI.py"
     command_string = get_command_string(script_name, n_macroparticles, n_turns,
-                                        n_bin, bunch_current, Qp_x, Qp_y,
-                                        id_state, include_Zlong,
-                                        harmonic_cavity, max_kick, sc, ibs)
+                                        n_bin, bunch_current, Qp_x, Qp_y, sc)
     src_folder = "/ccc/work/cont003/soleil/gubaiduv/transverse_instabilities/"
     data_folder = "/ccc/scratch/cont003/soleil/gubaiduv/transverse_instabilities/data/"
     machine_data_folder = "/ccc/work/cont003/soleil/gubaiduv/machine_data"
@@ -126,8 +119,8 @@ if __name__ == "__main__":
                                   args.job_name, args.job_time,
                                   args.n_macroparticles, args.n_turns,
                                   args.n_bin, args.bunch_current, args.Qp_x,
-                                  args.Qp_y, args.id_state, args.include_Zlong,
-                                  args.harmonic_cavity, args.max_kick, args.sc, args.ibs)
+                                  args.Qp_y, 
+                                  args.sc)
     print(args)
     if args.sub_mode == "ccrt":
         os.system("ccc_msub {:}".format(job))

@@ -4,17 +4,14 @@ from utils import get_parser_for_single_bunch
 
 
 def get_command_string(script_name, n_macroparticles, n_turns, n_bin,
-                       bunch_current, Qp_x, Qp_y, id_state, include_Zlong,
-                       harmonic_cavity, max_kick, sc, ibs):
+                       bunch_current, Qp_x, Qp_y, 
+                       sc):
     command_string = (f"python3 {script_name:}" +
                       f" --n_macroparticles {n_macroparticles:}" +
                       f" --n_turns {n_turns:}" + f" --n_bin {n_bin:}" +
                       f" --bunch_current {bunch_current:}" +
                       f" --Qp_x {Qp_x:}" + f" --Qp_y {Qp_y:}" +
-                      f" --id_state {id_state:}" +
-                      f" --include_Zlong {include_Zlong:}" +
-                      f" --harmonic_cavity {harmonic_cavity:}" +
-                      f" --max_kick {max_kick}" + f" --sc {sc:}" + f" --ibs {ibs:}" +"\n")
+                      f" --sc {sc:}"  +"\n")
     return command_string
 
 
@@ -64,10 +61,10 @@ def write_submission_script(sub_mode,
                 + command_string)
         elif sub_mode == "slurm":
             f.write("#SBATCH --partition sumo\n")
-            if is_longqueue == "True":
-                f.write("#SBATCH -qos long\n")
-            else:
-                pass
+            # if is_longqueue == "True":
+            #     f.write("#SBATCH -qos long\n")
+            # else:
+            #     pass
             f.write("#SBATCH -n 8\n")
             f.write("#SBATCH --time={:}\n".format(job_time))
             f.write("#SBATCH --export=ALL\n")

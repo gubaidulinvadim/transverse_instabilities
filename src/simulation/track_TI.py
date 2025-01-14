@@ -8,7 +8,7 @@ from mbtrack2.tracking.monitors import BunchMonitor, WakePotentialMonitor
 from mbtrack2.tracking.spacecharge import TransverseSpaceCharge
 from tqdm import tqdm
 from utils import get_parser_for_single_bunch
-from facilities_mbtrack2 import esrf_ebs
+from esrf_ebs import esrf_ebs
 from scipy.constants import c
 
 def run_mbtrack2(folder,

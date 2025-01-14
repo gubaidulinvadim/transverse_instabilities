@@ -37,16 +37,16 @@ def run_mbtrack2(folder,
         f"bunch_current={bunch_current:.2e},"+\
         f"Qp_x={Qp_x:.2f},"+\
         f"Qp_y={Qp_y:.2f},"+\
-        f"sc={sc:},"+\
+        f"sc={sc:}"+\
         ")"
-    bunch_monitor = BunchMonitor(
-        0,
-        save_every=1,
-        buffer_size=1000,
-        total_size=n_turns,
-        file_name=monitor_filename,
-        mpi_mode=False,
-    )
+    # bunch_monitor = BunchMonitor(
+    #     0,
+    #     save_every=1,
+    #     buffer_size=1000,
+    #     total_size=n_turns,
+    #     file_name=monitor_filename,
+    #     mpi_mode=False,
+    # )
     long_map = LongitudinalMap(ring)
     main_rf = RFCavity(ring, m=1, Vc=Vc, theta=np.arccos(ring.U0 / Vc))
     sr = SynchrotronRadiation(ring, switch=[1, 1, 1])
@@ -74,7 +74,7 @@ def run_mbtrack2(folder,
         file_name=None,
         mpi_mode=False,
     )
-    tracking_elements = [trans_map, long_map, bunch_monitor]
+    tracking_elements = [trans_map, long_map] #, bunch_monitor]
     tracking_elements.append(sr)
     if sc == 'True':
         besc = TransverseSpaceCharge(ring=ring,

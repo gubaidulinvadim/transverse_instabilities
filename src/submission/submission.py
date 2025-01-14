@@ -30,7 +30,7 @@ def write_submission_script(sub_mode,
     script_name = "/home/dockeruser/transverse_instabilities/src/simulation/track_TI.py"
     command_string = get_command_string(script_name, n_macroparticles, n_turns,
                                         n_bin, bunch_current, Qp_x, Qp_y, sc)
-    src_folder = "/ccc/work/cont003/soleil/gubaiduv/transverse_instabilities/"
+    src_folder ="/ccc/work/cont003/soleil/gubaiduv/transverse_instabilities/src/"
     data_folder = "/ccc/scratch/cont003/soleil/gubaiduv/transverse_instabilities/data/"
     machine_data_folder = "/ccc/work/cont003/soleil/gubaiduv/machine_data"
     with open(job_name, "w") as f:

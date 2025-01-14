@@ -1,13 +1,15 @@
 import numpy as np
 from mbtrack2.impedance.wakefield import WakeField
-from mbtrack2.tracking import (Beam, Bunch, LongitudinalMap, RFCavity,
+from mbtrack2.tracking import (Bunch, LongitudinalMap, RFCavity,
                                SynchrotronRadiation, TransverseMap,
-                               WakePotential, WakeFunction)
+                               WakePotential)
+from mbtrack2.impedance.wakefield import WakeField, WakeFunction
 from mbtrack2.tracking.monitors import BunchMonitor, WakePotentialMonitor
 from mbtrack2.tracking.spacecharge import TransverseSpaceCharge
-from mbtrack2.tracking.ibs import IntrabeamScattering
 from tqdm import tqdm
 from utils import get_parser_for_single_bunch
+from facilities_mbtrack2 import esrf_ebs
+from scipy.constants import c
 
 def run_mbtrack2(folder,
                  n_turns=100_000,
@@ -17,12 +19,11 @@ def run_mbtrack2(folder,
                  Qp_x=1.6,
                  Qp_y=1.6,
                  sc='False',
-                 ibs='False'):
-    Vc = 1.7e6
-    ring = v3588(IDs=id_state, HC_power=50e3, V_RF=Vc, load_lattice=True)
-    ring.tune = np.array([54.23, 18.21])
+                 ):
+    Vc = 6e6
+    ring = esrf_ebs()
     ring.chro = np.array([Qp_x, Qp_y])
-    ring.emit[1] = 0.3 * ring.emit[0]
+    ring.emit[1] = 10e-12 
     mybunch = Bunch(ring,
                     mp_number=n_macroparticles,
                     current=bunch_current,
@@ -37,7 +38,7 @@ def run_mbtrack2(folder,
         f"Qp_x={Qp_x:.2f},"+\
         f"Qp_y={Qp_y:.2f},"+\
         f"sc={sc:},"+\
-        f"ibs={ibs:}"+")"
+        ")"
     bunch_monitor = BunchMonitor(
         0,
         save_every=1,
@@ -47,11 +48,22 @@ def run_mbtrack2(folder,
         mpi_mode=False,
     )
     long_map = LongitudinalMap(ring)
-    # main_rf, harmonic_rf = setup_rf(ring, harmonic_cavity, Vc)
+    main_rf = RFCavity(ring, m=1, Vc=Vc, theta=np.arccos(ring.U0 / Vc))
     sr = SynchrotronRadiation(ring, switch=[1, 1, 1])
     trans_map = TransverseMap(ring)
     
     # wakefield_tr, wakefield_long, _ = setup_wakes(ring, id_state, include_Zlong, n_bin)
+    esrf_wakedata = np.loadtxt('../../data/input/full_wake.txt', delimiter=',')
+    Wz = WakeFunction(esrf_wakedata[:,0]/c, esrf_wakedata[:,1], component_type='long', )
+    Wdx = WakeFunction(esrf_wakedata[:,0]/c, esrf_wakedata[:,2], component_type='xdip')
+    Wdy = WakeFunction(esrf_wakedata[:,0]/c, esrf_wakedata[:,3], component_type='ydip')
+    Wqx = WakeFunction(esrf_wakedata[:,0]/c, esrf_wakedata[:,4], component_type='xquad')
+    Wqy = WakeFunction(esrf_wakedata[:,0]/c, esrf_wakedata[:,5], component_type='yquad')
+    # wf_esrf = WakeField([Wz, Wdx, Wdy, Wqx, Wqy], name="ESRF wakefield", )
+    wakefield_tr = WakePotential(ring, WakeField([Wz, Wdx, Wdy, Wqx, Wqy]))
+    wakefield_long = WakePotential(ring, WakeField([Wz]))
+                            
+
     wakepotential_monitor = WakePotentialMonitor(
         bunch_number=0,
         wake_types="Wydip",
@@ -63,17 +75,20 @@ def run_mbtrack2(folder,
         mpi_mode=False,
     )
     tracking_elements = [trans_map, long_map, bunch_monitor]
-    if include_Zlong == 'True':
-        tracking_elements.append(sr)
-    besc = TransverseSpaceCharge(ring=ring,
-                                interaction_length=ring.L,
-                                n_bins=100)
-    ibs_cimp = IntrabeamScattering(ring, mybunch, model="CIMP", n_points=100, n_bin=100)
-    if ibs == 'True':
-        print('IBS included')
-        tracking_elements.append(ibs_cimp)
+    tracking_elements.append(sr)
     if sc == 'True':
+        besc = TransverseSpaceCharge(ring=ring,
+                                    interaction_length=ring.L,
+                                    n_bins=100)
         print('space charge included')
+        tracking_elements.append(besc)
+    else:
+        ring.emit[1] = 40e-12
+        besc = TransverseSpaceCharge(ring=ring,
+                                    interaction_length=ring.L,
+                                    n_bins=100)
+        print('space-charge weakened')
+        
         tracking_elements.append(besc)
     print("Harmonic cavity is off.")
     tracking_elements.append(main_rf)
@@ -95,7 +110,7 @@ def run_mbtrack2(folder,
                         and monitor_count < 2500):
                     wakepotential_monitor.track(mybunch, wakefield_tr)
                     monitor_count += 1
-            elif include_Zlong == 'True':
+            else:
                 wakefield_long.track(mybunch)
     finally:
         bunch_monitor.close()
@@ -113,4 +128,4 @@ if __name__ == "__main__":
                  Qp_x=args.Qp_x,
                  Qp_y=args.Qp_y,
                  sc=args.sc, 
-                 ibs=args.ibs)
+                 )

@@ -26,7 +26,7 @@ def write_submission_script(sub_mode,
                             Qp_y=1.6,
                             sc='False',
                             ):
-    image_name = "soleil-pa:mbtrack2dev"
+    image_name = "soleil-pa:mbtrack2dev_p311"
     script_name = "/home/dockeruser/transverse_instabilities/src/simulation/track_TI.py"
     command_string = get_command_string(script_name, n_macroparticles, n_turns,
                                         n_bin, bunch_current, Qp_x, Qp_y, sc)

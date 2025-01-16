@@ -48,7 +48,7 @@ def write_submission_script(sub_mode,
             f.write("#MSUB -c 8\n")
             f.write("#MSUB -T {:}\n".format(job_time))
             f.write("#MSUB -A soleil\n")
-            f.write("#MSUB -@ gubaidulinvadim@gmail.com:begin,end,requeue\n")
+            # f.write("#MSUB -@ vadim.gubaidulin@synchrotron-soleil.fr:begin,end,requeue\n")
             f.write(
                 f"#MSUB -o /ccc/cont003/home/soleil/gubaiduv/{job_name:}.err\n"
             )
@@ -68,7 +68,7 @@ def write_submission_script(sub_mode,
             f.write("#SBATCH -n 8\n")
             f.write("#SBATCH --time={:}\n".format(job_time))
             f.write("#SBATCH --export=ALL\n")
-            f.write("#SBATCH --mail-user='gubaidulinvadim@gmail.com'\n")
+            # f.write("#SBATCH --mail-user='gubaidulinvadim@gmail.com'\n")
             f.write("#SBATCH --mail-type=begin,end,requeue\n")
             f.write(
                 "#SBATCH --error=/home/sources/physmach/gubaidulin/err/{0:}_%I.err\n"

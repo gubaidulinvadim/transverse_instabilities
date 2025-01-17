@@ -20,13 +20,13 @@ def get_command_string(script_name, n_macroparticles, n_turns, n_bin,
     )
 
 def main():
-    bunch_current = 1e-3 * np.linspace(0.2, 10, 1)
-    sc = ['True']
+    bunch_current = 1e-3 * np.linspace(0.2, 10, 50)
+    sc = ['True', 'False']
     Qp = [3.0]
     combinations = product(bunch_current, sc, Qp)
     for (Ib, sc, Qp) in combinations:
         s = get_command_string(script_name='submission.py',
-            n_macroparticles=10_000,
+            n_macroparticles=1_000_000,
             n_turns=(50_000 if Qp==0 else 100_000),
             n_bin=100,
             bunch_current=Ib,

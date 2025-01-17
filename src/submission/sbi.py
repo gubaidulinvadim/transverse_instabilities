@@ -26,7 +26,7 @@ def main():
     combinations = product(bunch_current, sc, Qp)
     for (Ib, sc, Qp) in combinations:
         s = get_command_string(script_name='submission.py',
-            n_macroparticles=1_000_000,
+            n_macroparticles=10_000,
             n_turns=(50_000 if Qp==0 else 100_000),
             n_bin=100,
             bunch_current=Ib,

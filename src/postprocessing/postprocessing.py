@@ -2,7 +2,8 @@ import h5py as hp
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import PyNAFF as pnf
+# import PyNAFF as pnf
+import nafflib
 from FITX import fit_risetime
 from machine_data.TDR2 import *
 from scipy.constants import c
@@ -184,9 +185,20 @@ def post_single(n_macroparticles=1e6,
                 cavity='False',
                 max_kick=0.0,
                 sc='False'):
-    filename = FOLDER + 'monitors(n_mp={:.1e},n_turns={:.1e},n_bin={:},bunch_current={:.2e},Qp_x={:.2f},Qp_y={:.2f},id_state={},Zlong={},cavity={:},max_kick={:.1e},sc={:},ibs=True)'.format(
-        n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y, ID_state,
-        Zlong, cavity, max_kick, sc)
+    # filename = FOLDER + 'monitors(n_mp={:.1e},n_turns={:.1e},n_bin={:},bunch_current={:.2e},Qp_x={:.2f},Qp_y={:.2f},id_state={},Zlong={},cavity={:},max_kick={:.1e},sc={:},ibs=True)'.format(
+    #     n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y, ID_state,
+    #     Zlong, cavity, max_kick, sc)
+    filename = (FOLDER +
+    f"monitors(n_mp={n_macroparticles:.1e},"+
+            f"n_turns={n_turns:.1e},"+
+            f"n_bin=100,bunch_current={bunch_current:.2e},"+
+            f"Qp_x={Qp_x:.2f},Qp_y={Qp_y:.2f}"+
+            # f",id_state={'close':},"+
+            # f"Zlong={'True':},"+
+            # f"cavity={'True':},"+
+            # f"max_kick={0:.1e}"+
+            f",sc={sc}"+
+            ")")
     with hp.File(filename + '.hdf5') as f:
         m = f['BunchData_0']['mean'][:]
         std = f['BunchData_0']['std'][:]

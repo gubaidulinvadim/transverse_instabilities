@@ -40,7 +40,7 @@ def write_submission_script(sub_mode,
                                         n_bin, bunch_current, Qp_x, Qp_y,
                                         id_state, include_Zlong,
                                         harmonic_cavity, max_kick, sc, ibs)
-    src_folder = "/ccc/work/cont003/soleil/gubaiduv/transverse_instabilities/"
+    src_folder = "/ccc/work/cont003/soleil/gubaiduv/transverse_instabilities/src/"
     data_folder = "/ccc/scratch/cont003/soleil/gubaiduv/transverse_instabilities/data/"
     machine_data_folder = "/ccc/work/cont003/soleil/gubaiduv/machine_data"
     with open(job_name, "w") as f:

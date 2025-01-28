@@ -28,10 +28,10 @@ def main():
     bunch_current = 1e-3 * np.linspace(0.2, 12, 60)
     id_state = 'close'
     Zlong = ['True']
-    hc = ['False', 'True']
+    hc = ['False']
     sc = ['True']
     ibs= ['True']
-    Qp = [0.0]
+    Qp = [1.6]
     combinations = product(bunch_current, Zlong, hc, sc, Qp, ibs)
     for (Ib, Zlong, hc, sc, Qp, ibs) in combinations:
         s = get_command_string(script_name='submission.py',

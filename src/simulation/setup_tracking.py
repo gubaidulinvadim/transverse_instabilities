@@ -7,7 +7,7 @@ from machine_data.TDR2 import *
 from mbtrack2.tracking import (RFCavity, WakePotential)
 
 def setup_wakes(ring, id_state, include_Zlong, n_bin):
-    wakemodel = load_TDR2_wf(version=("TDR2.1_ID" + id_state))
+    wakemodel = load_TDR2_wf(version=("TDR2.1_ID" + id_state+"_pandas2"))
     
     if include_Zlong == 'True':
         wakefield_tr = WakePotential(ring,

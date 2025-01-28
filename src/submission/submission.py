@@ -66,8 +66,9 @@ def write_submission_script(sub_mode,
                 f"#MSUB -e /ccc/cont003/home/soleil/gubaiduv/{job_name:}.out\n"
             )
             f.write(f"module purge\n")
+            f.write(f"module load mpi/openmpi/4.1.4\n")
             f.write(
-                f"ccc_mprun -C {image_name:} -E'--ctr-mount src={src_folder:},dst=/home/dockeruser/transverse_instabilities/src/:src={machine_data_folder},dst=/home/dockeruser/machine_data:src={data_folder},dst=/home/dockeruser/transverse_instabilities/data/' -- "
+                f"ccc_mprun -C {image_name:} -E'--ctr-module mpi/openmpi/4.1.4' -E'--ctr-mount src={src_folder:},dst=/home/dockeruser/transverse_instabilities/src/:src={machine_data_folder},dst=/home/dockeruser/machine_data:src={data_folder},dst=/home/dockeruser/transverse_instabilities/data/' -- "
                 + command_string)
         elif sub_mode == "slurm":
             f.write("#SBATCH --partition sumo\n")

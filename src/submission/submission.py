@@ -7,7 +7,7 @@ from utils import get_parser_for_single_bunch
 def get_command_string(script_name, n_macroparticles, n_turns, n_bin,
                        bunch_current, Qp_x, Qp_y, id_state, include_Zlong,
                        harmonic_cavity, max_kick, sc, ibs):
-    command_string = (f"/home/dockeruser/venv/python3 {script_name:}" +
+    command_string = (f"/home/dockeruser/venv/bin/python3 {script_name:}" +
                       f" --n_macroparticles {n_macroparticles:}" +
                       f" --n_turns {n_turns:}" + f" --n_bin {n_bin:}" +
                       f" --bunch_current {bunch_current:}" +

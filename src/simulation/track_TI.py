@@ -1,33 +1,32 @@
-import os
 import numpy as np
-from machine_data.soleil import v2366_v3, v3588
-from mbtrack2.impedance.wakefield import WakeField
-from mbtrack2.tracking import (Beam, Bunch, LongitudinalMap, RFCavity,
+from facilities_mbtrack2.SOLEIL_II import v3588
+from mbtrack2.tracking import (Bunch, LongitudinalMap, 
                                SynchrotronRadiation, TransverseMap,
-                               WakePotential)
+                               )
 from mbtrack2.tracking.monitors import BunchMonitor, WakePotentialMonitor
 from mbtrack2.tracking.spacecharge import TransverseSpaceCharge
 from mbtrack2.tracking.ibs import IntrabeamScattering
 from tqdm import tqdm
 from utils import get_parser_for_single_bunch
-from setup_tracking import get_active_cavity_params, setup_fbt, setup_wakes, setup_rf
+from setup_tracking import setup_fbt, setup_wakes, setup_rf
 
-def run_mbtrack2(folder,
-                 n_turns=100_000,
-                 n_macroparticles=int(1e5),
-                 n_bin=100,
-                 bunch_current=1e-3,
-                 Qp_x=1.6,
-                 Qp_y=1.6,
-                 id_state="open",
-                 include_Zlong="False",
-                 harmonic_cavity="False",
-                 max_kick=1.6e-6,
-                 sc='False',
-                 ibs='False'):
+def run_mbtrack2(folder: str,
+                 n_turns: int = 100_000,
+                 n_macroparticles: int = 100_000,
+                 n_bin: int = 100,
+                 bunch_current: float = 1e-3,
+                 Qp_x: float = 1.6,
+                 Qp_y: float = 1.6,
+                 id_state: str = "open",
+                 include_Zlong: str = "False",
+                 harmonic_cavity: str = "False",
+                 max_kick: float = 1.6e-6,
+                 sc: str = 'False',
+                 ibs: str = 'False') -> None:
     Vc = 1.7e6
     ring = v3588(IDs=id_state, HC_power=50e3, V_RF=Vc, load_lattice=True)
     ring.tune = np.array([54.23, 18.21])
+    ring.optics.average_beta = np.array([3.288, 4.003])
     Qpp = 50
     ring.chro = np.array([Qp_x, Qp_y, Qpp, Qpp])
     ring.emit[1] = 0.3 * ring.emit[0]

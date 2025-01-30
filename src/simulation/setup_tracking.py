@@ -1,14 +1,12 @@
-import matplotlib.pyplot as plt
 import numpy as np
 from mbtrack2 import BeamLoadingEquilibrium, CavityResonator
 from mbtrack2.tracking.feedback import ExponentialDamper, FIRDamper
 from mbtrack2.impedance.wakefield import WakeField
-from machine_data.TDR2 import *
 from mbtrack2.tracking import (RFCavity, WakePotential)
+from facilities_mbtrack2.SOLEIL_II.IMPEDANCE_MODEL.load import load_soleil_ii_wf
 
 def setup_wakes(ring, id_state, include_Zlong, n_bin):
-    wakemodel = load_TDR2_wf(version=("TDR2.1_ID" + id_state+"_pandas2"))
-    
+    wakemodel = load_soleil_ii_wf(f'wf_TDR2.1_ID{id_state}', ring)
     if include_Zlong == 'True':
         wakefield_tr = WakePotential(ring,
                                      wakefield=WakeField(

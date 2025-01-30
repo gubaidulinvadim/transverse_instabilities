@@ -2,7 +2,7 @@ import h5py as hp
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import PyNAFF as pnf
+# import PyNAFF as pnf
 from FITX import fit_risetime
 from machine_data.TDR2 import *
 from scipy.constants import c

@@ -57,10 +57,10 @@ def run_mbtrack2(folder,
     Wz = WakeFunction(esrf_wakedata[:,0]/c, esrf_wakedata[:,1], component_type='long', )
     # Wdx = WakeFunction(esrf_wakedata[:,0]/c, esrf_wakedata[:,2], component_type='xdip')
     Wdy = WakeFunction(esrf_wakedata[:,0]/c,
-                       1e3*esrf_wakedata[:,3], component_type='ydip')
+                       esrf_wakedata[:,3], component_type='ydip')
     # Wqx = WakeFunction(esrf_wakedata[:,0]/c, esrf_wakedata[:,4], component_type='xquad')
     Wqy = WakeFunction(esrf_wakedata[:,0]/c,
-                       1e3*esrf_wakedata[:,5], component_type='yquad')
+                       esrf_wakedata[:,5], component_type='yquad')
     # wf_esrf = WakeField([Wz, Wdx, Wdy, Wqx, Wqy], name="ESRF wakefield", )
     wakefield_tr = WakePotential(ring, WakeField([Wz, Wdy, Wqy]))
     wakefield_long = WakePotential(ring, WakeField([Wz]))

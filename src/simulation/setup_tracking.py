@@ -8,7 +8,7 @@ import os
 os.environ["PYTHONPATH"] += os.pathsep + "/home/dockeruser/facilities_mbtrack2"
 from facilities_mbtrack2.SOLEIL_II.IMPEDANCE_MODEL.load import load_soleil_ii_wf
 
-def setup_wakes(ring, id_state, include_Zlong, n_bin):
+def setup_wakes(ring, id_state, include_Zlong, n_bin, quad='False'):
     wakemodel = load_soleil_ii_wf(f'wf_CP1_IDgap_{id_state}_varyNEG_False', ring)
     #wakemodel = load_soleil_ii_wf(f'wf_TDR2.1_ID{id_state}_pandas2', ring)
     if include_Zlong == 'True':
@@ -17,8 +17,12 @@ def setup_wakes(ring, id_state, include_Zlong, n_bin):
                                          [wakemodel.Wydip, wakemodel.Wlong]),
                                      n_bin=n_bin)
     else:
+        if quad == 'True':
+            waketypes = [wakemodel.Wydip, wakemodel.Wyquad]
+        else:
+            waketypes = [wakemodel.Wydip]
         wakefield_tr = WakePotential(ring,
-                                     wakefield=WakeField([wakemodel.Wydip]),
+                                     wakefield=WakeField(waketypes),
                                      n_bin=n_bin)
     
     wakefield_long = WakePotential(ring,

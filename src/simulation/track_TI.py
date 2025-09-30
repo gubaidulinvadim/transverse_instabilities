@@ -25,7 +25,8 @@ def run_mbtrack2(folder: str,
                  harmonic_cavity: str = "False",
                  max_kick: float = 1.6e-6,
                  sc: str = 'False',
-                 ibs: str = 'False') -> None:
+                 ibs: str = 'False',
+                 quad: str = 'False') -> None:
     Vc = 1.7e6
     ring = v3588(IDs=id_state, HC_power=50e3, V_RF=Vc, load_lattice=True)
     ring.tune = np.array([54.23, 18.21])
@@ -50,7 +51,9 @@ def run_mbtrack2(folder: str,
         f"cavity={harmonic_cavity:},"+\
         f"max_kick={max_kick:.1e},"+\
         f"sc={sc:},"+\
-        f"ibs={ibs:}"+",Qpp"+")"
+        f"ibs={ibs:}"+",Qpp"+\
+        f"quad={quad:}"+\
+        ")"
     bunch_monitor = BunchMonitor(
         0,
         save_every=1,
@@ -64,10 +67,13 @@ def run_mbtrack2(folder: str,
     sr = SynchrotronRadiation(ring, switch=[1, 1, 1])
     trans_map = TransverseMap(ring)
     
-    wakefield_tr, wakefield_long, _ = setup_wakes(ring, id_state, include_Zlong, n_bin)
+    wakefield_tr, wakefield_long, _ = setup_wakes(ring, id_state,
+                                                  include_Zlong, n_bin,
+                                                  quad)
+    waketypes = ["Wydip", "Wyquad"] if quad=='True' else ["Wydip"] 
     wakepotential_monitor = WakePotentialMonitor(
         bunch_number=0,
-        wake_types="Wydip",
+        wake_types='Wydip',
         n_bin=n_bin,
         save_every=1,
         buffer_size=600,
@@ -139,4 +145,5 @@ if __name__ == "__main__":
                  harmonic_cavity=args.harmonic_cavity,
                  max_kick=args.max_kick,
                  sc=args.sc, 
-                 ibs=args.ibs)
+                 ibs=args.ibs,
+                 quad=args.quad)

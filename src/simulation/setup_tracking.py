@@ -1,12 +1,16 @@
 import numpy as np
 from mbtrack2 import BeamLoadingEquilibrium, CavityResonator
-from mbtrack2.tracking.feedback import ExponentialDamper, FIRDamper
+from mbtrack2.tracking.feedback import TransverseExponentialDamper
+from mbtrack2.tracking.feedback import FIRDamper
 from mbtrack2.impedance.wakefield import WakeField
 from mbtrack2.tracking import (RFCavity, WakePotential)
+import os
+os.environ["PYTHONPATH"] += os.pathsep + "/home/dockeruser/facilities_mbtrack2"
 from facilities_mbtrack2.SOLEIL_II.IMPEDANCE_MODEL.load import load_soleil_ii_wf
 
 def setup_wakes(ring, id_state, include_Zlong, n_bin):
-    wakemodel = load_soleil_ii_wf(f'wf_TDR2.1_ID{id_state}_pandas2', ring)
+    wakemodel = load_soleil_ii_wf(f'wf_CP1_IDgap_{id_state}_varyNEG_False', ring)
+    #wakemodel = load_soleil_ii_wf(f'wf_TDR2.1_ID{id_state}_pandas2', ring)
     if include_Zlong == 'True':
         wakefield_tr = WakePotential(ring,
                                      wakefield=WakeField(
@@ -26,14 +30,10 @@ def setup_wakes(ring, id_state, include_Zlong, n_bin):
 def setup_fbt(ring, max_kick, kind='exp'):
     if kind == 'exp':
         feedback_tau = max_kick / 1.8e-6 * 50
-        fbty = ExponentialDamper(ring,
-                                plane='y',
-                                damping_time=ring.T0 * feedback_tau,
-                                phase_diff=np.pi / 2)
-        fbtx = ExponentialDamper(ring,
-                                plane='x',
-                                damping_time=ring.T0 * feedback_tau,
-                                phase_diff=np.pi / 2)
+        fbty = TransverseExponentialDamper(ring,
+                                damping_time=[ring.T0 * feedback_tau, ring.T0*feedback_tau],
+                                phase_diff=[np.pi / 2, np.pi/2])
+        fbtx = fbty
     else:
         fbty = FIRDamper(ring,
                         plane='y',

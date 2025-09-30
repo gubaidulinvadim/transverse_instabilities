@@ -1,4 +1,7 @@
 import numpy as np
+import os, sys
+os.environ["PYTHONPATH"] += os.pathsep + "/home/dockeruser/facilities_mbtrack2/"
+sys.path.append('/home/dockeruser/facilities_mbtrack2')
 from facilities_mbtrack2.SOLEIL_II import v3588
 from mbtrack2.tracking import (Bunch, LongitudinalMap, 
                                SynchrotronRadiation, TransverseMap,
@@ -26,7 +29,6 @@ def run_mbtrack2(folder: str,
     Vc = 1.7e6
     ring = v3588(IDs=id_state, HC_power=50e3, V_RF=Vc, load_lattice=True)
     ring.tune = np.array([54.23, 18.21])
-    ring.optics.average_beta = np.array([3.288, 4.003])
     Qpp = 50
     ring.chro = np.array([Qp_x, Qp_y, Qpp, Qpp])
     ring.emit[1] = 0.3 * ring.emit[0]

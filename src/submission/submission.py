@@ -1,5 +1,5 @@
 import argparse
-import os
+import os, sys
 
 from utils import get_parser_for_single_bunch
 
@@ -34,7 +34,7 @@ def write_submission_script(sub_mode,
                             max_kick=1.6e-6,
                             sc='False',
                             ibs='False'):
-    image_name = "soleil-pa:mbtrack2dev"
+    image_name = "soleil-pa:mbtrack2"
     script_name = "/home/dockeruser/transverse_instabilities/src/simulation/track_TI.py"
     command_string = get_command_string(script_name, n_macroparticles, n_turns,
                                         n_bin, bunch_current, Qp_x, Qp_y,
@@ -42,7 +42,7 @@ def write_submission_script(sub_mode,
                                         harmonic_cavity, max_kick, sc, ibs)
     src_folder = "/ccc/work/cont003/soleil/gubaiduv/transverse_instabilities/src/"
     data_folder = "/ccc/work/cont003/soleil/gubaiduv/transverse_instabilities/data/"
-    machine_data_folder = "/ccc/work/cont003/soleil/gubaiduv/machine_data"
+    machine_data_folder = "/ccc/work/cont003/soleil/gubaiduv/facilities_mbtrack2/"
     with open(job_name, "w") as f:
         f.write("#!/bin/bash\n")
         if sub_mode == "ccrt":
@@ -68,7 +68,7 @@ def write_submission_script(sub_mode,
             f.write(f"module purge\n")
             f.write(f"module load mpi/openmpi/4.1.4\n")
             f.write(
-                f"ccc_mprun -C {image_name:} -E'--ctr-module openmpi-4.1.4' -E'--ctr-mount src={src_folder:},dst=/home/dockeruser/transverse_instabilities/src/:src={machine_data_folder},dst=/home/dockeruser/machine_data:src={data_folder},dst=/home/dockeruser/transverse_instabilities/data/' -- "
+                f"ccc_mprun -C {image_name:} -E'--ctr-module openmpi-4.1.4' -E'--ctr-mount src={src_folder:},dst=/home/dockeruser/transverse_instabilities/src/:src={machine_data_folder},dst=/home/dockeruser/facilities_mbtrack2/:src={data_folder},dst=/home/dockeruser/transverse_instabilities/data/' -- "
                 + command_string)
         elif sub_mode == "slurm":
             f.write("#SBATCH --partition sumo\n")
@@ -94,6 +94,7 @@ def write_submission_script(sub_mode,
 
 
 if __name__ == "__main__":
+    sys.path.append('/home/dockeruser/facilities_mbtrack2/')
     parser = get_parser_for_single_bunch()
     parser.add_argument(
         "--job_name",

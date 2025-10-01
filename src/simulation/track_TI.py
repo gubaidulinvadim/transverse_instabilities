@@ -30,8 +30,8 @@ def run_mbtrack2(folder: str,
     Vc = 1.7e6
     ring = v3588(IDs=id_state, HC_power=50e3, V_RF=Vc, load_lattice=True)
     ring.tune = np.array([54.23, 18.21])
-    Qpp = 50
-    ring.chro = np.array([Qp_x, Qp_y, Qpp, Qpp])
+    # Qpp = 50
+    ring.chro = np.array([Qp_x, Qp_y])  
     ring.emit[1] = 0.3 * ring.emit[0]
     mybunch = Bunch(ring,
                     mp_number=n_macroparticles,
@@ -51,7 +51,7 @@ def run_mbtrack2(folder: str,
         f"cavity={harmonic_cavity:},"+\
         f"max_kick={max_kick:.1e},"+\
         f"sc={sc:},"+\
-        f"ibs={ibs:}"+",Qpp"+\
+        f"ibs={ibs:}"+\
         f"quad={quad:}"+\
         ")"
     bunch_monitor = BunchMonitor(

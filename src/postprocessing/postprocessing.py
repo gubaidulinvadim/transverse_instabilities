@@ -4,10 +4,10 @@ import numpy as np
 import pandas as pd
 # import PyNAFF as pnf
 from FITX import fit_risetime
-from machine_data.TDR2 import *
+# from machine_data.TDR2 import *
 from scipy.constants import c
 from scipy.signal import find_peaks, periodogram
-from SOLEILII_parameters.SOLEILII_TDR_parameters import *
+# from SOLEILII_parameters.SOLEILII_TDR_parameters import *
 from tqdm.notebook import tqdm
 
 FOLDER = '/home/gubaidulin/scripts/tracking/transverse_instabilities/data/raw/sbi/'

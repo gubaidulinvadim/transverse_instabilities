@@ -94,6 +94,12 @@ def get_parser_for_single_bunch():
         help="Flag to include intrabeam scattering. Defaults to 'False'.",
         default='False',
         type=str)
+    parser.add_argument(
+        "--quad",
+        action="store",
+        help="Flag to include quadrupolar wakes. Defaults to 'False'.",
+        default='False',
+        type=str)
     return parser
 
 def get_parser_for_multibunch():

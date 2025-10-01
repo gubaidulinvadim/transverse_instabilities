@@ -13,6 +13,10 @@ from tqdm.notebook import tqdm
 FOLDER = '/home/gubaidulin/scripts/tracking/transverse_instabilities/data/raw/sbi/'
 FOLDER_FIG = '/home/gubaidulin/scripts/tracking/transverse_instabilities/data/processed/'
 
+Q_S = 1.95e-3
+BETA_X_SMOOTH, BETA_Y_SMOOTH = [13.02686839,  2.69098395]
+Q_X, Q_Y = 18.3, 52.2
+SIGMA_Z = 2.7e-3
 
 def plot_Q_s(m, n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y):
     fftz = np.abs(np.fft.rfft(m[4, :]))
@@ -183,10 +187,11 @@ def post_single(n_macroparticles=1e6,
                 Zlong='False',
                 cavity='False',
                 max_kick=0.0,
-                sc='False'):
-    filename = FOLDER + 'monitors(n_mp={:.1e},n_turns={:.1e},n_bin={:},bunch_current={:.2e},Qp_x={:.2f},Qp_y={:.2f},id_state={},Zlong={},cavity={:},max_kick={:.1e},sc={:},ibs=True)'.format(
+                sc='False',
+               ibs='True'):
+    filename = FOLDER + 'monitors(n_mp={:.1e},n_turns={:.1e},n_bin={:},bunch_current={:.2e},Qp_x={:.2f},Qp_y={:.2f},id_state={},Zlong={},cavity={:},max_kick={:.1e},sc={:},ibs={:},Qpp)'.format(
         n_macroparticles, n_turns, n_bin, bunch_current, Qp_x, Qp_y, ID_state,
-        Zlong, cavity, max_kick, sc)
+        Zlong, cavity, max_kick, sc, ibs)
     with hp.File(filename + '.hdf5') as f:
         m = f['BunchData_0']['mean'][:]
         std = f['BunchData_0']['std'][:]

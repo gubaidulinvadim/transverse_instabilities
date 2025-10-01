@@ -26,14 +26,14 @@ def get_command_string(script_name, n_macroparticles, n_turns, n_bin,
     )
 
 def main():
-    bunch_current = 1e-3 * np.linspace(0.2, 12, 60)
+    bunch_current = 1e-3 * np.linspace(0.2, 6, 30)
     id_state = 'close'
     Zlong = ['True']
     hc = ['False', 'True']
     sc = ['True']
     ibs= ['True']
-    Qp = [1.6]
-    quad = ['True']
+    Qp = [0.0]
+    quad = ['False', 'True']
     combinations = product(bunch_current, Zlong, hc, sc, Qp, ibs, quad)
     for (Ib, Zlong, hc, sc, Qp, ibs, quad) in combinations:
         s = get_command_string(script_name='submission.py',

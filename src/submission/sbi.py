@@ -34,8 +34,8 @@ def main():
     ibs= ['True']
     Qp = [1.6]
     quad = ['True']
-    combinations = product(bunch_current, Zlong, hc, sc, Qp, ibs)
-    for (Ib, Zlong, hc, sc, Qp, ibs) in combinations:
+    combinations = product(bunch_current, Zlong, hc, sc, Qp, ibs, quad)
+    for (Ib, Zlong, hc, sc, Qp, ibs, quad) in combinations:
         s = get_command_string(script_name='submission.py',
             n_macroparticles=500_000,
             n_turns=(50_000 if Qp==0 else 75_000),

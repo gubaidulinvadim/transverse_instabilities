@@ -53,7 +53,7 @@ def run_mbtrack2(folder: str,
         f"max_kick={max_kick:.1e},"+\
         f"sc={sc:},"+\
         f"ibs={ibs:}"+\
-        f"quad={quad:}"+
+        f"quad={quad:}"+\
         f"{wake_y=}"+ "_10c"\
         ")"
     bunch_monitor = BunchMonitor(

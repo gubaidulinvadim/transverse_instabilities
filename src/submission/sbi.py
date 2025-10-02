@@ -30,8 +30,8 @@ def main():
     id_state = 'close'
     Zlong = ['True']
     hc = ['False', 'True']
-    sc = ['False']
-    ibs= ['False']
+    sc = ['True']
+    ibs= ['True']
     Qp = [0.0]
     quad = ['False', 'True']
     combinations = product(bunch_current, Zlong, hc, sc, Qp, ibs, quad)

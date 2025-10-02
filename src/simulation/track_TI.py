@@ -32,7 +32,7 @@ def run_mbtrack2(folder: str,
     ring.tune = np.array([54.23, 18.21])
     # Qpp = 50
     ring.chro = np.array([Qp_x, Qp_y])  
-    ring.emit[1] = 0.3 * ring.emit[0]
+    ring.emit[1] = 0.1 * ring.emit[0]
     mybunch = Bunch(ring,
                     mp_number=n_macroparticles,
                     current=bunch_current,
@@ -52,7 +52,7 @@ def run_mbtrack2(folder: str,
         f"max_kick={max_kick:.1e},"+\
         f"sc={sc:},"+\
         f"ibs={ibs:}"+\
-        f"quad={quad:}"+\
+        f"quad={quad:}"+ "_10c"\
         ")"
     bunch_monitor = BunchMonitor(
         0,

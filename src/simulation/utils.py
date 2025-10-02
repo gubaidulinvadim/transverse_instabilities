@@ -121,28 +121,3 @@ def get_parser_for_multibunch():
     )
     return parser
 
-def laguerre_fit(x, *coeffs):
-    from scipy.special import genlaguerre
-    a = coeffs[0]
-    b = coeffs[1]
-    c = coeffs[2]
-    orders = np.linspace(0, len(coeffs) - 4, len(coeffs) - 3, dtype=np.int64)
-    laguerres = np.array([
-        coeffs[3 + order] * genlaguerre(order, 0)(b * (x + c)**2)
-        for order in orders
-    ])
-    return np.exp(-a * (x + c)**2) * np.sum(laguerres, axis=0)
-
-
-def fit_loop(t0, data):
-    # from scipy.optimize import curve_fit
-    # from sklearn.metrics import r2_score
-    order = 4
-    r2 = 0
-    while r2 < 0.998 and order != 20:
-        p0 = np.zeros(shape=(order, ))
-        p0[0:3] = 0.5, 0.5, 1
-        popt, pcov = curve_fit(laguerre_fit, t0, data, p0=p0)
-        r2 = r2_score(data, laguerre_fit(t0, *popt))
-        order += 1
-    return r2, popt

@@ -100,6 +100,12 @@ def get_parser_for_single_bunch():
         help="Flag to include quadrupolar wakes. Defaults to 'False'.",
         default='False',
         type=str)
+    parser.add_argument(
+        "--wake_y",
+        action="store",
+        help="Flag to include vertical wake, if False horizontal wake is included instead. Defaults to 'False'.",
+        default='True',
+        type=str)
     return parser
 
 def get_parser_for_multibunch():

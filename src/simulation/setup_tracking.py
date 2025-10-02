@@ -8,19 +8,31 @@ import os
 os.environ["PYTHONPATH"] += os.pathsep + "/home/dockeruser/facilities_mbtrack2"
 from facilities_mbtrack2.SOLEIL_II.IMPEDANCE_MODEL.load import load_soleil_ii_wf
 
-def setup_wakes(ring, id_state, include_Zlong, n_bin, quad='False'):
+def setup_wakes(ring, id_state, include_Zlong, n_bin, quad='False', wake_y='True'):
+    wake_y = True if wake_y=='True' else False
     wakemodel = load_soleil_ii_wf(f'wf_CP1_IDgap_{id_state}_varyNEG_False', ring)
     #wakemodel = load_soleil_ii_wf(f'wf_TDR2.1_ID{id_state}_pandas2', ring)
     if include_Zlong == 'True':
-        wakefield_tr = WakePotential(ring,
+        if wake_y:
+            wakefield_tr = WakePotential(ring,
                                      wakefield=WakeField(
-                                         [wakemodel.Wydip, wakemodel.Wlong]),
+                                         [wakemodel.Wydip, wakemodel.Wlong,
+                                          wakemodel.Wyquad]),
+                                     n_bin=n_bin)
+        else:
+            wakefield_tr = WakePotential(ring,
+                                     wakefield=WakeField(
+                                         [wakemodel.Wxdip, wakemodel.Wlong,
+                                          wakemodel.Wxquad]),
                                      n_bin=n_bin)
     else:
         if quad == 'True':
-            waketypes = [wakemodel.Wydip, wakemodel.Wyquad]
+            if wake_y:
+                waketypes = [wakemodel.Wydip, wakemodel.Wyquad]
+            else:
+                waketypes = [wakemodel.Wxdip, wakemodel.Wxquad]
         else:
-            waketypes = [wakemodel.Wydip]
+            waketypes = [wakemodel.Wydip] if wake_y else [wakemodel.Wxdip]
         wakefield_tr = WakePotential(ring,
                                      wakefield=WakeField(waketypes),
                                      n_bin=n_bin)

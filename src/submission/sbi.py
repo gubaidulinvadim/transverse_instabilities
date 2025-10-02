@@ -5,7 +5,7 @@ import numpy as np
 
 def get_command_string(script_name, n_macroparticles, n_turns, n_bin,
                        bunch_current, Qp_x, Qp_y, id_state, include_Zlong,
-                       harmonic_cavity, max_kick, sc, ibs, quad):
+                       harmonic_cavity, max_kick, sc, ibs, quad, wake_y):
     return (
         f"python3 {script_name} --sub_mode ccrt"
         f" --job_name tmci_{bunch_current:.1e}_sc={sc}_hc={harmonic_cavity}_Z={include_Zlong}_ibs={ibs}"
@@ -23,6 +23,7 @@ def get_command_string(script_name, n_macroparticles, n_turns, n_bin,
         f" --sc {sc}"
         f" --ibs {ibs}"
         f" --quad {quad}"
+        f" --wake_y {wake_y}"
     )
 
 def main():
@@ -34,8 +35,9 @@ def main():
     ibs= ['True']
     Qp = [0.0]
     quad = ['False', 'True']
-    combinations = product(bunch_current, Zlong, hc, sc, Qp, ibs, quad)
-    for (Ib, Zlong, hc, sc, Qp, ibs, quad) in combinations:
+    wake_y = ['True']
+    combinations = product(bunch_current, Zlong, hc, sc, Qp, ibs, quad, wake_y)
+    for (Ib, Zlong, hc, sc, Qp, ibs, quad, wake_y) in combinations:
         s = get_command_string(script_name='submission.py',
             n_macroparticles=500_000,
             n_turns=(50_000 if Qp==0 else 75_000),
@@ -49,7 +51,8 @@ def main():
             max_kick=0,
             sc=sc,
             ibs=ibs,
-            quad=quad)
+            quad=quad,
+            wake_y=wake_y)
         try:
             os.system(s)
         except Exception as e:

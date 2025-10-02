@@ -6,7 +6,7 @@ from utils import get_parser_for_single_bunch
 
 def get_command_string(script_name, n_macroparticles, n_turns, n_bin,
                        bunch_current, Qp_x, Qp_y, id_state, include_Zlong,
-                       harmonic_cavity, max_kick, sc, ibs, quad):
+                       harmonic_cavity, max_kick, sc, ibs, quad, wake_y):
     command_string = (f"/home/dockeruser/venv/bin/python3 {script_name:}" +
                       f" --n_macroparticles {n_macroparticles:}" +
                       f" --n_turns {n_turns:}" + f" --n_bin {n_bin:}" +
@@ -17,6 +17,7 @@ def get_command_string(script_name, n_macroparticles, n_turns, n_bin,
                       f" --harmonic_cavity {harmonic_cavity:}" +
                       f" --max_kick {max_kick}" + f" --sc {sc:}" + f" --ibs {ibs:}" +
                       f" --quad {quad}" +
+                      f" --wake_y {wake_y}"+
                       "\n")
     return command_string
 
@@ -36,14 +37,15 @@ def write_submission_script(sub_mode,
                             max_kick=1.6e-6,
                             sc='False',
                             ibs='False',
-                            quad='False'):
+                            quad='False',
+                            wake_y='True'):
     image_name = "soleil-pa:mbtrack2"
     script_name = "/home/dockeruser/transverse_instabilities/src/simulation/track_TI.py"
     command_string = get_command_string(script_name, n_macroparticles, n_turns,
                                         n_bin, bunch_current, Qp_x, Qp_y,
                                         id_state, include_Zlong,
                                         harmonic_cavity, max_kick, sc, ibs,
-                                        quad)
+                                        quad, wake_y)
     src_folder = "/ccc/work/cont003/soleil/gubaiduv/transverse_instabilities/src/"
     data_folder = "/ccc/work/cont003/soleil/gubaiduv/transverse_instabilities/data/"
     machine_data_folder = "/ccc/work/cont003/soleil/gubaiduv/facilities_mbtrack2/"
@@ -134,7 +136,7 @@ if __name__ == "__main__":
                                   args.n_bin, args.bunch_current, args.Qp_x,
                                   args.Qp_y, args.id_state, args.include_Zlong,
                                   args.harmonic_cavity, args.max_kick, args.sc,
-                                  args.ibs, args.quad)
+                                  args.ibs, args.quad, args.wake_y)
     print(args)
     if args.sub_mode == "ccrt":
         os.system("ccc_msub {:}".format(job))

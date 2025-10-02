@@ -26,7 +26,8 @@ def run_mbtrack2(folder: str,
                  max_kick: float = 1.6e-6,
                  sc: str = 'False',
                  ibs: str = 'False',
-                 quad: str = 'False') -> None:
+                 quad: str = 'False',
+                 wake_y: str = 'True') -> None:
     Vc = 1.7e6
     ring = v3588(IDs=id_state, HC_power=50e3, V_RF=Vc, load_lattice=True)
     ring.tune = np.array([54.23, 18.21])
@@ -52,7 +53,8 @@ def run_mbtrack2(folder: str,
         f"max_kick={max_kick:.1e},"+\
         f"sc={sc:},"+\
         f"ibs={ibs:}"+\
-        f"quad={quad:}"+ "_10c"\
+        f"quad={quad:}"+
+        f"{wake_y=}"+ "_10c"\
         ")"
     bunch_monitor = BunchMonitor(
         0,
@@ -69,8 +71,7 @@ def run_mbtrack2(folder: str,
     
     wakefield_tr, wakefield_long, _ = setup_wakes(ring, id_state,
                                                   include_Zlong, n_bin,
-                                                  quad)
-    waketypes = ["Wydip", "Wyquad"] if quad=='True' else ["Wydip"] 
+                                                  quad, wake_y)
     wakepotential_monitor = WakePotentialMonitor(
         bunch_number=0,
         wake_types='Wydip',

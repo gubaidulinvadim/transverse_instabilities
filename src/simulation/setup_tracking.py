@@ -3,7 +3,7 @@ from mbtrack2 import BeamLoadingEquilibrium, CavityResonator
 from mbtrack2.tracking.feedback import TransverseExponentialDamper
 from mbtrack2.tracking.feedback import FIRDamper
 from mbtrack2.impedance.wakefield import WakeField
-from mbtrack2.tracking import (RFCavity, WakePotential)
+from mbtrack2.tracking import (RFCavity, WakePotential, DirectFeedback)
 import os
 os.environ["PYTHONPATH"] += os.pathsep + "/home/dockeruser/facilities_mbtrack2"
 from facilities_mbtrack2.SOLEIL_II.IMPEDANCE_MODEL.load import load_soleil_ii_wf

@@ -126,7 +126,7 @@ def run_mbtrack2(folder,
     besc = TransverseSpaceCharge(ring=ring,
                                 interaction_length=ring.L,
                                 n_bins=n_bin)
-    ibs_cimp = IntrabeamScattering(ring, beam, model="CIMP", n_points=100, n_bin=100)
+    ibs_cimp = IntrabeamScattering(ring, model="CIMP", n_points=100, n_bin=100)
     if ibs == 'True':
         print('IBS included')
         tracking_elements.append(ibs_cimp)

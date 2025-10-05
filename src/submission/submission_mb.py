@@ -23,7 +23,7 @@ def get_command_string(script_name, n_macroparticles, n_turns, n_bin,
         f"--n_turns_wake {n_turns_wake} "
         f"--max_kick {max_kick} "
         f"--sc {sc}"+ f" --ibs {ibs}"+
-        f"--quad {quad}"+
+        f" --quad {quad}"+
         "\n"
     )
 

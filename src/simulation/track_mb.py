@@ -27,7 +27,9 @@ def run_mbtrack2(folder,
                  n_turns_wake=1,
                  max_kick=1.6e-6,
                  sc="False",
-                 ibs='False'):
+                 ibs='False',
+                 quad='False',
+                 wake_y='True'):
     Vc = 1.7e6
     ring = v3588(IDs=id_state, V_RF=Vc, load_lattice=True)
     ring.tune = np.array([54.23, 18.21])
@@ -57,7 +59,9 @@ def run_mbtrack2(folder,
         f",n_turns_wake={n_turns_wake:}"
         f",max_kick={max_kick:.1e}"+
         f",sc={sc:}"+\
-        f",ibs={ibs:}"+")")
+        f",ibs={ibs:}"+
+        f"quad={quad:}"+
+        ")")
     beam_monitor = BeamMonitor(
         ring.h,
         save_every=10,
@@ -81,22 +85,42 @@ def run_mbtrack2(folder,
     trans_map = TransverseMap(ring)
     wakefield_tr, wakefield_long, wakemodel = setup_wakes(ring, id_state, include_Zlong, n_bin)
 
-    x3 = 6.38e-3
     if id_state == "open":
-        y3 = 6.73e-3
-    if id_state == "close":
-        y3 = 5.50e-3
+        x3 = 6.51e-3
+        y3 = 6.70e-3
+    else: #id_state == "close":
+        x3 = 5.78e-3
+        y3 = 5.61e-3
     long_wakefield = LongRangeResistiveWall(
         ring=ring,
         beam=beam,
-        length=350.749,
+        length=ring.L,
         rho=2.135e-8,
         radius=8e-3,
-        types=["Wydip"],
+        types=["Wxdip", "Wydip"],
         nt=n_turns_wake,
         x3=x3,
         y3=y3,
     )
+    
+    if id_state == "open":
+        x3 = -15.01e-3
+        y3 = 15.63e-3
+    else: #id_state == "close":
+        x3 = -7.90e-3
+        y3 = 8.87e-3
+    long_wakefield_quad = LongRangeResistiveWall(
+        ring=ring,
+        beam=beam,
+        length=ring.L,
+        rho=2.135e-8,
+        radius=8e-3,
+        types=["Wxdip", "Wydip"],
+        nt=n_turns_wake,
+        x3=x3,
+        y3=y3,
+        )
+
 
     rf, hrf = setup_dual_rf(ring, beam, harmonic_cavity, bunch_current,  wakemodel)
     fbtx, fbty = setup_fbt(ring, max_kick)
@@ -138,6 +162,8 @@ def run_mbtrack2(folder,
             if i > 25_000:
                 wakefield_tr.track(beam)
                 long_wakefield.track(beam)
+                if quad == 'True':
+                    long_wakefield_quad.track(beam)
             elif include_Zlong == 'True':
                 wakefield_long.track(beam)
                 
@@ -168,4 +194,6 @@ if __name__ == "__main__":
                  n_turns_wake=args.n_turns_wake,
                  max_kick=args.max_kick,
                  sc=args.sc,
-                 ibs=args.ibs)
+                 ibs=args.ibs,
+                 quad=args.quad,
+                 wake_y=args.wake_y)

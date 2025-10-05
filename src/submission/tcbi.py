@@ -4,7 +4,7 @@ import numpy as np
 
 def get_command_string(script_name, n_macroparticles, n_turns, n_bin,
                        bunch_current, Qp_x, Qp_y, id_state, include_Zlong,
-                       harmonic_cavity, max_kick, n_turns_wake, sc, ibs):
+                       harmonic_cavity, max_kick, n_turns_wake, sc, ibs, quad):
     return (
         f"python3 {script_name} --sub_mode ccrt"
         f" --job_name TBCIchroma{Qp_y:.1f}_current_{bunch_current:.1e}_sc_{sc}"
@@ -22,9 +22,13 @@ def get_command_string(script_name, n_macroparticles, n_turns, n_bin,
         f" --max_kick {max_kick}"
         f" --sc {sc}"
         f" --ibs {ibs}"
+        f" --quad {quad}"
     )
 
-def run_simulation(script_name, n_macroparticles, n_turns, n_bin, chromaticity_list, bunch_current_list, id_state, zlong_hc_pairs, sc_list, n_turns_wake, ibs_list, max_kick=0):
+def run_simulation(script_name, n_macroparticles, n_turns, n_bin,
+                   chromaticity_list, bunch_current_list, id_state,
+                   zlong_hc_pairs, sc_list, n_turns_wake, ibs_list, max_kick=0,
+                   quad='False'):
     for chromaticity in chromaticity_list:
         for bunch_current in bunch_current_list:
             combinations = product(zlong_hc_pairs, sc_list, ibs_list)
@@ -43,7 +47,8 @@ def run_simulation(script_name, n_macroparticles, n_turns, n_bin, chromaticity_l
                     max_kick=max_kick,
                     n_turns_wake=n_turns_wake,
                     sc=sc,
-                    ibs=ibs
+                    ibs=ibs,
+                    quad=quad
                 )
                 try:
                     os.system(command)
@@ -81,7 +86,8 @@ def main():
         sc_list=sc_list,
         n_turns_wake=n_turns_wake,
         max_kick=max_kick,
-        ibs_list=ibs_list
+        ibs_list=ibs_list,
+        quad='False'
     )
     
     # run_simulation(

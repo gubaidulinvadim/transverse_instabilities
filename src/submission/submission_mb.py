@@ -48,9 +48,12 @@ def write_submission_script(sub_mode,
                             quad='False'):
     script_name = "/home/dockeruser/transverse_instabilities/src/simulation/track_mb.py"
     image_name = "soleil-pa:mbtrack2"
-    mount_folder = "/ccc/work/cont003/soleil/gubaiduv/transverse_instabilities"
-    machine_data_folder = "/ccc/work/cont003/soleil/gubaiduv/facilities_mbtrack2/"
+    # mount_folder = "/ccc/work/cont003/soleil/gubaiduv/transverse_instabilities"
+    # machine_data_folder = "/ccc/work/cont003/soleil/gubaiduv/facilities_mbtrack2/"
     
+    src_folder = "/ccc/work/cont003/soleil/gubaiduv/transverse_instabilities/src/"
+    data_folder = "/ccc/work/cont003/soleil/gubaiduv/transverse_instabilities/data/"
+    machine_data_folder = "/ccc/work/cont003/soleil/gubaiduv/facilities_mbtrack2/"
     command_string = get_command_string(script_name, n_macroparticles, n_turns,
                                         n_bin, bunch_current, Qp_x, Qp_y,
                                         id_state, include_Zlong,
@@ -78,12 +81,15 @@ def write_submission_script(sub_mode,
             f.write(f"#MSUB -e /ccc/cont003/home/soleil/gubaiduv/{job_name}.out\n")
             f.write("module purge\n")
             f.write("module load mpi/openmpi/4.1.4\n")
+            # f.write(
+            #     f"ccc_mprun -C {image_name} "
+            #     f"-E'--ctr-module openmpi-4.1.4' "
+            #     f"-E'--ctr-mount src={mount_folder},dst=/home/dockeruser/transverse_instabilities:src={machine_data_folder},dst=/home/dockeruser/facilities_mbtrack2/' "
+            #     f"-- {command_string}"
+            # )
             f.write(
-                f"ccc_mprun -C {image_name} "
-                f"-E'--ctr-module openmpi-4.1.4' "
-                f"-E'--ctr-mount src={mount_folder},dst=/home/dockeruser/transverse_instabilities:src={machine_data_folder},dst=/home/dockeruser/facilities_mbtrack2' "
-                f"-- {command_string}"
-            )
+                f"ccc_mprun -C {image_name:} -E'--ctr-module openmpi-4.1.4' -E'--ctr-mount src={src_folder:},dst=/home/dockeruser/transverse_instabilities/src/:src={machine_data_folder},dst=/home/dockeruser/facilities_mbtrack2/:src={data_folder},dst=/home/dockeruser/transverse_instabilities/data/' -- "
+                + command_string)
         elif sub_mode == "slurm":
             f.write("#SBATCH --partition sumo\n")
             # if is_longqueue == "True":

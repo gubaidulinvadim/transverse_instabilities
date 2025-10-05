@@ -1,5 +1,7 @@
 import os
 import numpy as np
+os.environ["PYTHONPATH"] += os.pathsep + "/home/dockeruser/facilities_mbtrack2/"
+sys.path.append('/home/dockeruser/facilities_mbtrack2')
 from mbtrack2.tracking import (Beam, LongitudinalMap,
                                LongRangeResistiveWall,
                                SynchrotronRadiation, TransverseMap)

@@ -1,12 +1,11 @@
-import argparse
 import os
 
-from utils import get_parser_for_single_bunch, get_parser_for_multibunch
+from utils import get_parser_for_multibunch
 
 
 def get_command_string(script_name, n_macroparticles, n_turns, n_bin,
                        bunch_current, Qp_x, Qp_y, id_state, include_Zlong,
-                       harmonic_cavity, n_turns_wake, max_kick, sc, ibs):
+                       harmonic_cavity, n_turns_wake, max_kick, sc, ibs, quad):
     """
     Generate the command string to execute the simulation script with given parameters.
     """
@@ -23,7 +22,9 @@ def get_command_string(script_name, n_macroparticles, n_turns, n_bin,
         f"--harmonic_cavity {harmonic_cavity} "
         f"--n_turns_wake {n_turns_wake} "
         f"--max_kick {max_kick} "
-        f"--sc {sc}"+ f" --ibs {ibs}\n"
+        f"--sc {sc}"+ f" --ibs {ibs}"+
+        f"--quad {quad}"+
+        "\n"
     )
 
 
@@ -43,17 +44,18 @@ def write_submission_script(sub_mode,
                             n_turns_wake=50,
                             max_kick=1.6e-6,
                             sc="False",
-                            ibs='False'):
+                            ibs='False',
+                            quad='False'):
     script_name = "/home/dockeruser/transverse_instabilities/src/simulation/track_mb.py"
-    image_name = "soleil-pa:mbtrack2dev"
+    image_name = "soleil-pa:mbtrack2"
     mount_folder = "/ccc/work/cont003/soleil/gubaiduv/transverse_instabilities"
-    machine_data_folder = "/ccc/work/cont003/soleil/gubaiduv/machine_data"
+    machine_data_folder = "/ccc/work/cont003/soleil/gubaiduv/facilities_mbtrack2/"
     
     command_string = get_command_string(script_name, n_macroparticles, n_turns,
                                         n_bin, bunch_current, Qp_x, Qp_y,
                                         id_state, include_Zlong,
                                         harmonic_cavity, n_turns_wake,
-                                        max_kick, sc, ibs)
+                                        max_kick, sc, ibs, quad)
     submission_script_path = f"{job_name}.sh"
     
     with open(submission_script_path, "w") as f:
@@ -79,13 +81,13 @@ def write_submission_script(sub_mode,
             f.write(
                 f"ccc_mprun -C {image_name} "
                 f"-E'--ctr-module openmpi-4.1.4' "
-                f"-E'--ctr-mount src={mount_folder},dst=/home/dockeruser/transverse_instabilities:src={machine_data_folder},dst=/home/dockeruser/machine_data' "
+                f"-E'--ctr-mount src={mount_folder},dst=/home/dockeruser/transverse_instabilities:src={machine_data_folder},dst=/home/dockeruser/facilities_mbtrack2' "
                 f"-- {command_string}"
             )
         elif sub_mode == "slurm":
             f.write("#SBATCH --partition sumo\n")
-            if is_longqueue == "True":
-                f.write("#SBATCH --qos long\n")
+            # if is_longqueue == "True":
+            f.write("#SBATCH --qos long\n")
             f.write("#SBATCH -n 8\n")
             f.write(f"#SBATCH --time={job_time}\n")
             f.write("#SBATCH --export=ALL\n")
@@ -145,7 +147,8 @@ if __name__ == "__main__":
         args.sub_mode, args.job_name, args.job_time,
         args.n_macroparticles, args.n_turns, args.n_bin, args.bunch_current,
         args.Qp_x, args.Qp_y, args.id_state, args.include_Zlong,
-        args.harmonic_cavity, args.n_tasks, args.n_turns_wake, args.max_kick, args.sc)
+        args.harmonic_cavity, args.n_tasks, args.n_turns_wake, args.max_kick,
+        args.sc, args.ibs, args.quad)
     print(args)
     if args.sub_mode == "ccrt":
         os.system("ccc_msub {:}".format(job))

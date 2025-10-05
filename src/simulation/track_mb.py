@@ -1,17 +1,14 @@
 import os
 import numpy as np
-from mbtrack2 import DirectFeedback
-from mbtrack2.tracking import (Beam, Bunch, CavityResonator, LongitudinalMap,
-                               LongRangeResistiveWall, RFCavity,
-                               SynchrotronRadiation, TransverseMap,
-                               WakePotential)
+from mbtrack2.tracking import (Beam, LongitudinalMap,
+                               LongRangeResistiveWall,
+                               SynchrotronRadiation, TransverseMap)
 from mbtrack2.tracking.monitors import BeamMonitor, WakePotentialMonitor
-from tqdm import tqdm
 from utils import get_parser_for_multibunch
 from setup_tracking import setup_fbt, setup_wakes, setup_dual_rf
 from mbtrack2.tracking.spacecharge import TransverseSpaceCharge
 from mbtrack2.tracking.ibs import IntrabeamScattering
-from machine_data.soleil import v2366_v3, v3588
+from facilities_mbtrack2 import v3588
 
 
 def run_mbtrack2(folder,
@@ -28,8 +25,7 @@ def run_mbtrack2(folder,
                  max_kick=1.6e-6,
                  sc="False",
                  ibs='False',
-                 quad='False',
-                 wake_y='True'):
+                 quad='False'):
     Vc = 1.7e6
     ring = v3588(IDs=id_state, V_RF=Vc, load_lattice=True)
     ring.tune = np.array([54.23, 18.21])
@@ -195,5 +191,4 @@ if __name__ == "__main__":
                  max_kick=args.max_kick,
                  sc=args.sc,
                  ibs=args.ibs,
-                 quad=args.quad,
-                 wake_y=args.wake_y)
+                 quad=args.quad)

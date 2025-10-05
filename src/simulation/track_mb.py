@@ -1,4 +1,4 @@
-import os
+import os, sys
 import numpy as np
 os.environ["PYTHONPATH"] += os.pathsep + "/home/dockeruser/facilities_mbtrack2/"
 sys.path.append('/home/dockeruser/facilities_mbtrack2')

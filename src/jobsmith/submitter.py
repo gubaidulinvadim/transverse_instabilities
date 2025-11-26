@@ -64,6 +64,9 @@ class Submitter(ABC):
 class CCRTSubmitter(Submitter):
     """Submitter for CCRT (CEA) HPC system using ccc_msub."""
     
+    # Default container module for MPI applications
+    DEFAULT_CTR_MODULE = "openmpi-4.1.4"
+    
     def __init__(self, home_dir: str = "/ccc/cont003/home/soleil/gubaiduv"):
         """
         Initialize CCRT submitter.
@@ -124,7 +127,7 @@ class CCRTSubmitter(Submitter):
             mount_args = ":".join([
                 f"src={src},dst={dst}" for src, dst in job.mounts.items()
             ])
-            container_modules = job.extra_args.get('ctr_module', 'openmpi-4.1.4')
+            container_modules = job.extra_args.get('ctr_module', self.DEFAULT_CTR_MODULE)
             cmd = (
                 f"ccc_mprun -C {job.image} "
                 f"-E'--ctr-module {container_modules}' "
@@ -148,8 +151,16 @@ class CCRTSubmitter(Submitter):
                 text=True
             )
             if result.returncode == 0:
-                # Parse job ID from output
-                return result.stdout.strip()
+                # Parse job ID from ccc_msub output
+                # Typical output format: "Submitted batch job 12345"
+                # or just a numeric job ID
+                output = result.stdout.strip()
+                # Try to extract numeric job ID from the output
+                for part in output.split():
+                    if part.isdigit():
+                        return part
+                # If no numeric ID found, return the full output
+                return output if output else None
             else:
                 print(f"Submission failed: {result.stderr}")
                 return None

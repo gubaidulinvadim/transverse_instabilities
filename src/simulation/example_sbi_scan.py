@@ -19,7 +19,7 @@ import os
 # Add src directory to path for local imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from jobsmith import Job, submit_scan, ParameterGrid, get_submitter
+from jobsmith import Job, submit_scan, ParameterGrid
 
 
 # Default paths for CCRT

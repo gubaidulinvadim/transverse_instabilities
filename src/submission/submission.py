@@ -1,5 +1,34 @@
+"""
+Deprecated single-bunch submission script - use jobsmith instead.
+
+This script is deprecated and will be removed in a future release.
+Please migrate to the jobsmith package for job submission functionality.
+
+Example using jobsmith:
+    from jobsmith import Job, CCRTSubmitter, submit_scan
+
+    def make_job(params):
+        return Job(
+            name=f"sbi_{params['bunch_current']:.1e}",
+            command=f"python track_TI.py --bunch_current {params['bunch_current']}",
+            time_limit=85000,
+            image="soleil-pa:mbtrack2",
+        )
+
+    submit_scan('ccrt', {'bunch_current': [1e-3, 2e-3]}, make_job)
+"""
+
 import argparse
-import os, sys
+import os
+import sys
+import warnings
+
+warnings.warn(
+    "submission.py is deprecated. Please use jobsmith for job submission. "
+    "See README.md for migration instructions.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 from utils import get_parser_for_single_bunch
 

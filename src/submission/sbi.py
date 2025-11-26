@@ -1,6 +1,20 @@
+"""
+Deprecated single-bunch instability scan script - use jobsmith instead.
+
+This script is deprecated. Use jobsmith.submit_scan for parameter scans.
+"""
+
 import os
+import warnings
 from itertools import product
 import numpy as np
+
+warnings.warn(
+    "sbi.py is deprecated. Please use jobsmith.submit_scan for parameter scans. "
+    "See README.md for migration instructions.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 
 def get_command_string(script_name, n_macroparticles, n_turns, n_bin,

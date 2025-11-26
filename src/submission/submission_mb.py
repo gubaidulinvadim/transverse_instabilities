@@ -1,4 +1,33 @@
+"""
+Deprecated multi-bunch submission script - use jobsmith instead.
+
+This script is deprecated and will be removed in a future release.
+Please migrate to the jobsmith package for job submission functionality.
+
+Example using jobsmith:
+    from jobsmith import Job, CCRTSubmitter, submit_scan
+
+    def make_job(params):
+        return Job(
+            name=f"tcbi_{params['bunch_current']:.1e}",
+            command=f"python track_mb.py --bunch_current {params['bunch_current']}",
+            time_limit=86000,
+            n_tasks=416,
+            image="soleil-pa:mbtrack2",
+        )
+
+    submit_scan('ccrt', {'bunch_current': [1e-3, 2e-3]}, make_job)
+"""
+
 import os
+import warnings
+
+warnings.warn(
+    "submission_mb.py is deprecated. Please use jobsmith for job submission. "
+    "See README.md for migration instructions.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 from utils import get_parser_for_multibunch
 

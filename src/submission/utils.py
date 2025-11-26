@@ -1,4 +1,18 @@
+"""
+Deprecated utility functions for submission scripts.
+
+This module is deprecated. The parser functions are now available in
+src/simulation/utils.py which should be used instead.
+"""
+
 import argparse
+import warnings
+
+warnings.warn(
+    "submission/utils.py is deprecated. Please use simulation/utils.py instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 def get_parser_for_single_bunch():
     parser = argparse.ArgumentParser(

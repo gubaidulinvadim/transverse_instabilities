@@ -1,107 +1,150 @@
+"""Generic parameter scan submission functionality.
+
+This module provides functionality for submitting parameter scans - multiple
+jobs with varying parameter values.
 """
-Parameter scan utilities for submitting multiple jobs.
-"""
 
-from itertools import product
-from typing import Any, Callable, Dict, Iterator, List, Optional, Union
+import copy
+import itertools
+import os
 
-from .job import Job
-from .submitter import Submitter, get_submitter
+import numpy as np
 
+from jobsmith.core import Job, Submitter
+from jobsmith.utils import load_config, validate_config, write_toml
+from time import sleep
 
-class ParameterGrid:
+def expand_scan_values(scan_spec) -> list:
+    """Expand a scan specification into a list of values.
+
+    Args:
+        scan_spec: Either a list of explicit values or a dict with
+                   {start, stop, num} for linspace.
+
+    Returns:
+        List of values to scan.
     """
-    A class for generating parameter combinations for scans.
-    
-    Example:
-        >>> grid = ParameterGrid({
-        ...     'bunch_current': [1e-3, 2e-3, 3e-3],
-        ...     'chromaticity': [0.0, 1.6],
-        ... })
-        >>> for params in grid:
-        ...     print(params)
+    if isinstance(scan_spec, list):
+        return scan_spec
+    elif isinstance(scan_spec, dict):
+        start = scan_spec.get('start', 0)
+        stop = scan_spec.get('stop', 1)
+        num = scan_spec.get('num', 10)
+        return np.linspace(start, stop, num).tolist()
+    else:
+        return [scan_spec]
+
+
+def generate_scan_configs(base_config: dict) -> list:
+    """Generate configurations for all parameter combinations.
+
+    Args:
+        base_config: Base configuration with [scan] section.
+
+    Returns:
+        List of (job_name, config) tuples for each parameter combination.
     """
-    
-    def __init__(self, param_dict: Dict[str, List[Any]]):
-        """
-        Initialize parameter grid.
-        
-        Args:
-            param_dict: Dictionary mapping parameter names to lists of values
-        """
-        self.param_dict = param_dict
-        self._keys = list(param_dict.keys())
-        self._values = [param_dict[k] for k in self._keys]
-    
-    def __iter__(self) -> Iterator[Dict[str, Any]]:
-        """Iterate over all parameter combinations."""
-        for combo in product(*self._values):
-            yield dict(zip(self._keys, combo))
-    
-    def __len__(self) -> int:
-        """Return the total number of parameter combinations."""
-        result = 1
-        for values in self._values:
-            result *= len(values)
-        return result
+    scan_params = base_config.get('scan', {})
+
+    if not scan_params:
+        print("Warning: No [scan] section found. Submitting single job.")
+        job_name = base_config.get('job', {}).get('name', 'job')
+        return [(job_name, base_config)]
+
+    # Expand all scan specifications
+    param_names = list(scan_params.keys())
+    param_values = [expand_scan_values(scan_params[p]) for p in param_names]
+
+    configs = []
+    base_job_name = base_config.get('job', {}).get('name', 'scan')
+
+    # Generate all combinations
+    for combo in itertools.product(*param_values):
+        # Create a copy of the base config without the scan section
+        config = copy.deepcopy(base_config)
+        if 'scan' in config:
+            del config['scan']
+
+        # Build job name suffix from parameter values
+        name_parts = []
+        for param, value in zip(param_names, combo):
+            # Update script parameter
+            config['script'][param] = value
+            # Format value for job name
+            if isinstance(value, float):
+                if value >= 1:
+                    name_parts.append(f"{param}_{value:.1f}")
+                else:
+                    name_parts.append(f"{param}_{value:.3f}")
+            else:
+                name_parts.append(f"{param}_{value}")
+
+        job_name = f"{base_job_name}_{'_'.join(name_parts)}"
+        config['job']['name'] = job_name
+        configs.append((job_name, config))
+
+    return configs
+
+
+def _submit_single_job(config: dict, config_file: str) -> None:
+    """Submit a single job from a configuration dictionary.
+
+    Args:
+        config: Configuration dictionary.
+        config_file: Path to save the config file.
+
+    Raises:
+        subprocess.CalledProcessError: If the submission fails.
+    """
+    # Write config to a temporary TOML file
+    write_toml(config, config_file)
+
+    job = Job.from_dict(config)
+    job.config_file = config_file
+    submitter = Submitter(server=job.server)
+    submitter.submit(job, cleanup=True)
 
 
 def submit_scan(
-    submitter: Union[str, Submitter],
-    param_grid: Union[Dict[str, List[Any]], ParameterGrid],
-    job_factory: Callable[[Dict[str, Any]], Job],
+    config_file: str,
     dry_run: bool = False,
-) -> List[Optional[str]]:
-    """
-    Submit a parameter scan to an HPC system.
-    
-    This function generates and submits jobs for all combinations of parameters
-    in the parameter grid.
-    
+    keep_configs: bool = False
+) -> None:
+    """Submit a parameter scan from a configuration file.
+
+    This function reads a TOML configuration file with a [scan] section that
+    defines arrays of parameter values to scan over. It generates and submits
+    a separate job for each combination of parameter values.
+
     Args:
-        submitter: Submitter instance or mode string ('ccrt', 'slurm')
-        param_grid: Parameter grid as a dict or ParameterGrid instance
-        job_factory: Function that takes parameter dict and returns a Job
-        dry_run: If True, print jobs without submitting
-        
-    Returns:
-        List of job IDs (or None for failed submissions)
-        
-    Example:
-        >>> def make_job(params):
-        ...     return Job(
-        ...         name=f"scan_{params['current']:.1e}",
-        ...         command=f"python track.py --current {params['current']}",
-        ...         time_limit=86000,
-        ...     )
-        >>> 
-        >>> job_ids = submit_scan(
-        ...     'ccrt',
-        ...     {'current': [1e-3, 2e-3, 3e-3]},
-        ...     make_job,
-        ... )
+        config_file: Path to the .toml configuration file with [scan] section.
+        dry_run: If True, print jobs that would be submitted without submitting.
+        keep_configs: If True, keep generated config files after submission.
     """
-    if isinstance(submitter, str):
-        submitter = get_submitter(submitter)
-    
-    if isinstance(param_grid, dict):
-        param_grid = ParameterGrid(param_grid)
-    
-    job_ids = []
-    for params in param_grid:
-        job = job_factory(params)
+    config = load_config(config_file)
+    validate_config(config, config_file)
+    scan_configs = generate_scan_configs(config)
+
+    print(f"Generated {len(scan_configs)} job(s) from scan configuration.")
+
+    generated_files = []
+    for i, (job_name, job_config) in enumerate(scan_configs, 1):
         if dry_run:
-            print(f"Would submit: {job.name}")
-            print(f"  Parameters: {params}")
-            print(f"  Command: {job.command}")
-            job_ids.append(None)
+            script_section = job_config.get('script', {})
+            scan_params = {k: script_section.get(k) for k in config.get('scan', {}).keys()}
+            print(f"  [{i}/{len(scan_configs)}] {job_name}: {scan_params}")
         else:
-            try:
-                job_id = submitter.submit(job)
-                job_ids.append(job_id)
-                print(f"Submitted {job.name}: {job_id}")
-            except Exception as e:
-                print(f"Failed to submit {job.name}: {e}")
-                job_ids.append(None)
-    
-    return job_ids
+            print(f"Submitting [{i}/{len(scan_configs)}]: {job_name}")
+            temp_config_file = f"{job_name}_config.toml"
+            generated_files.append(temp_config_file)
+            sleep(0.5)
+            _submit_single_job(job_config, temp_config_file)
+
+    if dry_run:
+        print("\n(Dry run mode - no jobs were submitted)")
+    elif not keep_configs:
+        # Clean up generated config files
+        for temp_file in generated_files:
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
+        print(f"Cleaned up {len(generated_files)} generated config file(s).")

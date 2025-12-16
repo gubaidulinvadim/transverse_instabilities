@@ -174,6 +174,7 @@ class Submitter:
                 f.write(f"#MSUB -e {job.err_folder}{job.name}.err\n")
                 f.write(f"#MSUB -o {job.out_folder}{job.name}.out\n")
                 f.write('module purge\n')
+                f.write('module load hwloc/2.5.0\n')
                 if job.is_gpu:
                     f.write(
                         f"ccc_mprun -C {job.container} -E'--ctr-mount src={src_folder},dst={src_dest}:src={data_folder},dst={data_dest}' -E'--ctr-module nvidia' -- "

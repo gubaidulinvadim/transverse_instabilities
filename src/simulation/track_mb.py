@@ -12,7 +12,7 @@ from config import load_toml_config, merge_config_and_args
 from setup_tracking import setup_fbt, setup_wakes, setup_dual_rf
 from mbtrack2.tracking.spacecharge import TransverseSpaceCharge
 from mbtrack2.tracking.ibs import IntrabeamScattering
-from facilities_mbtrack2 import v3588
+from facilities_mbtrack2 import v3633
 
 
 def run_mbtrack2(config: dict) -> None:
@@ -34,7 +34,7 @@ def run_mbtrack2(config: dict) -> None:
     quad = config.get('quad', False)
 
     Vc = 1.7e6
-    ring = v3588(IDs=id_state, V_RF=Vc, load_lattice=True)
+    ring = v3633(IDs=id_state, V_RF=Vc, load_lattice=True)
     ring.tune = np.array([54.23, 18.21])
     ring.chro = [Qp_x, Qp_y]
     ring.emit[1] = 0.3 * ring.emit[0]

@@ -41,9 +41,9 @@ is_gpu = false
 # =============================================================================
 [script]
 name = "/home/dockeruser/transverse_instabilities/src/simulation/track_TI.py"
-n_macroparticles = 10000
+n_macroparticles = 1000000
 n_turns = 100000
-beam_current = 0.5
+beam_current = 0.0012
 
 feedback_tau = 0
 
@@ -61,5 +61,5 @@ feedback_tau = 0
 #          generates 4 jobs: (10, 0.1), (10, 0.2), (20, 0.1), (20, 0.2)
 [scan]
 # Scan beam current using a range specification
-beam_current = [0.01, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50]
+bunch_current = [0.0012, 0.0024]
 

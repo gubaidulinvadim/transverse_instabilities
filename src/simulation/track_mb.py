@@ -6,28 +6,33 @@ from mbtrack2.tracking import (Beam, LongitudinalMap,
                                LongRangeResistiveWall,
                                SynchrotronRadiation, TransverseMap)
 from mbtrack2.tracking.monitors import BeamMonitor, WakePotentialMonitor
-from utils import get_parser_for_multibunch
+import argparse
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from config import load_toml_config, merge_config_and_args
 from setup_tracking import setup_fbt, setup_wakes, setup_dual_rf
 from mbtrack2.tracking.spacecharge import TransverseSpaceCharge
 from mbtrack2.tracking.ibs import IntrabeamScattering
 from facilities_mbtrack2 import v3588
 
 
-def run_mbtrack2(folder,
-                 n_turns=100_000,
-                 n_macroparticles=int(1e5),
-                 n_bin=100,
-                 bunch_current=1.2e-3,
-                 Qp_x=1.6,
-                 Qp_y=1.6,
-                 id_state="open",
-                 include_Zlong="False",
-                 harmonic_cavity="False",
-                 n_turns_wake=1,
-                 max_kick=1.6e-6,
-                 sc="False",
-                 ibs='False',
-                 quad='False'):
+def run_mbtrack2(config: dict) -> None:
+
+    folder = config['folder']
+    n_turns = config.get('n_turns', 100_000)
+    n_macroparticles = config.get('n_macroparticles', int(1e5))
+    n_bin = config.get('n_bin', 100)
+    bunch_current = config.get('bunch_current', 1.2e-3)
+    Qp_x = config.get('Qp_x', 1.6)
+    Qp_y = config.get('Qp_y', 1.6)
+    id_state = config.get('id_state', "open")
+    include_Zlong = config.get('include_Zlong', False)
+    harmonic_cavity = config.get('harmonic_cavity', False)
+    n_turns_wake = config.get('n_turns_wake', 1)
+    max_kick = config.get('max_kick', 1.6e-6)
+    sc = config.get('sc', False)
+    ibs = config.get('ibs', False)
+    quad = config.get('quad', False)
+
     Vc = 1.7e6
     ring = v3588(IDs=id_state, V_RF=Vc, load_lattice=True)
     ring.tune = np.array([54.23, 18.21])
@@ -176,21 +181,40 @@ def run_mbtrack2(folder,
 
 
 if __name__ == "__main__":
-    parser = get_parser_for_multibunch()
+    parser = argparse.ArgumentParser(
+    description="""Track beam-ion instability in a light source storage ring.
+
+    Supports both CLI arguments and TOML configuration files. CLI arguments
+    override values from the config file. If no config file is provided,
+    all simulation parameters must be specified via CLI or will use defaults.
+
+    Example usage:
+      # Using config file only:
+      python track_TI.py --config config.toml
+
+    """,
+            formatter_class=argparse.RawDescriptionHelpFormatter
+        )
+
+    # Config file argument (optional, for backward compatibility)
+    parser.add_argument('-c', '--config', metavar='CONFIG_FILE', type=str,
+                        default=None,
+                        help='Path to TOML configuration file. CLI args override config values.')
     args = parser.parse_args()
-    folder = "/home/dockeruser/transverse_instabilities/data/raw/tcbi/"
-    run_mbtrack2(folder=folder,
-                 n_turns=args.n_turns,
-                 n_macroparticles=args.n_macroparticles,
-                 n_bin=args.n_bin,
-                 bunch_current=args.bunch_current,
-                 Qp_x=args.Qp_x,
-                 Qp_y=args.Qp_y,
-                 id_state=args.id_state,
-                 include_Zlong=args.include_Zlong,
-                 harmonic_cavity=args.harmonic_cavity,
-                 n_turns_wake=args.n_turns_wake,
-                 max_kick=args.max_kick,
-                 sc=args.sc,
-                 ibs=args.ibs,
-                 quad=args.quad)
+
+
+    
+    config_path = args.config if args.config else args.config_file
+    if config_path:
+        full_config = load_toml_config(config_path)
+
+    # Support both 'script' section (for backward compatibility) and flat structure
+        if 'script' in full_config:
+            config = full_config['script']
+        else:
+           config = full_config
+    else:
+        config = {}
+
+    # folder = "/home/dockeruser/transverse_instabilities/data/raw/tcbi/"
+    run_mbtrack2(config)

@@ -9,10 +9,9 @@ os.environ["PYTHONPATH"] += os.pathsep + "/home/dockeruser/facilities_mbtrack2"
 from facilities_mbtrack2.SOLEIL_II.IMPEDANCE_MODEL.load import load_soleil_ii_wf
 
 def setup_wakes(ring, id_state, include_Zlong, n_bin, quad='False', wake_y='True'):
-    wake_y = True if wake_y=='True' else False
     wakemodel = load_soleil_ii_wf(f'wf_CP1_IDgap_{id_state}_varyNEG_False', ring)
     #wakemodel = load_soleil_ii_wf(f'wf_TDR2.1_ID{id_state}_pandas2', ring)
-    if include_Zlong == 'True':
+    if include_Zlong:
         if wake_y:
             wakefield_tr = WakePotential(ring,
                                      wakefield=WakeField(
@@ -26,7 +25,7 @@ def setup_wakes(ring, id_state, include_Zlong, n_bin, quad='False', wake_y='True
                                           wakemodel.Wxquad]),
                                      n_bin=n_bin)
     else:
-        if quad == 'True':
+        if quad:
             if wake_y:
                 waketypes = [wakemodel.Wydip, wakemodel.Wyquad]
             else:
@@ -119,23 +118,22 @@ def get_active_cavity_params(ring):
 
 
 def setup_rf(ring, harmonic_cavity, Vc):
-    if harmonic_cavity == "False":
-        main_rf = RFCavity(ring, m=1, Vc=Vc, theta=np.arccos(ring.U0 / Vc))
-        harmonic_rf = None
-    if harmonic_cavity == "True":
-        V_main, theta_main, V_harmonic, theta_harmonic = get_active_cavity_params(
-            ring)
+    if harmonic_cavity:
+        V_main, theta_main, V_harmonic, theta_harmonic = get_active_cavity_params(ring)
         main_rf = RFCavity(ring, m=1, Vc=V_main, theta=theta_main)
         harmonic_rf = RFCavity(ring,
                                m=4,
                                Vc=V_harmonic,
                                theta=theta_harmonic)
+    else:
+        main_rf = RFCavity(ring, m=1, Vc=Vc, theta=np.arccos(ring.U0 / Vc))
+        harmonic_rf = None
     return main_rf, harmonic_rf
 
 
 def setup_dual_rf(ring, beam, harmonic_cavity, bunch_current, wakemodel):
     Vc = 1.7e6
-    if harmonic_cavity == "True":
+    if harmonic_cavity:
         Itot = ring.h * bunch_current  # Use for fixed detuning or CT
         HC_det = 110e3  # Use for fixed detuning or CT
         HC_det_end = 3e3

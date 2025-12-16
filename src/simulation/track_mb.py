@@ -28,7 +28,7 @@ def run_mbtrack2(config: dict) -> None:
     include_Zlong = config.get('include_Zlong', False)
     harmonic_cavity = config.get('harmonic_cavity', False)
     n_turns_wake = config.get('n_turns_wake', 1)
-    max_kick = config.get('max_kick', 1.6e-6)
+    feedback_tau = config.get('feedback-tau', 1.e-2)
     sc = config.get('sc', False)
     ibs = config.get('ibs', False)
     quad = config.get('quad', False)
@@ -60,7 +60,7 @@ def run_mbtrack2(config: dict) -> None:
         f",include_Zlong={include_Zlong:}"+
         f",harmonic_cavity={harmonic_cavity:}"+
         f",n_turns_wake={n_turns_wake:}"
-        f",max_kick={max_kick:.1e}"+
+        f",feedback_tau={feedback_tau:.1e}"+
         f",sc={sc:}"+\
         f",ibs={ibs:}"+
         f"quad={quad:}"+
@@ -126,7 +126,7 @@ def run_mbtrack2(config: dict) -> None:
 
 
     rf, hrf = setup_dual_rf(ring, beam, harmonic_cavity, bunch_current,  wakemodel)
-    fbtx, fbty = setup_fbt(ring, max_kick)
+    fbtx, fbty = setup_fbt(ring, feedback_tau)
     tracking_elements = [trans_map, long_map, sr, beam_monitor, rf]
     besc = TransverseSpaceCharge(ring=ring,
                                 interaction_length=ring.L,
@@ -141,7 +141,7 @@ def run_mbtrack2(config: dict) -> None:
         tracking_elements.append(besc)
     if harmonic_cavity == 'True':
         tracking_elements.append(hrf)
-    if max_kick != 0:
+    if feedback_tau != 0:
         tracking_elements.append(fbtx)
         tracking_elements.append(fbty)
 

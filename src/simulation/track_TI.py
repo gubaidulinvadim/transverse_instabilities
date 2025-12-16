@@ -69,7 +69,7 @@ def run_mbtrack2(config: dict) -> None:
         f"id_state={id_state:},"+\
         f"Zlong={include_Zlong:},"+\
         f"cavity={harmonic_cavity:},"+\
-        f"max_kick={max_kick:.1e},"+\
+        f"feedback_tau={feedback_tau:.1e},"+\
         f"sc={sc:},"+\
         f"ibs={ibs:}"+\
         f"quad={quad:}"+\

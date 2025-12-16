@@ -169,10 +169,10 @@ class Submitter:
                 f.write(f"#MSUB -c {job.n_cpu}\n")
                 f.write(f"#MSUB -T {job.time}\n")
                 f.write("#MSUB -A soldai\n")
-                f.write("#MSUB -@ vadim.gubaidulin@synchrotron-soleil.fr:begin,end,requeue\n")
+                # f.write("#MSUB -@ vadim.gubaidulin@synchrotron-soleil.fr:begin,end,requeue\n")
                 # Note: -o and -e appear swapped but this matches original behavior
-                f.write(f"#MSUB -o {job.err_folder}{job.name}.err\n")
-                f.write(f"#MSUB -e {job.out_folder}{job.name}.out\n")
+                f.write(f"#MSUB -e {job.err_folder}{job.name}.err\n")
+                f.write(f"#MSUB -o {job.out_folder}{job.name}.out\n")
                 f.write('module purge\n')
                 if job.is_gpu:
                     f.write(

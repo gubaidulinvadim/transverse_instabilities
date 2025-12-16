@@ -43,9 +43,8 @@ def setup_wakes(ring, id_state, include_Zlong, n_bin, quad='False', wake_y='True
     return wakefield_tr, wakefield_long, wakemodel
 
 
-def setup_fbt(ring, max_kick, kind='exp'):
+def setup_fbt(ring, feedback_tau, kind='exp'):
     if kind == 'exp':
-        feedback_tau = max_kick / 1.8e-6 * 50
         fbty = TransverseExponentialDamper(ring,
                                 damping_time=[ring.T0 * feedback_tau, ring.T0*feedback_tau],
                                 phase_diff=[np.pi / 2, np.pi/2])

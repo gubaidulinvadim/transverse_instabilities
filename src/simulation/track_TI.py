@@ -42,7 +42,7 @@ def run_mbtrack2(config: dict) -> None:
     id_state = config.get('id_state', "open")
     include_Zlong = config.get('include_Zlong', False)
     harmonic_cavity = config.get('harmonic_cavity', False)
-    max_kick = config.get('max_kick', 1.6e-6)
+    feedback_tau = config.get('feedback_tau', 0.01)
     sc = config.get('sc', False)
     ibs = config.get('ibs', False)
     quad = config.get('quad', False)
@@ -101,7 +101,6 @@ def run_mbtrack2(config: dict) -> None:
         file_name=None,
         mpi_mode=False,
     )
-    fbtx, fbty = setup_fbt(ring, max_kick)
     tracking_elements = [trans_map, long_map, bunch_monitor]
     if include_Zlong == 'True':
         tracking_elements.append(sr)
@@ -122,7 +121,8 @@ def run_mbtrack2(config: dict) -> None:
     else:
         print("Harmonic cavity is off.")
         tracking_elements.append(main_rf)
-    if max_kick != 0:
+    if feedback_tau != 0:
+        fbtx, fbty = setup_fbt(ring, max_kick)
         tracking_elements.append(fbtx)
         tracking_elements.append(fbty)
 

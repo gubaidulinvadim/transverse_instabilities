@@ -41,10 +41,19 @@ is_gpu = false
 # =============================================================================
 [script]
 name = "/home/dockeruser/transverse_instabilities/src/simulation/track_TI.py"
+folder = '/home/dockeruser/transverse_instabilities/data/raw/sbi/'
 n_macroparticles = 1000000
 n_turns = 100000
 beam_current = 0.0012
-
+Qp_x = 0.0
+Qp_y = 0.0
+id_state = 'open'
+include_Zlong = true
+harmonic_cavity = true
+sc = true
+ibs = true
+quad = true
+wake_y = true
 feedback_tau = 0
 
 # =============================================================================

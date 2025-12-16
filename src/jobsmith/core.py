@@ -137,7 +137,7 @@ class Submitter:
         Returns:
             Command string to execute the simulation.
         """
-        return f'/home/dockeruser/venv/bin/python3 {script_name} --config_file {config_file}\n'
+        return f'/home/dockeruser/venv/bin/python3 {script_name} --config {config_file}\n'
 
     def _write_submission_script(self, job: Job, config_file: str) -> str:
         """Write a temporary submission script based on the job configuration.

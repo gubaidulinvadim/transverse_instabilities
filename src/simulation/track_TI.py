@@ -16,21 +16,6 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import load_toml_config
 from setup_tracking import setup_fbt, setup_wakes, setup_rf
 
-# def run_mbtrack2(folder: str,
-#                  n_turns: int = 100_000,
-#                  n_macroparticles: int = 100_000,
-#                  n_bin: int = 100,
-#                  bunch_current: float = 1e-3,
-#                  Qp_x: float = 1.6,
-#                  Qp_y: float = 1.6,
-#                  id_state: str = "open",
-#                  include_Zlong: str = "False",
-#                  harmonic_cavity: str = "False",
-#                  max_kick: float = 1.6e-6,
-#                  sc: str = 'False',
-#                  ibs: str = 'False',
-#                  quad: str = 'False',
-#                  wake_y: str = 'True') -> None:
 def run_mbtrack2(config: dict) -> None:
     folder = config['folder']
     n_turns = config.get('n_turns', 100_000)
@@ -46,7 +31,7 @@ def run_mbtrack2(config: dict) -> None:
     sc = config.get('sc', False)
     ibs = config.get('ibs', False)
     quad = config.get('quad', False)
-    wake_y = config.get('wake_y', True)
+    wake_types = config.get('wake_types', ['Wydip'])
 
     Vc = 1.7e6
     ring = v3633(IDs=id_state, HC_power=50e3, V_RF=Vc, load_lattice=True)
@@ -72,8 +57,7 @@ def run_mbtrack2(config: dict) -> None:
         f"feedback_tau={feedback_tau:.1e},"+\
         f"sc={sc:},"+\
         f"ibs={ibs:}"+\
-        f"quad={quad:}"+\
-        f"wake_y={wake_y:}"\
+        f"wake_types={wake_types:}"\
         ")"
     bunch_monitor = BunchMonitor(
         0,
@@ -90,10 +74,10 @@ def run_mbtrack2(config: dict) -> None:
     
     wakefield_tr, wakefield_long, _ = setup_wakes(ring, id_state,
                                                   include_Zlong, n_bin,
-                                                  quad, wake_y)
+                                                  wake_types)
     wakepotential_monitor = WakePotentialMonitor(
         bunch_number=0,
-        wake_types='Wydip',
+        wake_types=wake_types,
         n_bin=n_bin,
         save_every=1,
         buffer_size=600,
@@ -102,7 +86,7 @@ def run_mbtrack2(config: dict) -> None:
         mpi_mode=False,
     )
     tracking_elements = [trans_map, long_map, bunch_monitor]
-    if include_Zlong == 'True':
+    if include_Zlong:
         tracking_elements.append(sr)
     besc = TransverseSpaceCharge(ring=ring,
                                 interaction_length=ring.L,
@@ -122,7 +106,7 @@ def run_mbtrack2(config: dict) -> None:
         print("Harmonic cavity is off.")
         tracking_elements.append(main_rf)
     if feedback_tau != 0:
-        fbtx, fbty = setup_fbt(ring, max_kick)
+        fbtx, fbty = setup_fbt(ring, feedback_tau)
         tracking_elements.append(fbtx)
         tracking_elements.append(fbty)
 
@@ -185,5 +169,4 @@ if __name__ == "__main__":
     else:
         config = {}
 
-    # folder = "/home/dockeruser/transverse_instabilities/data/raw/sbi/"
     run_mbtrack2(config)

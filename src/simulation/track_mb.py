@@ -91,7 +91,7 @@ def run_mbtrack2(config: dict) -> None:
     if id_state == "open":
         x3 = 6.51e-3
         y3 = 6.70e-3
-    else: #id_state == "close":
+    else:
         x3 = 5.78e-3
         y3 = 5.61e-3
     long_wakefield = LongRangeResistiveWall(
@@ -109,7 +109,7 @@ def run_mbtrack2(config: dict) -> None:
     if id_state == "open":
         x3 = -15.01e-3
         y3 = 15.63e-3
-    else: #id_state == "close":
+    else:
         x3 = -7.90e-3
         y3 = 8.87e-3
     long_wakefield_quad = LongRangeResistiveWall(
@@ -216,5 +216,4 @@ if __name__ == "__main__":
     else:
         config = {}
 
-    # folder = "/home/dockeruser/transverse_instabilities/data/raw/tcbi/"
     run_mbtrack2(config)

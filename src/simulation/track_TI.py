@@ -30,7 +30,6 @@ def run_mbtrack2(config: dict) -> None:
     feedback_tau = config.get('feedback_tau', 0.01)
     sc = config.get('sc', False)
     ibs = config.get('ibs', False)
-    quad = config.get('quad', False)
     wake_types = config.get('wake_types', ['Wydip'])
 
     Vc = 1.7e6
@@ -143,7 +142,7 @@ if __name__ == "__main__":
 
     Example usage:
       # Using config file only:
-      python track_TI.py --config config.toml
+      python track_TI.py --config_file config.toml
 
     """,
             formatter_class=argparse.RawDescriptionHelpFormatter

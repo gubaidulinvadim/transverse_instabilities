@@ -41,19 +41,16 @@ is_gpu = false
 # =============================================================================
 [script]
 name = "/home/dockeruser/transverse_instabilities/src/simulation/track_TI.py"
-folder = '/home/dockeruser/transverse_instabilities/data/raw/sbi/'
-n_macroparticles = 1000000
-n_turns = 100000
-beam_current = 0.0012
+folder = '/home/dockeruser/transverse_instabilities/data/raw/mwi/'
+n_turns = 25000
+n_bin = 500
 Qp_x = 0.0
 Qp_y = 0.0
-id_state = 'open'
 include_Zlong = true
-harmonic_cavity = true
-sc = true
-ibs = true
-quad = true
-wake_y = true
+wake_types = []
+id_state = 'open'
+sc = false
+ibs = false
 feedback_tau = 0
 
 # =============================================================================
@@ -70,5 +67,8 @@ feedback_tau = 0
 #          generates 4 jobs: (10, 0.1), (10, 0.2), (20, 0.1), (20, 0.2)
 [scan]
 # Scan beam current using a range specification
-bunch_current = [0.0012, 0.0024]
+bunch_current = {start = 0.0006, stop = 0.012, num = 20}
+n_macroparticles = [100_000, 500_000, 1_000_000, 2_000_000, 5_000_000,
+10_000_000]
+
 

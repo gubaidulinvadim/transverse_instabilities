@@ -137,7 +137,7 @@ class Submitter:
         Returns:
             Command string to execute the simulation.
         """
-        return f'/home/dockeruser/venv/bin/python3 {script_name} --config {config_file}\n'
+        return f'/home/dockeruser/venv/bin/python3 {script_name} --config_file {config_file}\n'
 
     def _write_submission_script(self, job: Job, config_file: str) -> str:
         """Write a temporary submission script based on the job configuration.
@@ -174,14 +174,13 @@ class Submitter:
                 f.write(f"#MSUB -e {job.err_folder}{job.name}.err\n")
                 f.write(f"#MSUB -o {job.out_folder}{job.name}.out\n")
                 f.write('module purge\n')
-                f.write('module load hwloc/2.5.0\n')
                 if job.is_gpu:
                     f.write(
                         f"ccc_mprun -C {job.container} -E'--ctr-mount src={src_folder},dst={src_dest}:src={data_folder},dst={data_dest}' -E'--ctr-module nvidia' -- "
                         + command_string)
                 else:
                     f.write(
-                        f"ccc_mprun -C {job.container} -E'--ctr-mount src={src_folder},dst={src_dest}:src={data_folder},dst={data_dest}' -- "
+                        f"ccc_mprun -C {job.container} -E'--ctr-mount src={src_folder},dst={src_dest}:src={data_folder},dst={data_dest}' -E'--ctr-module openmpi-4.1.4' -- "
                         + command_string)
             elif self.server == 'slurm':
                 mount_folder = '/lustre/scratch/sources/physmach/gubaidulin/bii_tracking:/home/dockeruser/bii_tracking'

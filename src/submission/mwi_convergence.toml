@@ -67,7 +67,8 @@ feedback_tau = 0
 #          generates 4 jobs: (10, 0.1), (10, 0.2), (20, 0.1), (20, 0.2)
 [scan]
 # Scan beam current using a range specification
-bunch_current = [0.00625]
-n_macroparticles = [100_000, 1_000_000]
+bunch_current = {start = 0.0006, stop = 0.012, num = 20}
+n_macroparticles = [100_000, 500_000, 1_000_000, 2_000_000, 5_000_000,
+10_000_000]
 
 

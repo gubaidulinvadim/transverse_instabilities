@@ -41,7 +41,7 @@ is_gpu = false
 # =============================================================================
 [script]
 name = "/home/dockeruser/transverse_instabilities/src/simulation/track_TI.py"
-folder = '/home/dockeruser/transverse_instabilities/data/raw/mwi/'
+folder = '/home/dockeruser/transverse_instabilities/data/raw/csr/'
 n_turns = 25000
 n_bin = 500
 Qp_x = 0.0

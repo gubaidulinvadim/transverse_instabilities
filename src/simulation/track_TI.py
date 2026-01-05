@@ -156,7 +156,7 @@ if __name__ == "__main__":
 
 
     
-    config_path = args.config if args.config else args.config_file
+    config_path = args.config_file
     if config_path:
         full_config = load_toml_config(config_path)
 

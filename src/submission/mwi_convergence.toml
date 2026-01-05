@@ -29,7 +29,7 @@ server = "ccrt"
 [job]
 # Base name for jobs (parameter values will be appended)
 name = "example_scan"
-time = 86000
+time = 259200
 n_cpu = 8
 partition = "milan"
 err_folder = "/ccc/work/cont003/soleil/gubaiduv/err/"
@@ -68,7 +68,6 @@ feedback_tau = 0
 [scan]
 # Scan beam current using a range specification
 bunch_current = {start = 0.0006, stop = 0.012, num = 20}
-n_macroparticles = [100_000, 500_000, 1_000_000, 2_000_000, 5_000_000,
-10_000_000]
+n_macroparticles = [1_000_000, 2_000_000, 5_000_000, 10_000_000]
 
 

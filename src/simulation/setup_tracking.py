@@ -34,7 +34,7 @@ def setup_wakes(ring, id_state, include_Zlong, n_bin, wake_types='Wydip'):
         try:
             wakemodels.append(wakemodel.Wcsr)
         except:
-            print(f"No CSR found in the model. Including CSR wakes from
+            print(f"No CSR found in the model. Including CSR wakes from \
                     analytical model.")
             f = np.linspace(1, 100e9, 10)
             sampling = 1e-13

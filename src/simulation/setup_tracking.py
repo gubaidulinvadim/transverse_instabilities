@@ -3,6 +3,7 @@ from mbtrack2 import BeamLoadingEquilibrium, CavityResonator
 from mbtrack2.tracking.feedback import TransverseExponentialDamper
 from mbtrack2.tracking.feedback import FIRDamper
 from mbtrack2.impedance.wakefield import WakeField
+from mbtrack2.impedance.csr import FreeSpaceCSR, ParallelPlatesCSR
 from mbtrack2.tracking import (RFCavity, WakePotential, DirectFeedback)
 import os
 os.environ["PYTHONPATH"] += os.pathsep + "/home/dockeruser/facilities_mbtrack2"
@@ -20,11 +21,34 @@ def setup_wakes(ring, id_state, include_Zlong, n_bin, wake_types='Wydip'):
             wakemodels.append(wakemodel.Wxquad)
         elif wake_type == 'Wyquad':
             wakemodels.append(wakemodel.Wyquad)
+        elif wake_type == 'Wcsr':
+            try:
+                wakemodels.append(wakemodel.Wcsr)
+            except:
+                print("No CSR in the wake model")
         else:
             raise ValueError(f"Unknown wake type: {wake_type}")
 
     if include_Zlong:
         wakemodels.append(wakemodel.Wlong)
+        try:
+            wakemodels.append(wakemodel.Wcsr)
+        except:
+            print(f"No CSR found in the model. Including CSR wakes from
+                    analytical model.")
+            f = np.linspace(1, 100e9, 10)
+            sampling = 1e-13
+            t = np.arange(-500*ring.sigma_0, 500*ring.sigma_0, sampling)
+            # CSR bending radius, shielding gap and corresponding length
+            # based on MAC08 presentation of A. Gamelin
+            csr_parameters = [(10.74, 16e-3, 40*0.44),
+                              (12.80, 16e-3, 64*0.88),
+                              (12.68, 8e-3, 12*0.87) ]
+            for (R, h, L) in csr_parameters:
+                csr_fs = FreeSpaceCSR(time=t, frequency=f, length=L, radius=R, ring=ring)
+                csr_pp = ParallelPlatesCSR(time=t, frequency=f, length=L, radius=R, distance=h, ring=ring)
+                wakemodels.append(csr_fs.Wcsr)
+                wakemodels.append(csr_pp.Wlong)
 
     wakefield_tr = WakePotential(ring,
                                  wakefield=WakeField(

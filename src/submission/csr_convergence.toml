@@ -28,7 +28,7 @@ server = "ccrt"
 # =============================================================================
 [job]
 # Base name for jobs (parameter values will be appended)
-name = "mwi_scan"
+name = "csr_scan"
 time = 259200
 n_cpu = 8
 partition = "milan"

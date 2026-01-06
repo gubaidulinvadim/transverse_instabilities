@@ -38,7 +38,7 @@ def setup_wakes(ring, id_state, include_Zlong, n_bin, wake_types='Wydip'):
                     analytical model.")
             f = np.linspace(1, 100e9, 10)
             sampling = 1e-13
-            t = np.arange(-500*ring.sigma_0, 500*ring.sigma_0, sampling)
+            t = np.arange(-100*ring.sigma_0, 100*ring.sigma_0, sampling)
             # CSR bending radius, shielding gap and corresponding length
             # based on MAC08 presentation of A. Gamelin
             csr_parameters = [(10.74, 16e-3, 40*0.44),

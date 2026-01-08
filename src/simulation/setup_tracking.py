@@ -44,11 +44,18 @@ def setup_wakes(ring, id_state, include_Zlong, n_bin, wake_types='Wydip'):
             csr_parameters = [(10.74, 16e-3, 40*0.44),
                               (12.80, 16e-3, 64*0.88),
                               (12.68, 8e-3, 12*0.87) ]
-            for (R, h, L) in csr_parameters:
-                csr_fs = FreeSpaceCSR(time=t, frequency=f, length=L, radius=R, ring=ring)
-                csr_pp = ParallelPlatesCSR(time=t, frequency=f, length=L, radius=R, distance=h, ring=ring)
-                wakemodels.append(csr_fs.Wcsr)
-                wakemodels.append(csr_pp.Wlong)
+            R0, h0, L0 = 10.74, 16e-3, 40*0.44
+            csr = FreeSpaceCSR(time=t, frequency=f, length=L0, radius=R0,
+                                  ring=ring)
+            csr += ParallelPlatesCSR(time=t, frequency=f, length=L0,
+                                       radius=R0,
+                                       distance=h0, ring=ring)
+            for (R, h, L) in csr_parameters[1:]:
+                csr += FreeSpaceCSR(time=t, frequency=f, length=L,
+                                           radius=R, ring=ring)
+                csr += ParallelPlatesCSR(time=t, frequency=f, length=L,
+                                                radius=R, distance=h,
+                                                ring=ring)
 
     wakefield_tr = WakePotential(ring,
                                  wakefield=WakeField(
@@ -58,7 +65,12 @@ def setup_wakes(ring, id_state, include_Zlong, n_bin, wake_types='Wydip'):
     wakefield_long = WakePotential(ring,
                                    wakefield=WakeField([wakemodel.Wlong]),
                                    n_bin=n_bin)
-    return wakefield_tr, wakefield_long, wakemodels
+    if include_Zlong:
+        wakefield_csr = Wakepotential(ring,
+                                  wakefield=WakeField([csr.Wlong, csr.Wcsr])
+    else:
+        wakefield_csr = None
+    return wakefield_tr, wakefield_long, wakemodels, wakefield_csr
 
 
 def setup_fbt(ring, feedback_tau, kind='exp'):

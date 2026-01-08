@@ -71,7 +71,7 @@ def run_mbtrack2(config: dict) -> None:
     sr = SynchrotronRadiation(ring, switch=[1, 1, 1])
     trans_map = TransverseMap(ring)
     
-    wakefield_tr, wakefield_long, _ = setup_wakes(ring, id_state,
+    wakefield_tr, wakefield_long, _, wakefield_csr = setup_wakes(ring, id_state,
                                                   include_Zlong, n_bin,
                                                   wake_types)
     wakepotential_monitor = WakePotentialMonitor(
@@ -108,6 +108,8 @@ def run_mbtrack2(config: dict) -> None:
         fbtx, fbty = setup_fbt(ring, feedback_tau)
         tracking_elements.append(fbtx)
         tracking_elements.append(fbty)
+    if wakefield_csr:
+        tracking_elements.append(wakefield_csr)
 
     monitor_count = 0
     track_wake_monitor = False

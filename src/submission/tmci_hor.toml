@@ -12,7 +12,7 @@
 # - An array of explicit values: [10, 20, 30, 40, 50]
 # - A range specification: {start = 0.1, stop = 0.5, num = 5} (uses linspace)
 
-title = "Example parameter scan configuration"
+title = "TMCI scan"
 
 # =============================================================================
 # Environment Configuration
@@ -28,7 +28,7 @@ server = "ccrt"
 # =============================================================================
 [job]
 # Base name for jobs (parameter values will be appended)
-name = "example_scan"
+name = "tmci"
 time = 86000
 n_cpu = 8
 partition = "milan"
@@ -41,16 +41,15 @@ is_gpu = false
 # =============================================================================
 [script]
 name = "/home/dockeruser/transverse_instabilities/src/simulation/track_TI.py"
-folder = '/home/dockeruser/transverse_instabilities/data/raw/mwi/'
-n_turns = 25000
-n_bin = 500
+folder = '/home/dockeruser/transverse_instabilities/data/raw/tmci_hor/'
+n_turns = 50000
+n_macroparticles = 1_000_000
+n_bin = 100
 Qp_x = 0.0
 Qp_y = 0.0
 include_Zlong = true
-wake_types = []
 id_state = 'open'
-sc = false
-ibs = false
+ibs = true
 feedback_tau = 0
 
 # =============================================================================
@@ -67,7 +66,8 @@ feedback_tau = 0
 #          generates 4 jobs: (10, 0.1), (10, 0.2), (20, 0.1), (20, 0.2)
 [scan]
 # Scan beam current using a range specification
-bunch_current = [0.00625]
-n_macroparticles = [100_000, 1_000_000]
+bunch_current = {start = 0.0006, 0.012, num = 39}
+sc = [false, true]
+wake_types = [['Wxdip'], ['Wxdip', 'Wxquad']]
 
 

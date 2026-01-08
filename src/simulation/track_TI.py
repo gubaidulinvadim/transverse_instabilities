@@ -31,12 +31,13 @@ def run_mbtrack2(config: dict) -> None:
     sc = config.get('sc', False)
     ibs = config.get('ibs', False)
     wake_types = config.get('wake_types', ['Wydip'])
+    emittance_ratio = config.get('emittance_ratio', 0.3)
 
     Vc = 1.7e6
     ring = v3633(IDs=id_state, HC_power=50e3, V_RF=Vc, load_lattice=True)
     ring.tune = np.array([54.23, 18.21])
     ring.chro = np.array([Qp_x, Qp_y])  
-    ring.emit[1] = 0.3 * ring.emit[0]
+    ring.emit[1] = emittance_ratio * ring.emit[0]
     mybunch = Bunch(ring,
                     mp_number=n_macroparticles,
                     current=bunch_current,
@@ -57,6 +58,7 @@ def run_mbtrack2(config: dict) -> None:
         f"sc={sc:},"+\
         f"ibs={ibs:}"+\
         f"wake_types={wake_types:}"\
+        f"{emittance_ratio=:}"\
         ")"
     bunch_monitor = BunchMonitor(
         0,

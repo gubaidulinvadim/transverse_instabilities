@@ -63,8 +63,9 @@ def setup_wakes(ring, id_state, include_Zlong, n_bin, wake_types='Wydip'):
     if include_Zlong:
         wlong_csr = sum([c.Wlong for c in csr_long])
         wcsr_csr = sum([c.Wcsr for c in csr])
-        wakefield_csr = Wakepotential(ring,
-                                  wakefield=WakeField([wlong_csr, wcsr_csr])
+        wakefield_csr = WakePotential(ring,
+                                      wakefield=WakeField([wlong_csr, wcsr_csr]),
+                                      n_bin=n_bin)
     else:
         wakefield_csr = None
     return wakefield_tr, wakefield_long, wakemodels, wakefield_csr

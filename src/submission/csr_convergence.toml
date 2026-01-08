@@ -30,7 +30,7 @@ server = "ccrt"
 # Base name for jobs (parameter values will be appended)
 name = "csr_scan"
 time = 259200
-n_cpu = 8
+n_cpu = 24
 partition = "milan"
 err_folder = "/ccc/work/cont003/soleil/gubaiduv/err/"
 out_folder = "/ccc/work/cont003/soleil/gubaiduv/out/"

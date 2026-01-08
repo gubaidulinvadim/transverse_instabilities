@@ -68,8 +68,6 @@ def generate_scan_configs(base_config: dict) -> list:
         # Build job name suffix from parameter values
         name_parts = []
         for param, value in zip(param_names, combo):
-            # Update script parameter
-            config['script'][param] = value
             # Format value for job name
             if isinstance(value, float):
                 if value >= 1:
@@ -77,7 +75,13 @@ def generate_scan_configs(base_config: dict) -> list:
                 else:
                     name_parts.append(f"{param}_{value:.3f}")
             else:
-                name_parts.append(f"{param}_{value}")
+                if isinstance(value, list):
+                    # Join list elements with a separator (e.g., '-')
+                    sanitized_list = [str(v).replace("'", "").replace('"', '') for v in value]
+                    value_str = "-".join(sanitized_list)
+                else:
+                    value_str = str(value).replace("'", "").replace('"', '')
+                    name_parts.append(f"{param}_{value_str}")
 
         job_name = f"{base_job_name}_{'_'.join(name_parts)}"
         config['job']['name'] = job_name

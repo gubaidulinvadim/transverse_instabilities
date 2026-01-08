@@ -51,6 +51,7 @@ include_Zlong = true
 id_state = 'open'
 ibs = true
 feedback_tau = 0
+bunch_current = 0.0042
 
 # =============================================================================
 # Scan Parameters

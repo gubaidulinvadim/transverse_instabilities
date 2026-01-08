@@ -79,9 +79,12 @@ def generate_scan_configs(base_config: dict) -> list:
                     # Join list elements with a separator (e.g., '-')
                     sanitized_list = [str(v).replace("'", "").replace('"', '') for v in value]
                     value_str = "-".join(sanitized_list)
-                else:
+                    name_parts.append(f"{param}_{value_str}")
+                elif isinstance(value, str):
                     value_str = str(value).replace("'", "").replace('"', '')
-                name_parts.append(f"{param}_{value_str}")
+                    name_parts.append(f"{param}_{value_str}")
+                else:
+                    name_parts.append(f"{param}_{value}")
 
         job_name = f"{base_job_name}_{'_'.join(name_parts)}"
         config['job']['name'] = job_name

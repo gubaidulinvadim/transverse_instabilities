@@ -57,7 +57,7 @@ def run_mbtrack2(config: dict) -> None:
         f"feedback_tau={feedback_tau:.1e},"+\
         f"sc={sc:},"+\
         f"ibs={ibs:}"+\
-        f"wake_types={wake_types:}"\
+        f"wake_types={len(wake_types):}"\
         f"{emittance_ratio=:}"\
         ")"
     bunch_monitor = BunchMonitor(

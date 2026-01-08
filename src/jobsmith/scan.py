@@ -81,7 +81,7 @@ def generate_scan_configs(base_config: dict) -> list:
                     value_str = "-".join(sanitized_list)
                 else:
                     value_str = str(value).replace("'", "").replace('"', '')
-                    name_parts.append(f"{param}_{value_str}")
+                name_parts.append(f"{param}_{value_str}")
 
         job_name = f"{base_job_name}_{'_'.join(name_parts)}"
         config['job']['name'] = job_name

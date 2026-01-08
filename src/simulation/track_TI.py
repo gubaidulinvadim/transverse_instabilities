@@ -74,6 +74,9 @@ def run_mbtrack2(config: dict) -> None:
     wakefield_tr, wakefield_long, _, wakefield_csr = setup_wakes(ring, id_state,
                                                   include_Zlong, n_bin,
                                                   wake_types)
+    ###############################################
+    wakefield_csr = None
+    ###############################################
     wakepotential_monitor = WakePotentialMonitor(
         bunch_number=0,
         wake_types=wake_types,

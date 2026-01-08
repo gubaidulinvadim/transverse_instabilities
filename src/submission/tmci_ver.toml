@@ -68,5 +68,5 @@ feedback_tau = 0
 # Scan beam current using a range specification
 bunch_current = {start = 0.0006, stop = 0.012, num = 39}
 sc = [false, true]
-wake_types = [['Wydip'], ['Wydip', 'Wyquad']]
+wake_types = [["Wydip"], ["Wydip", "Wyquad"]]
 

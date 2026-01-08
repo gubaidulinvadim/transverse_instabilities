@@ -29,6 +29,8 @@ def setup_wakes(ring, id_state, include_Zlong, n_bin, wake_types='Wydip'):
         else:
             raise ValueError(f"Unknown wake type: {wake_type}")
 
+    csr = []
+    csr_long = []
     if include_Zlong:
         wakemodels.append(wakemodel.Wlong)
         try:
@@ -44,30 +46,25 @@ def setup_wakes(ring, id_state, include_Zlong, n_bin, wake_types='Wydip'):
             csr_parameters = [(10.74, 16e-3, 40*0.44),
                               (12.80, 16e-3, 64*0.88),
                               (12.68, 8e-3, 12*0.87) ]
-            R0, h0, L0 = 10.74, 16e-3, 40*0.44
-            csr = FreeSpaceCSR(time=t, frequency=f, length=L0, radius=R0,
-                                  ring=ring)
-            csr += ParallelPlatesCSR(time=t, frequency=f, length=L0,
-                                       radius=R0,
-                                       distance=h0, ring=ring)
-            for (R, h, L) in csr_parameters[1:]:
-                csr += FreeSpaceCSR(time=t, frequency=f, length=L,
-                                           radius=R, ring=ring)
-                csr += ParallelPlatesCSR(time=t, frequency=f, length=L,
+            for (R, h, L) in csr_parameters:
+                csr.append(FreeSpaceCSR(time=t, frequency=f, length=L,
+                                           radius=R, ring=ring))
+                csr_long.append(ParallelPlatesCSR(time=t, frequency=f, length=L,
                                                 radius=R, distance=h,
-                                                ring=ring)
+                                                ring=ring))
 
     wakefield_tr = WakePotential(ring,
                                  wakefield=WakeField(
                                  wakemodels),
                                  n_bin=n_bin)
-    
     wakefield_long = WakePotential(ring,
                                    wakefield=WakeField([wakemodel.Wlong]),
                                    n_bin=n_bin)
     if include_Zlong:
+        wlong_csr = sum([c.Wlong for c in csr_long])
+        wcsr_csr = sum([c.Wcsr for c in csr])
         wakefield_csr = Wakepotential(ring,
-                                  wakefield=WakeField([csr.Wlong, csr.Wcsr])
+                                  wakefield=WakeField([wlong_csr, wcsr_csr])
     else:
         wakefield_csr = None
     return wakefield_tr, wakefield_long, wakemodels, wakefield_csr

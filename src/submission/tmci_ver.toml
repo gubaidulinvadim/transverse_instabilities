@@ -66,7 +66,7 @@ feedback_tau = 0
 #          generates 4 jobs: (10, 0.1), (10, 0.2), (20, 0.1), (20, 0.2)
 [scan]
 # Scan beam current using a range specification
-bunch_current = {start = 0.0006, 0.012, num = 39}
+bunch_current = {start = 0.0006, stop = 0.012, num = 39}
 sc = [false, true]
 wake_types = [['Wydip'], ['Wydip', 'Wyquad']]
 

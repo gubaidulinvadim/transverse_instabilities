@@ -62,12 +62,14 @@ feedback_tau = 0
 #   - Range with linspace: {start = 0.1, stop = 0.5, num = 5}
 #
 # When multiple parameters are specified, all combinations are scanned.
-# Example: feedback_tau = [10, 20] and beam_current = [0.1, 0.2]
+
+        # # Example: feedback_tau = [10, 20] and beam_current = [0.1, 0.2]
 #          generates 4 jobs: (10, 0.1), (10, 0.2), (20, 0.1), (20, 0.2)
 [scan]
 # Scan beam current using a range specification
-bunch_current = {start = 0.0006, 0.012, num = 39}
+bunch_current = {start = 0.0006, stop = 0.012, num = 39}
 sc = [false, true]
 wake_types = [['Wxdip'], ['Wxdip', 'Wxquad']]
+
 
 

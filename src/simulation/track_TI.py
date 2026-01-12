@@ -45,6 +45,10 @@ def run_mbtrack2(config: dict) -> None:
     np.random.seed(42)
     mybunch.init_gaussian()
     stdx, stdy = np.std(mybunch['x']), np.std(mybunch['y'])
+    sanitized_list = [str(v).replace("'", "").replace('"', '') for v in
+                      wake_types]
+    wake_types_str = "-".join(sanitized_list)
+
     monitor_filename = folder + f"monitors(n_mp={n_macroparticles:.1e}," + \
         f"n_turns={n_turns:.1e}," +\
         f"n_bin={n_bin:},"+\
@@ -57,7 +61,7 @@ def run_mbtrack2(config: dict) -> None:
         f"feedback_tau={feedback_tau:.1e},"+\
         f"sc={sc:},"+\
         f"ibs={ibs:}"+\
-        f"wake_types={len(wake_types):}"\
+        f"wake_types={wake_types_str:}"\
         f"{emittance_ratio=:}"\
         ")"
     bunch_monitor = BunchMonitor(

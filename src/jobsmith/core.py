@@ -164,7 +164,10 @@ class Submitter:
                     f.write("#MSUB -q a100\n")
                 else:
                     f.write(f"#MSUB -q {job.partition}\n")
-                f.write("#MSUB -Q long\n")
+                if int(job.time) < 86400:
+                    f.write("#MSUB -Q normal\n")
+                else:
+                    f.write("#MSUB -Q long\n")
                 f.write("#MSUB -n 1\n")
                 f.write(f"#MSUB -c {job.n_cpu}\n")
                 f.write(f"#MSUB -T {job.time}\n")

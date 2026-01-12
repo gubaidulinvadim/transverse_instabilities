@@ -54,7 +54,6 @@ def generate_scan_configs(base_config: dict) -> list:
     # Expand all scan specifications
     param_names = list(scan_params.keys())
     param_values = [expand_scan_values(scan_params[p]) for p in param_names]
-
     configs = []
     base_job_name = base_config.get('job', {}).get('name', 'scan')
 
@@ -68,23 +67,25 @@ def generate_scan_configs(base_config: dict) -> list:
         # Build job name suffix from parameter values
         name_parts = []
         for param, value in zip(param_names, combo):
+            # Update script parameter
+            config['script'][param] = value
             # Format value for job name
             if isinstance(value, float):
                 if value >= 1:
                     name_parts.append(f"{param}_{value:.1f}")
                 else:
                     name_parts.append(f"{param}_{value:.3f}")
+            
+            elif isinstance(value, list):
+                # Join list elements with a separator (e.g., '-')
+                sanitized_list = [str(v).replace("'", "").replace('"', '') for v in value]
+                value_str = "-".join(sanitized_list)
+                name_parts.append(f"{param}_{value_str}")
+            elif isinstance(value, str):
+                value_str = str(value).replace("'", "").replace('"', '')
+                name_parts.append(f"{param}_{value_str}")
             else:
-                if isinstance(value, list):
-                    # Join list elements with a separator (e.g., '-')
-                    sanitized_list = [str(v).replace("'", "").replace('"', '') for v in value]
-                    value_str = "-".join(sanitized_list)
-                    name_parts.append(f"{param}_{value_str}")
-                elif isinstance(value, str):
-                    value_str = str(value).replace("'", "").replace('"', '')
-                    name_parts.append(f"{param}_{value_str}")
-                else:
-                    name_parts.append(f"{param}_{value}")
+                name_parts.append(f"{param}_{value}")
 
         job_name = f"{base_job_name}_{'_'.join(name_parts)}"
         config['job']['name'] = job_name

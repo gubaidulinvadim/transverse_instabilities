@@ -52,6 +52,7 @@ id_state = 'open'
 sc = false
 ibs = false
 feedback_tau = 0
+csr = true
 
 # =============================================================================
 # Scan Parameters

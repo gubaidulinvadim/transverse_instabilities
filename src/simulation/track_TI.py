@@ -5,6 +5,7 @@ sys.path.append('/home/dockeruser/facilities_mbtrack2')
 from facilities_mbtrack2.SOLEIL_II import v3633
 from mbtrack2.tracking import (Bunch, LongitudinalMap, 
                                SynchrotronRadiation, TransverseMap,
+                               SkewQuadrupole
                                )
 from mbtrack2.tracking.monitors import BunchMonitor, WakePotentialMonitor
 from mbtrack2.tracking.spacecharge import TransverseSpaceCharge
@@ -32,12 +33,16 @@ def run_mbtrack2(config: dict) -> None:
     ibs = config.get('ibs', False)
     wake_types = config.get('wake_types', ['Wydip'])
     emittance_ratio = config.get('emittance_ratio', 0.3)
+    n_bunches = config.get('n_bunches', 32)
 
     Vc = 1.7e6
-    ring = v3633(IDs=id_state, HC_power=50e3, V_RF=Vc, load_lattice=True)
+    HC_power = 2e3 if n_bunches == 416 else 15e3
+    ring = v3633(IDs=id_state, HC_power=2e3, V_RF=Vc, load_lattice=True)
     ring.tune = np.array([54.23, 18.21])
     ring.chro = np.array([Qp_x, Qp_y])  
     ring.emit[1] = emittance_ratio * ring.emit[0]
+    if emittance_ratio == 1.0:
+        ring.emit[1] = 0.02*ring.emit[0]
     mybunch = Bunch(ring,
                     mp_number=n_macroparticles,
                     current=bunch_current,
@@ -73,7 +78,8 @@ def run_mbtrack2(config: dict) -> None:
         mpi_mode=False,
     )
     long_map = LongitudinalMap(ring)
-    main_rf, harmonic_rf = setup_rf(ring, harmonic_cavity, Vc)
+    main_rf, harmonic_rf = setup_rf(ring, harmonic_cavity, Vc, n_bunches,
+                                    bunch_current)
     sr = SynchrotronRadiation(ring, switch=[1, 1, 1])
     trans_map = TransverseMap(ring)
     
@@ -121,6 +127,8 @@ def run_mbtrack2(config: dict) -> None:
         tracking_elements.append(wakefield_csr)
     if include_Zlong:
         tracking_elements.append(wakefield_long)
+    if emittance_ratio == 1.0:
+        tracking_elements.append(SkewQuadrupole(ring, strength=0.01))
     monitor_count = 0
     track_wake_monitor = False
     stdx, stdy = mybunch.std[0], mybunch.std[2]

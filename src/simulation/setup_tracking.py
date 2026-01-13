@@ -98,26 +98,27 @@ def setup_fbt(ring, feedback_tau, kind='exp'):
     return fbtx, fbty
 
 
-def get_active_cavity_params(ring):
+def get_active_cavity_params(ring, I0=0.2):
     I0 = 0.2
-    xi = 1.1
+    xi = 1.027 if I0==0.2 else 1.18
     Vc = 1.7e6
-
+    
+    
     HC = CavityResonator(ring,
                          m=4,
-                         Rs=60 * 31e3,
+                         Rs=30 * 31e3,
                          Q=31e3,
                          QL=31e3,
                          detune=1e6,
-                         Ncav=1)
+                         Ncav=2)
     HC.Vg = 0
     HC.theta_g = 0
-
+    
     HC_det = I0 * HC.Rs / HC.Q * ring.f1 / Vc * HC.m**2 / xi
     HC.detune = HC_det
-
+    
     delta = HC.Vb(I0) * np.cos(HC.psi)
-
+    
     MC = CavityResonator(ring,
                          m=1,
                          Rs=5e6,
@@ -129,25 +130,26 @@ def get_active_cavity_params(ring):
     MC.theta = np.arccos((ring.U0 + delta) / MC.Vc)
     MC.set_optimal_detune(I0)
     MC.set_generator(I0)
-
+    
     BLE = BeamLoadingEquilibrium(ring, [MC, HC], I0, auto_set_MC_theta=True)
     BLE.beam_equilibrium(CM=True, plot=False)
     print(BLE.std_rho() / 3e8 * 1e12)
-
+    
     print("Form factors", BLE.F, BLE.PHI)
-
+    
     for i, cavity in enumerate([MC, HC]):
         Vc_phasor = -1 * cavity.Vb(I0) * BLE.F[i] * np.exp(1j * (
             cavity.psi - BLE.PHI[i])) + cavity.Vg * np.exp(1j * cavity.theta_g)
         cavity.Vc = np.abs(Vc_phasor)
         cavity.theta = np.angle(Vc_phasor)
-
+    
     return MC.Vc, MC.theta, HC.Vc, HC.theta
 
 
-def setup_rf(ring, harmonic_cavity, Vc):
+def setup_rf(ring, harmonic_cavity, Vc, n_bunches, bunch_current):
     if harmonic_cavity:
-        V_main, theta_main, V_harmonic, theta_harmonic = get_active_cavity_params(ring)
+        I0 = n_bunches * bunch_current
+        V_main, theta_main, V_harmonic, theta_harmonic = get_active_cavity_params(ring, I0)
         main_rf = RFCavity(ring, m=1, Vc=V_main, theta=theta_main)
         harmonic_rf = RFCavity(ring,
                                m=4,

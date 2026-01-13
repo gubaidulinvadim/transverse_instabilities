@@ -30,7 +30,7 @@ server = "ccrt"
 # Base name for jobs (parameter values will be appended)
 name = "ht_hor"
 time = 86000
-n_cpu = 12
+n_cpu = 8
 partition = "milan"
 err_folder = "/ccc/work/cont003/soleil/gubaiduv/err/"
 out_folder = "/ccc/work/cont003/soleil/gubaiduv/out/"
@@ -43,7 +43,7 @@ is_gpu = false
 name = "/home/dockeruser/transverse_instabilities/src/simulation/track_TI.py"
 folder = '/home/dockeruser/transverse_instabilities/data/raw/headtail_hor/'
 n_turns = 50000
-n_macroparticles = 1_000_000
+n_macroparticles = 500_000
 n_bin = 100
 Qp_x = 1.8
 Qp_y = 1.4

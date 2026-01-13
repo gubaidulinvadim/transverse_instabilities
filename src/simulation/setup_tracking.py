@@ -9,7 +9,8 @@ import os
 os.environ["PYTHONPATH"] += os.pathsep + "/home/dockeruser/facilities_mbtrack2"
 from facilities_mbtrack2.SOLEIL_II.IMPEDANCE_MODEL.load import load_soleil_ii_wf
 
-def setup_wakes(ring, id_state, include_Zlong, n_bin, wake_types='Wydip'):
+def setup_wakes(ring, id_state, include_Zlong, n_bin, wake_types='Wydip',
+                csr=False):
     wakemodel = load_soleil_ii_wf(f'wf_CP1_IDgap_{id_state}_varyNEG_False', ring)
     wakemodels = []
     for wake_type in wake_types:
@@ -31,26 +32,27 @@ def setup_wakes(ring, id_state, include_Zlong, n_bin, wake_types='Wydip'):
 
     csr = []
     csr_long = []
-    if include_Zlong:
+    if csr:
         try:
             wakemodels.append(wakemodel.Wcsr)
         except:
             print(f"No CSR found in the model. Including CSR wakes from \
                     analytical model.")
-            # f = np.linspace(1, 100e9, 10)
-            # sampling = 1e-13
-            # t = np.arange(-100*ring.sigma_0, 100*ring.sigma_0, sampling)
-            # # CSR bending radius, shielding gap and corresponding length
-            # # based on MAC08 presentation of A. Gamelin
-            # csr_parameters = [(10.74, 16e-3, 40*0.44),
-            #                   (12.80, 16e-3, 64*0.88),
-            #                   (12.68, 8e-3, 12*0.87) ]
-            # for (R, h, L) in csr_parameters:
-            #     csr.append(FreeSpaceCSR(time=t, frequency=f, length=L,
-            #                                radius=R, ring=ring))
-            #     csr_long.append(ParallelPlatesCSR(time=t, frequency=f, length=L,
-            #                                     radius=R, distance=h,
-            #                                     ring=ring))
+            if csr:
+            f = np.linspace(1, 100e9, 10)
+            sampling = 1e-13
+            t = np.arange(-100*ring.sigma_0, 100*ring.sigma_0, sampling)
+            # CSR bending radius, shielding gap and corresponding length
+            # based on MAC08 presentation of A. Gamelin
+            csr_parameters = [(10.74, 16e-3, 40*0.44),
+                              (12.80, 16e-3, 64*0.88),
+                              (12.68, 8e-3, 12*0.87) ]
+            for (R, h, L) in csr_parameters:
+                csr.append(FreeSpaceCSR(time=t, frequency=f, length=L,
+                                           radius=R, ring=ring))
+                csr_long.append(ParallelPlatesCSR(time=t, frequency=f, length=L,
+                                                radius=R, distance=h,
+                                                ring=ring))
 
     wakefield_tr = WakePotential(ring,
                                  wakefield=WakeField(
@@ -59,12 +61,12 @@ def setup_wakes(ring, id_state, include_Zlong, n_bin, wake_types='Wydip'):
     wakefield_long = WakePotential(ring,
                                    wakefield=WakeField([wakemodel.Wlong]),
                                    n_bin=n_bin)
-    # if include_Zlong:
-    #     wlong_csr = sum([c.Wlong for c in csr_long])
-    #     wcsr_csr = sum([c.Wcsr for c in csr])
-    #     wakefield_csr = WakePotential(ring,
-    #                                   wakefield=WakeField([wlong_csr, wcsr_csr]),
-    #                                   n_bin=n_bin)
+    if csr:
+        wlong_csr = sum([c.Wlong for c in csr_long])
+        wcsr_csr = sum([c.Wcsr for c in csr])
+        wakefield_csr = WakePotential(ring,
+                                      wakefield=WakeField([wlong_csr, wcsr_csr]),
+                                      n_bin=n_bin)
     # else:
     wakefield_csr = None
     return wakefield_tr, wakefield_long, wakemodels, wakefield_csr

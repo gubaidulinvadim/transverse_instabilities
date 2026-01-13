@@ -34,6 +34,7 @@ def run_mbtrack2(config: dict) -> None:
     wake_types = config.get('wake_types', ['Wydip'])
     emittance_ratio = config.get('emittance_ratio', 0.3)
     n_bunches = config.get('n_bunches', 32)
+    csr_flag = config.get('csr', False)
 
     Vc = 1.7e6
     HC_power = 2e3 if n_bunches == 416 else 15e3
@@ -85,9 +86,9 @@ def run_mbtrack2(config: dict) -> None:
     
     wakefield_tr, wakefield_long, _, wakefield_csr = setup_wakes(ring, id_state,
                                                   include_Zlong, n_bin,
-                                                  wake_types)
+                                                  wake_types, csr_flag)
     ###############################################
-    wakefield_csr = None
+    wakefield_csr = None if not csr_flag else wakefield_csr
     ###############################################
     wakepotential_monitor = WakePotentialMonitor(
         bunch_number=0,

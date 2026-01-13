@@ -70,6 +70,6 @@ csr = true
 # Scan beam current using a range specification
 bunch_current = {start = 0.0006, stop = 0.012, num = 20}
 n_macroparticles = [1_000_000, 2_000_000, 5_000_000, 10_000_000]
-n_bin = [200, 500]
+n_bin = [300]
 
 

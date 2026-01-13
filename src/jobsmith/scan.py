@@ -72,9 +72,9 @@ def generate_scan_configs(base_config: dict) -> list:
             # Format value for job name
             if isinstance(value, float):
                 if value >= 1:
-                    name_parts.append(f"{param}_{value:.1f}")
+                    name_parts.append(f"{param}_{value:.1e}")
                 else:
-                    name_parts.append(f"{param}_{value:.3f}")
+                    name_parts.append(f"{param}_{value:.2e}")
             
             elif isinstance(value, list):
                 # Join list elements with a separator (e.g., '-')

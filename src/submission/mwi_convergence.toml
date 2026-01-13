@@ -49,6 +49,7 @@ Qp_y = 0.0
 include_Zlong = true
 wake_types = []
 id_state = 'open'
+harmonic_cavity = false
 sc = false
 ibs = false
 feedback_tau = 0

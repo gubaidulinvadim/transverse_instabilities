@@ -60,8 +60,8 @@ def run_mbtrack2(config: dict) -> None:
         f"cavity={harmonic_cavity:},"+\
         f"feedback_tau={feedback_tau:.1e},"+\
         f"sc={sc:},"+\
-        f"ibs={ibs:}"+\
-        f"wake_types={wake_types_str:}"\
+        f"ibs={ibs:},"+\
+        f"wake_types={wake_types_str:},"\
         f"{emittance_ratio=:}"\
         ")"
     bunch_monitor = BunchMonitor(
@@ -119,7 +119,8 @@ def run_mbtrack2(config: dict) -> None:
         tracking_elements.append(fbty)
     if wakefield_csr:
         tracking_elements.append(wakefield_csr)
-
+    if include_Zlong:
+        tracking_elements.append(wakefield_long)
     monitor_count = 0
     track_wake_monitor = False
     stdx, stdy = mybunch.std[0], mybunch.std[2]
@@ -137,8 +138,6 @@ def run_mbtrack2(config: dict) -> None:
                         and monitor_count < 2500):
                     wakepotential_monitor.track(mybunch, wakefield_tr)
                     monitor_count += 1
-            elif include_Zlong:
-                wakefield_long.track(mybunch)
     finally:
         bunch_monitor.close()
 

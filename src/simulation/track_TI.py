@@ -28,10 +28,10 @@ def run_mbtrack2(config: dict) -> None:
     id_state = config.get('id_state', "open")
     include_Zlong = config.get('include_Zlong', False)
     harmonic_cavity = config.get('harmonic_cavity', False)
-    feedback_tau = config.get('feedback_tau', 0.01)
+    feedback_tau = config.get('feedback_tau', 0)
     sc = config.get('sc', False)
     ibs = config.get('ibs', False)
-    wake_types = config.get('wake_types', ['Wydip'])
+    wake_types = config.get('wake_types', ['Wydip']
     emittance_ratio = config.get('emittance_ratio', 0.3)
     n_bunches = config.get('n_bunches', 32)
     csr_flag = config.get('csr', False)

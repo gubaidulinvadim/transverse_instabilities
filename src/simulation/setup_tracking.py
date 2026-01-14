@@ -74,8 +74,8 @@ def setup_wakes(ring, id_state, include_Zlong, n_bin, wake_types='Wydip',
 def setup_fbt(ring, feedback_tau, kind='exp'):
     if kind == 'exp':
         fbty = TransverseExponentialDamper(ring,
-                                damping_time=[ring.T0 * feedback_tau, ring.T0*feedback_tau],
-                                phase_diff=[np.pi / 2, np.pi/2])
+                                damping_time=[feedback_tau, feedback_tau],
+                                phase_diff=[90, 90])
         fbtx = fbty
     else:
         fbty = FIRDamper(ring,

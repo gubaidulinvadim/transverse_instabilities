@@ -100,7 +100,6 @@ def setup_fbt(ring, feedback_tau, kind='exp'):
 
 
 def get_active_cavity_params(ring, I0=0.2):
-    I0 = 0.2
     xi = 1.027 if I0==0.2 else 1.18
     Vc = 1.7e6
     

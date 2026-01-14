@@ -44,6 +44,8 @@ def run_mbtrack2(config: dict) -> None:
     ring.emit[1] = emittance_ratio * ring.emit[0]
     if emittance_ratio == 1.0:
         ring.emit[1] = 0.02*ring.emit[0]
+        ring.tune[0] = 54.2
+        ring.tune[1] = 18.2
     mybunch = Bunch(ring,
                     mp_number=n_macroparticles,
                     current=bunch_current,
@@ -129,7 +131,8 @@ def run_mbtrack2(config: dict) -> None:
     if include_Zlong:
         tracking_elements.append(wakefield_long)
     if emittance_ratio == 1.0:
-        tracking_elements.append(SkewQuadrupole(strength=0.1))
+        tracking_elements.append(SkewQuadrupole(strength=0.05))
+
     monitor_count = 0
     track_wake_monitor = False
     stdx, stdy = mybunch.std[0], mybunch.std[2]

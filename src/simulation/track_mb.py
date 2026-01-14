@@ -18,26 +18,28 @@ from facilities_mbtrack2 import v3633
 def run_mbtrack2(config: dict) -> None:
 
     folder = config['folder']
-    n_turns = config.get('n_turns', 100_000)
+    n_turns = config.get('n_turns', 75_000)
     n_macroparticles = config.get('n_macroparticles', int(1e5))
     n_bin = config.get('n_bin', 100)
     bunch_current = config.get('bunch_current', 1.2e-3)
-    Qp_x = config.get('Qp_x', 1.6)
-    Qp_y = config.get('Qp_y', 1.6)
+    Qp_x = config.get('Qp_x', 1.8)
+    Qp_y = config.get('Qp_y', 1.4)
     id_state = config.get('id_state', "open")
     include_Zlong = config.get('include_Zlong', False)
     harmonic_cavity = config.get('harmonic_cavity', False)
-    n_turns_wake = config.get('n_turns_wake', 1)
-    feedback_tau = config.get('feedback-tau', 1.e-2)
+    n_turns_wake = config.get('n_turns_wake', 20)
+    feedback_tau = config.get('feedback_tau', 100)
     sc = config.get('sc', False)
     ibs = config.get('ibs', False)
-    quad = config.get('quad', False)
+    wake_types = config.get('wake_types', ['Wydip']
+    emittance_ratio = config.get('emittance_ratio', 0.3)
+    n_bunches = config.get('n_bunches', 32)
 
     Vc = 1.7e6
     ring = v3633(IDs=id_state, V_RF=Vc, load_lattice=True)
     ring.tune = np.array([54.23, 18.21])
     ring.chro = [Qp_x, Qp_y]
-    ring.emit[1] = 0.3 * ring.emit[0]
+    ring.emit[1] = emittance_ratio * ring.emit[0]
     np.random.seed(42)
     beam = Beam(ring)
     is_mpi = True
@@ -63,7 +65,6 @@ def run_mbtrack2(config: dict) -> None:
         f",feedback_tau={feedback_tau:.1e}"+
         f",sc={sc:}"+\
         f",ibs={ibs:}"+
-        f"quad={quad:}"+
         ")")
     beam_monitor = BeamMonitor(
         ring.h,
@@ -100,7 +101,7 @@ def run_mbtrack2(config: dict) -> None:
         length=ring.L,
         rho=2.135e-8,
         radius=8e-3,
-        types=["Wxdip", "Wydip"],
+        types=wake_types,
         nt=n_turns_wake,
         x3=x3,
         y3=y3,
@@ -118,7 +119,7 @@ def run_mbtrack2(config: dict) -> None:
         length=ring.L,
         rho=2.135e-8,
         radius=8e-3,
-        types=["Wxdip", "Wydip"],
+        types=wake_types,
         nt=n_turns_wake,
         x3=x3,
         y3=y3,

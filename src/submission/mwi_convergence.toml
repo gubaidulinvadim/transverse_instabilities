@@ -67,7 +67,7 @@ feedback_tau = 0
 [scan]
 # Scan beam current using a range specification
 bunch_current = {start = 0.0006, stop = 0.012, num = 20}
-n_macroparticles = [500_000, 1_000_000, 2_000_000]
+n_macroparticles = [2_000_000]
 ibs = [true, false]
 harmonic_cavity = [true, false]
 

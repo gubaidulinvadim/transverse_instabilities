@@ -29,7 +29,7 @@ server = "ccrt"
 [job]
 # Base name for jobs (parameter values will be appended)
 name = "mwi_scan"
-time = 259200
+time = 86000
 n_cpu = 8
 partition = "milan"
 err_folder = "/ccc/work/cont003/soleil/gubaiduv/err/"
@@ -43,15 +43,13 @@ is_gpu = false
 name = "/home/dockeruser/transverse_instabilities/src/simulation/track_TI.py"
 folder = '/home/dockeruser/transverse_instabilities/data/raw/mwi/'
 n_turns = 25000
-n_bin = 500
+n_bin = 300
 Qp_x = 0.0
 Qp_y = 0.0
 include_Zlong = true
 wake_types = []
 id_state = 'open'
-harmonic_cavity = false
 sc = false
-ibs = false
 feedback_tau = 0
 
 # =============================================================================
@@ -69,6 +67,8 @@ feedback_tau = 0
 [scan]
 # Scan beam current using a range specification
 bunch_current = {start = 0.0006, stop = 0.012, num = 20}
-n_macroparticles = [1_000_000, 2_000_000, 5_000_000, 10_000_000]
+n_macroparticles = [500_000, 1_000_000, 2_000_000]
+ibs = [true, false]
+harmonic_cavity = [true, false]
 
 

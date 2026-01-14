@@ -129,7 +129,7 @@ def run_mbtrack2(config: dict) -> None:
     if include_Zlong:
         tracking_elements.append(wakefield_long)
     if emittance_ratio == 1.0:
-        tracking_elements.append(SkewQuadrupole(strength=0.01))
+        tracking_elements.append(SkewQuadrupole(strength=0.1))
     monitor_count = 0
     track_wake_monitor = False
     stdx, stdy = mybunch.std[0], mybunch.std[2]

@@ -170,7 +170,7 @@ class Submitter:
                     f.write("#MSUB -Q long\n")
                 max_cpu = 128
                 n_node = job.n_cpu // max_cpu + 1
-                f.write(f"#MSUB -n {n_node}\n")
+                f.write(f"#MSUB -N {n_node}\n")
                 f.write(f"#MSUB -c {job.n_cpu}\n")
                 f.write(f"#MSUB -T {job.time}\n")
                 f.write("#MSUB -A soldai\n")

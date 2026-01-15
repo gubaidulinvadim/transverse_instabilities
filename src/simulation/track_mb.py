@@ -209,14 +209,14 @@ if __name__ == "__main__":
         )
 
     # Config file argument (optional, for backward compatibility)
-    parser.add_argument('-c', '--config', metavar='CONFIG_FILE', type=str,
+    parser.add_argument('-c', '--config_file', metavar='CONFIG_FILE', type=str,
                         default=None,
                         help='Path to TOML configuration file. CLI args override config values.')
     args = parser.parse_args()
 
 
     
-    config_path = args.config if args.config else args.config_file
+    config_path = args.config_file
     if config_path:
         full_config = load_toml_config(config_path)
 

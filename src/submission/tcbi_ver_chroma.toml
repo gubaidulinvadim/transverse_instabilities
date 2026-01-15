@@ -49,7 +49,7 @@ include_Zlong = true
 id_state = 'open'
 ibs = true
 bunch_current = 0.0012
-wake_types = ["Wxdip", "Wxquad"]
+wake_types = ["Wydip", "Wyquad"]
 n_bunches = 416
 # =============================================================================
 # Scan Parameters

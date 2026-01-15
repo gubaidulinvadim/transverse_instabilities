@@ -1,0 +1,72 @@
+# Example TOML configuration file for parameter scan submission.
+#
+# This file extends the standard configuration with a [scan] section
+# that defines arrays of values to scan over. The submit_scan.py script
+# will generate and submit a separate job for each combination of values.
+#
+# Usage:
+#   python submit_scan.py --config_file example_scan_config.toml
+#
+# The [scan] section can contain any parameter from [script].
+# Each parameter can be specified as:
+# - An array of explicit values: [10, 20, 30, 40, 50]
+# - A range specification: {start = 0.1, stop = 0.5, num = 5} (uses linspace)
+
+title = "horizontal coupled-bunch instability chromaticity scan"
+
+# =============================================================================
+# Environment Configuration
+# =============================================================================
+[environment]
+container = "soleil-pa:mbtrack2"
+mount_source = ["/ccc/work/cont003/soleil/gubaiduv/transverse_instabilities/", "/ccc/work/cont003/soleil/gubaiduv/facilities_mbtrack2/"]
+mount_destination = ["/home/dockeruser/transverse_instabilities/", "/home/dockeruser/facilities_mbtrack2/"]
+server = "ccrt"
+
+# =============================================================================
+# Job Configuration
+# =============================================================================
+[job]
+# Base name for jobs (parameter values will be appended)
+name = "tcbi_hor"
+time = 86000
+n_cpu = 8
+partition = "milan"
+err_folder = "/ccc/work/cont003/soleil/gubaiduv/err/"
+out_folder = "/ccc/work/cont003/soleil/gubaiduv/out/"
+is_gpu = false
+
+# =============================================================================
+# Simulation Script Parameters (base values)
+# =============================================================================
+[script]
+name = "/home/dockeruser/transverse_instabilities/src/simulation/track_mb.py"
+folder = '/home/dockeruser/transverse_instabilities/data/raw/tcbi_hor/'
+n_turns = 50000
+n_macroparticles = 500_000
+n_bin = 100
+include_Zlong = true
+id_state = 'open'
+ibs = true
+bunch_current = 0.0012
+wake_types = ["Wxdip", "Wxquad"]
+n_bunches = 416
+# =============================================================================
+# Scan Parameters
+# =============================================================================
+# The [scan] section defines which parameters to vary.
+# Each key corresponds to a parameter in [script].
+# Values can be:
+#   - Explicit array: [10, 20, 30, 40, 50]
+#   - Range with linspace: {start = 0.1, stop = 0.5, num = 5}
+#
+# When multiple parameters are specified, all combinations are scanned.
+# Example: feedback_tau = [10, 20] and beam_current = [0.1, 0.2]
+#          generates 4 jobs: (10, 0.1), (10, 0.2), (20, 0.1), (20, 0.2)
+[scan]
+sc = [false, true]
+harmonic_cavity = [false, true]
+feedback_tau = [0, 100]
+Qp_y = 1.4
+Qp_x = [-1.0, -0.5, -0.1, 0.1, 0.5, 1.0, 1.4, 1.5, 1.6, 1.7, 1.8, 2.0, 2.5, 3.0, 3.5]
+

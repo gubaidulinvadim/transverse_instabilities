@@ -33,10 +33,11 @@ def run_mbtrack2(config: dict) -> None:
     ibs = config.get('ibs', False)
     wake_types = config.get('wake_types', ['Wydip'])
     emittance_ratio = config.get('emittance_ratio', 0.3)
-    n_bunches = config.get('n_bunches', 32)
+    n_bunches = config.get('n_bunches', 416)
 
     Vc = 1.7e6
-    ring = v3633(IDs=id_state, V_RF=Vc, load_lattice=True)
+    HC_power = 2e3 if n_bunches == 416 else 15e3
+    ring = v3633(IDs=id_state, HC_power=HC_power, V_RF=Vc, load_lattice=True)
     ring.tune = np.array([54.23, 18.21])
     ring.chro = [Qp_x, Qp_y]
     ring.emit[1] = emittance_ratio * ring.emit[0]
@@ -50,6 +51,10 @@ def run_mbtrack2(config: dict) -> None:
         track_alive=False,
         mpi=is_mpi,
     )
+    sanitized_list = [str(v).replace("'", "").replace('"', '') for v in
+                      wake_types]
+    wake_types_str = "-".join(sanitized_list)
+
     monitor_filename = (
         folder +
         f"monitors(n_mp={n_macroparticles:.1e}"+
@@ -63,8 +68,10 @@ def run_mbtrack2(config: dict) -> None:
         f",harmonic_cavity={harmonic_cavity:}"+
         f",n_turns_wake={n_turns_wake:}"
         f",feedback_tau={feedback_tau:.1e}"+
-        f",sc={sc:}"+\
+        f",sc={sc:}"+
         f",ibs={ibs:}"+
+        f",wake_types={wake_types_str:}"+
+        f",{emittance_ratio=:}"
         ")")
     beam_monitor = BeamMonitor(
         ring.h,
@@ -76,7 +83,7 @@ def run_mbtrack2(config: dict) -> None:
     )
     wakepotential_monitor = WakePotentialMonitor(
         bunch_number=0,
-        wake_types="Wydip",
+        wake_types=wake_types,
         n_bin=n_bin,
         save_every=1,
         buffer_size=600,
@@ -87,7 +94,10 @@ def run_mbtrack2(config: dict) -> None:
     long_map = LongitudinalMap(ring)
     sr = SynchrotronRadiation(ring, switch=[1, 1, 1])
     trans_map = TransverseMap(ring)
-    wakefield_tr, wakefield_long, wakemodel = setup_wakes(ring, id_state, include_Zlong, n_bin)
+    wakefield_tr, wakefield_long, wakemodel, _ = setup_wakes(ring, id_state,
+                                                             include_Zlong,
+                                                             n_bin,
+                                                             csr_flag=False)
 
     if id_state == "open":
         x3 = 6.62e-3
@@ -126,7 +136,8 @@ def run_mbtrack2(config: dict) -> None:
         )
 
 
-    rf, hrf = setup_dual_rf(ring, beam, harmonic_cavity, bunch_current,  wakemodel)
+    rf, hrf = setup_dual_rf(ring, beam, harmonic_cavity, bunch_current,
+                            wakemodel, n_bunches)
     fbtx, fbty = setup_fbt(ring, feedback_tau)
     tracking_elements = [trans_map, long_map, sr, beam_monitor, rf]
     besc = TransverseSpaceCharge(ring=ring,

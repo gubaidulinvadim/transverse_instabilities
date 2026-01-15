@@ -161,7 +161,8 @@ def setup_rf(ring, harmonic_cavity, Vc, n_bunches, bunch_current):
     return main_rf, harmonic_rf
 
 
-def setup_dual_rf(ring, beam, harmonic_cavity, bunch_current, wakemodel):
+def setup_dual_rf(ring, beam, harmonic_cavity, bunch_current, wakemodel,
+                  n_bunches):
     Vc = 1.7e6
     if harmonic_cavity:
         Itot = ring.h * bunch_current  # Use for fixed detuning or CT
@@ -172,19 +173,20 @@ def setup_dual_rf(ring, beam, harmonic_cavity, bunch_current, wakemodel):
         xi_end = 1.2
         estimated_bunch_length = 40e-12
     
-        # FB Settings
+        # DFB Settings
         fb_gain = [0.01, 1000]  # fb Gain for IQ components of Vc
         fb_sample_num = (
             208  # 2*2*2*2*3*3*3, mean Vc value of this number is used for Vg control
         )
         fb_every = 208  # 192ns (assumption),corresponding to process speed of the Feedback system
         fb_delay = 704  # int(2e-6/ring.T1)
-        directFB_gain = 0.1
+        directFB_gain = 0.2
         directFB_phaseShift = 0 / 180 * np.pi
         tuner_gain = 0.01
         PFB_gainA = 0.01
         PFB_gainP = 0.01
         PFB_delay = 1
+
         m = 1
         Rs = 5e6
         Q = 35.7e3
@@ -194,10 +196,10 @@ def setup_dual_rf(ring, beam, harmonic_cavity, bunch_current, wakemodel):
         rf = CavityResonator(ring, m, Rs, Q, QL, detune, Ncav=Ncav)
     
         m = 4
-        Rs = 2.358e6
+        Rs = 30
         Q = 36e3
         QL = 36e3
-        Ncav = 1
+        Ncav = 2
         hrf = CavityResonator(ring, m, Rs, Q, QL, detune, Ncav=Ncav)
         hrf.Vg = 0
         hrf.theta_g = 0

@@ -38,7 +38,7 @@ def run_mbtrack2(config: dict) -> None:
 
     Vc = 1.7e6
     HC_power = 2e3 if n_bunches == 416 else 15e3
-    ring = v3633(IDs=id_state, HC_power=2e3, V_RF=Vc, load_lattice=True)
+    ring = v3633(IDs=id_state, HC_power=HC_power, V_RF=Vc, load_lattice=True)
     ring.tune = np.array([54.23, 18.21])
     ring.chro = np.array([Qp_x, Qp_y])  
     ring.emit[1] = emittance_ratio * ring.emit[0]

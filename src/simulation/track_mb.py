@@ -31,7 +31,7 @@ def run_mbtrack2(config: dict) -> None:
     feedback_tau = config.get('feedback_tau', 100)
     sc = config.get('sc', False)
     ibs = config.get('ibs', False)
-    wake_types = config.get('wake_types', ['Wydip']
+    wake_types = config.get('wake_types', ['Wydip'])
     emittance_ratio = config.get('emittance_ratio', 0.3)
     n_bunches = config.get('n_bunches', 32)
 

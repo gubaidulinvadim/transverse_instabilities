@@ -168,7 +168,8 @@ class Submitter:
                     f.write("#MSUB -Q normal\n")
                 else:
                     f.write("#MSUB -Q long\n")
-                f.write("#MSUB -n 1\n")
+                max_cpu = 128
+                f.write("#MSUB -n {int(np.ceil(job.n_cpu / max_cpu))}\n")
                 f.write(f"#MSUB -c {job.n_cpu}\n")
                 f.write(f"#MSUB -T {job.time}\n")
                 f.write("#MSUB -A soldai\n")

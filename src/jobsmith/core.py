@@ -171,7 +171,8 @@ class Submitter:
                 max_cpu = 128
                 n_node = job.n_cpu // max_cpu + 1
                 f.write(f"#MSUB -N {n_node}\n")
-                f.write(f"#MSUB -c {job.n_cpu}\n")
+                f.write(f"#MSUB -n {job.n_cpu}\n")
+                f.write(f"#MSUB -c 1\n")
                 f.write(f"#MSUB -T {job.time}\n")
                 f.write("#MSUB -A soldai\n")
                 # f.write("#MSUB -@ vadim.gubaidulin@synchrotron-soleil.fr:begin,end,requeue\n")

@@ -94,7 +94,7 @@ def run_mbtrack2(config: dict) -> None:
     ###############################################
     wakepotential_monitor = WakePotentialMonitor(
         bunch_number=0,
-        wake_types=wake_types,
+        wake_types=wake_types.append("Wlong"),
         n_bin=n_bin,
         save_every=1,
         buffer_size=600,

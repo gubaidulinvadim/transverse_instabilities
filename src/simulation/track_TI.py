@@ -93,7 +93,7 @@ def run_mbtrack2(config: dict) -> None:
     wakefield_csr = None if not csr_flag else wakefield_csr
     ###############################################
     monitored_wake_types = ['Wlong']
-    monitored_wake_types.append(wake_types)
+    monitored_wake_types += wake_types
     wakepotential_monitor = WakePotentialMonitor(
         bunch_number=0,
         wake_types=monitored_wake_types,

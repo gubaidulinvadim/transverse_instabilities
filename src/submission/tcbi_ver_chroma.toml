@@ -30,7 +30,8 @@ server = "ccrt"
 # Base name for jobs (parameter values will be appended)
 name = "tcbi_ver"
 time = 86000
-n_cpu = 416
+n_cpu = 1
+n_tasks = 416
 partition = "milan"
 err_folder = "/ccc/work/cont003/soleil/gubaiduv/err/"
 out_folder = "/ccc/work/cont003/soleil/gubaiduv/out/"

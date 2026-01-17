@@ -35,6 +35,7 @@ class Job:
     name: str = "job"
     time: int = 86000
     n_cpu: int = 24
+    n_tasks: int = 1
     partition: str = "milan"
     err_folder: str = "/ccc/work/cont003/soleil/gubaiduv/err/"
     out_folder: str = "/ccc/work/cont003/soleil/gubaiduv/out/"
@@ -68,6 +69,7 @@ class Job:
             name=job_config.get('name', 'job'),
             time=job_config.get('time', 86000),
             n_cpu=job_config.get('n_cpu', 24),
+            n_tasks=job_config.get('n_tasks', 1)
             partition=job_config.get('partition', 'milan'),
             err_folder=job_config.get('err_folder', '/ccc/work/cont003/soleil/gubaiduv/err/'),
             out_folder=job_config.get('out_folder', '/ccc/work/cont003/soleil/gubaiduv/out/'),
@@ -99,6 +101,7 @@ class Job:
             name=job_config.get('name', 'job'),
             time=job_config.get('time', 86000),
             n_cpu=job_config.get('n_cpu', 24),
+            n_tasks=job_config.get('n_tasks', 1)
             partition=job_config.get('partition', 'milan'),
             err_folder=job_config.get('err_folder', '/ccc/work/cont003/soleil/gubaiduv/err/'),
             out_folder=job_config.get('out_folder', '/ccc/work/cont003/soleil/gubaiduv/out/'),
@@ -171,7 +174,7 @@ class Submitter:
                 max_cpu = 128
                 n_node = job.n_cpu // max_cpu + 1
                 # f.write(f"#MSUB -N {n_node}\n")
-                # f.write(f"#MSUB -n {job.n_cpu}\n")
+                f.write(f"#MSUB -n {job.n_tasks}\n")
                 f.write(f"#MSUB -c {job.n_cpu}\n")
                 f.write(f"#MSUB -T {job.time}\n")
                 f.write("#MSUB -A soldai\n")

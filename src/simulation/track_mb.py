@@ -99,7 +99,7 @@ def run_mbtrack2(config: dict) -> None:
     wakefield_tr, wakefield_long, wakemodel, _ = setup_wakes(ring, id_state,
                                                              include_Zlong,
                                                              n_bin,
-                                                             csr_flag=False)
+                                                             csr=False)
 
     if id_state == "open":
         x3 = 6.62e-3

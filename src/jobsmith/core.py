@@ -69,7 +69,7 @@ class Job:
             name=job_config.get('name', 'job'),
             time=job_config.get('time', 86000),
             n_cpu=job_config.get('n_cpu', 24),
-            n_tasks=job_config.get('n_tasks', 1)
+            n_tasks=job_config.get('n_tasks', 1),
             partition=job_config.get('partition', 'milan'),
             err_folder=job_config.get('err_folder', '/ccc/work/cont003/soleil/gubaiduv/err/'),
             out_folder=job_config.get('out_folder', '/ccc/work/cont003/soleil/gubaiduv/out/'),
@@ -101,7 +101,7 @@ class Job:
             name=job_config.get('name', 'job'),
             time=job_config.get('time', 86000),
             n_cpu=job_config.get('n_cpu', 24),
-            n_tasks=job_config.get('n_tasks', 1)
+            n_tasks=job_config.get('n_tasks', 1),
             partition=job_config.get('partition', 'milan'),
             err_folder=job_config.get('err_folder', '/ccc/work/cont003/soleil/gubaiduv/err/'),
             out_folder=job_config.get('out_folder', '/ccc/work/cont003/soleil/gubaiduv/out/'),

@@ -68,7 +68,7 @@ def setup_wakes(ring, id_state, include_Zlong, n_bin, wake_types='Wydip',
                                       n_bin=n_bin)
     # else:
     wakefield_csr = None
-    return wakefield_tr, wakefield_long, wakemodels, wakefield_csr
+    return wakefield_tr, wakefield_long, wakemodel, wakefield_csr
 
 
 def setup_fbt(ring, feedback_tau, kind='exp'):

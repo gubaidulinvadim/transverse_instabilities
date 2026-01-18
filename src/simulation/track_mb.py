@@ -99,6 +99,7 @@ def run_mbtrack2(config: dict) -> None:
     wakefield_tr, wakefield_long, wakemodel, _ = setup_wakes(ring, id_state,
                                                              include_Zlong,
                                                              n_bin,
+                                                             wake_types,
                                                              csr=False)
 
     if id_state == "open":
@@ -107,13 +108,15 @@ def run_mbtrack2(config: dict) -> None:
     else:
         x3 = 5.78e-3
         y3 = 5.61e-3
+    wake_types_dip = [item for item in wake_types if item.endswith('dip')]
+    wake_types_quad = [item for item in wake_types if item.endswith('quad')]
     long_wakefield = LongRangeResistiveWall(
         ring=ring,
         beam=beam,
         length=ring.L,
         rho=2.135e-8,
         radius=8e-3,
-        types=wake_types,
+        types=wake_types_dip,
         nt=n_turns_wake,
         x3=x3,
         y3=y3,
@@ -131,7 +134,7 @@ def run_mbtrack2(config: dict) -> None:
         length=ring.L,
         rho=2.135e-8,
         radius=8e-3,
-        types=wake_types,
+        types=wake_types_quad,
         nt=n_turns_wake,
         x3=x3,
         y3=y3,
@@ -179,8 +182,7 @@ def run_mbtrack2(config: dict) -> None:
             if i > 25_000:
                 wakefield_tr.track(beam)
                 long_wakefield.track(beam)
-                if quad == 'True':
-                    long_wakefield_quad.track(beam)
+                long_wakefield_quad.track(beam)
             elif include_Zlong == 'True':
                 wakefield_long.track(beam)
                 

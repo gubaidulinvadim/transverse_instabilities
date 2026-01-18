@@ -27,7 +27,7 @@ def run_mbtrack2(config: dict) -> None:
     id_state = config.get('id_state', "open")
     include_Zlong = config.get('include_Zlong', False)
     harmonic_cavity = config.get('harmonic_cavity', False)
-    n_turns_wake = config.get('n_turns_wake', 20)
+    n_turns_wake = config.get('n_turns_wake', 50)
     feedback_tau = config.get('feedback_tau', 100)
     sc = config.get('sc', False)
     ibs = config.get('ibs', False)
@@ -123,11 +123,11 @@ def run_mbtrack2(config: dict) -> None:
     )
     
     if id_state == "open":
-        x3 = -15.01e-3
-        y3 = 15.63e-3
+        x3_quad = -15.01e-3
+        y3_quad = 15.63e-3
     else:
-        x3 = -7.90e-3
-        y3 = 8.87e-3
+        x3_quad = -7.90e-3
+        y3_quad = 8.87e-3
     long_wakefield_quad = LongRangeResistiveWall(
         ring=ring,
         beam=beam,
@@ -136,8 +136,8 @@ def run_mbtrack2(config: dict) -> None:
         radius=8e-3,
         types=wake_types_quad,
         nt=n_turns_wake,
-        x3=x3,
-        y3=y3,
+        x3_quad=x3_quad,
+        y3_quad=y3_quad,
         )
 
 
@@ -161,6 +161,8 @@ def run_mbtrack2(config: dict) -> None:
     if feedback_tau != 0:
         tracking_elements.append(fbtx)
         tracking_elements.append(fbty)
+    if include_Zlong:
+        tracking_elements.append(wakefield_long)
 
     stdx, stdy = np.mean(beam.bunch_std[:][0]), np.mean(beam.bunch_std[:][2])
     track_wake_monitor = False
@@ -183,8 +185,6 @@ def run_mbtrack2(config: dict) -> None:
                 wakefield_tr.track(beam)
                 long_wakefield.track(beam)
                 long_wakefield_quad.track(beam)
-            elif include_Zlong == 'True':
-                wakefield_long.track(beam)
                 
             if (monitor_count < 2500 and (np.mean(beam.bunch_mean[:][0]) > 0.1 * stdx or np.mean(beam.bunch_mean[:][2]) > 0.1 * stdy)):
                 track_wake_monitor=True

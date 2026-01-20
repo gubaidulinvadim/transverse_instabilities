@@ -46,10 +46,10 @@ n_turns = 50000
 n_macroparticles = 500_000
 n_bin = 100
 include_Zlong = true
-id_state = 'open'
+id_state = 'close'
 ibs = true
 bunch_current = 0.00625
-wake_types = ["Wydip", "Wyquad"]
+wake_types = ["Wydip", "Wyquad", "Wxquad"]
 # =============================================================================
 # Scan Parameters
 # =============================================================================

@@ -12,7 +12,7 @@
 # - An array of explicit values: [10, 20, 30, 40, 50]
 # - A range specification: {start = 0.1, stop = 0.5, num = 5} (uses linspace)
 
-title = "vertical Head-tail threshold scan"
+title = "Horizontal Head-tail threshold scan"
 
 # =============================================================================
 # Environment Configuration
@@ -28,7 +28,7 @@ server = "ccrt"
 # =============================================================================
 [job]
 # Base name for jobs (parameter values will be appended)
-name = "ht_ver"
+name = "ht_hor"
 time = 86000
 n_cpu = 8
 partition = "milan"
@@ -41,15 +41,15 @@ is_gpu = false
 # =============================================================================
 [script]
 name = "/home/dockeruser/transverse_instabilities/src/simulation/track_TI.py"
-folder = '/home/dockeruser/transverse_instabilities/data/raw/headtail_ver/'
+folder = '/home/dockeruser/transverse_instabilities/data/raw/headtail_hor/'
 n_turns = 50000
 n_macroparticles = 500_000
 n_bin = 100
 include_Zlong = true
-id_state = 'open'
+id_state = 'close'
 ibs = true
 bunch_current = 0.00625
-wake_types = ["Wxdip", "Wxquad"]
+wake_types = ["Wxdip", "Wxquad", "Wyquad"]
 # =============================================================================
 # Scan Parameters
 # =============================================================================

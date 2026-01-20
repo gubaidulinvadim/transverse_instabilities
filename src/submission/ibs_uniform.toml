@@ -51,7 +51,7 @@ include_Zlong = true
 ibs = true
 sc = false
 feedback_tau = 0
-wake_types = []
+wake_types = ['Wxdip']
 n_bunches = 416
 # =============================================================================
 # Scan Parameters

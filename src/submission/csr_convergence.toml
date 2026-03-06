@@ -43,7 +43,6 @@ is_gpu = false
 name = "/home/dockeruser/transverse_instabilities/src/simulation/track_TI.py"
 folder = '/home/dockeruser/transverse_instabilities/data/raw/csr/'
 n_turns = 25000
-n_bin = 300
 Qp_x = 0.0
 Qp_y = 0.0
 wake_types = []
@@ -67,9 +66,9 @@ csr = true
 #          generates 4 jobs: (10, 0.1), (10, 0.2), (20, 0.1), (20, 0.2)
 [scan]
 # Scan beam current using a range specification
-bunch_current = {start = 0.0006, stop = 0.012, num = 20}
-n_macroparticles = [10_000_000, 20_000_000]
-include_Zlong = [true, false]
-n_bin = [300]
+bunch_current = {start = 0.002, stop = 0.02, num = 10}
+n_macroparticles = [1_000_000, 5_000_000, 10_000_000, 20_000_000]
+include_Zlong = [false]
+n_bin = [256, 512, 1024]
 
 

@@ -125,14 +125,19 @@ def run_mbtrack2(config: dict) -> None:
         print("Harmonic cavity is off.")
         tracking_elements.append(main_rf)
     if feedback_tau != 0:
+        print("Feedback system is included in tracking.")
         fbtx, fbty = setup_fbt(ring, feedback_tau)
         tracking_elements.append(fbtx)
         tracking_elements.append(fbty)
     if wakefield_csr:
+        print("CSR is included.")
         tracking_elements.append(wakefield_csr)
     if include_Zlong:
+        print('Longitudinal impedance is included in tracking')
         tracking_elements.append(wakefield_long)
     if emittance_ratio == 1.0:
+        print('Skew quadrupole is on and the tunes are set to a Qx-Qy=n \
+              resonance.')
         tracking_elements.append(SkewQuadrupole(strength=0.05))
 
     monitor_count = 0

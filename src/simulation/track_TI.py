@@ -105,8 +105,7 @@ def run_mbtrack2(config: dict) -> None:
         mpi_mode=False,
     )
     tracking_elements = [trans_map, long_map, bunch_monitor]
-    if include_Zlong:
-        tracking_elements.append(sr)
+    tracking_elements.append(sr)
     besc = TransverseSpaceCharge(ring=ring,
                                 interaction_length=ring.L,
                                 n_bins=100)

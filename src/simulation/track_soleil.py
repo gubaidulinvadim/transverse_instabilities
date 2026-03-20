@@ -51,7 +51,7 @@ def run_mbtrack2(config: dict) -> None:
                       wake_types]
     wake_types_str = "-".join(sanitized_list)
 
-    monitor_filename = folder + f"monitors(n_mp={n_macroparticles:.1e}," + \
+    monitor_filename = folder + f"soleil_monitors(n_mp={n_macroparticles:.1e}," + \
         f"n_turns={n_turns:.1e}," +\
         f"n_bin={n_bin:},"+\
         f"bunch_current={bunch_current:.2e},"+\

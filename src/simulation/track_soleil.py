@@ -2,7 +2,7 @@ import numpy as np
 import os, sys
 os.environ["PYTHONPATH"] += os.pathsep + "/home/dockeruser/facilities_mbtrack2/"
 sys.path.append('/home/dockeruser/facilities_mbtrack2')
-from facilities_mbtrack2.SOLEIL_II import soleil_rock
+from facilities_mbtrack2 import soleil_rock
 from mbtrack2.tracking import (Bunch, LongitudinalMap, 
                                SynchrotronRadiation, TransverseMap,
                                SkewQuadrupole

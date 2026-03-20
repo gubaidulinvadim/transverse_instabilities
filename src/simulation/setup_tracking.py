@@ -7,8 +7,8 @@ from mbtrack2.impedance.csr import FreeSpaceCSR, ParallelPlatesCSR
 from mbtrack2.tracking import (RFCavity, WakePotential, DirectFeedback)
 import os
 os.environ["PYTHONPATH"] += os.pathsep + "/home/dockeruser/facilities_mbtrack2"
-from facilities_mbtrack2.SOLEIL.IMPEDANCE_MODEL.load import (load_soleil_wf,
-                                                             load_soleil_ii_wf)
+from facilities_mbtrack2.SOLEIL.IMPEDANCE_MODEL.load import load_soleil_wf
+from facilities_mbtrack2.SOLEIL_II.IMPEDANCE_MODEL.load import load_soleil_ii_wf
 
 def setup_wakes(ring, id_state, include_Zlong, n_bin, wake_types='Wydip',
                 csr_flag=False):

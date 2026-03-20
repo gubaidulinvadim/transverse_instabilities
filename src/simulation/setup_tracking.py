@@ -7,7 +7,8 @@ from mbtrack2.impedance.csr import FreeSpaceCSR, ParallelPlatesCSR
 from mbtrack2.tracking import (RFCavity, WakePotential, DirectFeedback)
 import os
 os.environ["PYTHONPATH"] += os.pathsep + "/home/dockeruser/facilities_mbtrack2"
-from facilities_mbtrack2.SOLEIL_II.IMPEDANCE_MODEL.load import load_soleil_ii_wf
+from facilities_mbtrack2.SOLEIL.IMPEDANCE_MODEL.load import (load_soleil_wf,
+                                                             load_soleil_ii_wf)
 
 def setup_wakes(ring, id_state, include_Zlong, n_bin, wake_types='Wydip',
                 csr_flag=False):
@@ -52,6 +53,64 @@ def setup_wakes(ring, id_state, include_Zlong, n_bin, wake_types='Wydip',
             csr_long.append(ParallelPlatesCSR(time=t, frequency=f, length=L,
                                             radius=R, distance=h,
                                             ring=ring))
+
+    wakefield_tr = WakePotential(ring,
+                                 wakefield=WakeField(
+                                 wakemodels),
+                                 n_bin=n_bin)
+    wakefield_long = WakePotential(ring,
+                                   wakefield=WakeField([wakemodel.Wlong]),
+                                   n_bin=n_bin)
+    if csr_flag:
+        wlong_csr = sum([c.Wlong for c in csr_long])
+        wcsr_csr = sum([c.Wcsr for c in csr])
+        wakefield_csr = WakePotential(ring,
+                                      wakefield=WakeField([wlong_csr, wcsr_csr]),
+                                      n_bin=n_bin)
+    # else:
+    # wakefield_csr = None
+    return wakefield_tr, wakefield_long, wakemodel, wakefield_csr
+
+def setup_wakes_soleil(ring, id_state, include_Zlong, n_bin, wake_types='Wydip',
+                csr_flag=False):
+    wakemodel = load_soleil_wf(f'wf_{id_state}_ID_new_formula_final', ring)
+    wakemodels = []
+    for wake_type in wake_types:
+        if wake_type == 'Wydip':
+            wakemodels.append(wakemodel.Wydip)
+        elif wake_type == 'Wxdip':
+            wakemodels.append(wakemodel.Wxdip)
+        elif wake_type == 'Wxquad':
+            wakemodels.append(wakemodel.Wxquad)
+        elif wake_type == 'Wyquad':
+            wakemodels.append(wakemodel.Wyquad)
+        elif wake_type == 'Wcsr':
+            try:
+                wakemodels.append(wakemodel.Wcsr)
+            except:
+                print("No CSR in the wake model")
+        else:
+            raise ValueError(f"Unknown wake type: {wake_type}")
+
+    csr = []
+    csr_long = []
+    if csr_flag:
+        try:
+            wakemodels.append(wakemodel.Wcsr)
+        except:
+            print(f"No CSR found in the model. Including CSR wakes from \
+                    analytical model.")
+        f = np.linspace(1, 100e9, 10)
+        sampling = 1e-13
+        t = np.arange(-100*ring.sigma_0, 100*ring.sigma_0, sampling)
+        # CSR bending radius, shielding gap and corresponding length
+        # based on MAC08 presentation of A. Gamelin
+        R, h, L =  1.05243/0.1963495, 0.0125, 32*1.05243
+        csr.append(FreeSpaceCSR(time=t, frequency=f, length=L,
+                                radius=R, ring=ring))
+        csr_long.append(ParallelPlatesCSR(time=t, frequency=f, length=L,
+                                          radius=R, distance=h,
+                                          ring=ring))
 
     wakefield_tr = WakePotential(ring,
                                  wakefield=WakeField(

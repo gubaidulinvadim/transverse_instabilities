@@ -50,10 +50,9 @@ Qp_y = 0.0
 wake_types = []
 id_state = 'open'
 sc = false
-ibs = true
+ibs = false
 feedback_tau = 0
 csr = true
-include_Zlong = true
 # =============================================================================
 # Scan Parameters
 # =============================================================================
@@ -70,5 +69,6 @@ include_Zlong = true
 # Scan beam current using a range specification
 bunch_current = [0.0005, 0.001, 0.0015, 0.002, 0.0025, 0.003, 0.0035, 0.004, 0.0045, 0.005, 0.0055, 0.006, 0.008, 0.010]
 harmonic_cavity = [false]
+include_Zlong = [true, false]
 
 

@@ -66,8 +66,8 @@ def setup_wakes(ring, id_state, include_Zlong, n_bin, wake_types='Wydip',
         wakefield_csr = WakePotential(ring,
                                       wakefield=WakeField([wlong_csr, wcsr_csr]),
                                       n_bin=n_bin)
-    # else:
-    # wakefield_csr = None
+    else:
+        wakefield_csr = None
     return wakefield_tr, wakefield_long, wakemodel, wakefield_csr
 
 def setup_wakes_soleil(ring, id_state, include_Zlong, n_bin, wake_types='Wydip',

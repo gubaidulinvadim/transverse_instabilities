@@ -46,9 +46,10 @@ n_turns = 25000
 Qp_x = 0.0
 Qp_y = 0.0
 wake_types = []
-id_state = 'open'
+id_state = 'close'
 sc = false
 ibs = false
+include_Zlong = false
 feedback_tau = 0
 csr = true
 
@@ -66,9 +67,8 @@ csr = true
 #          generates 4 jobs: (10, 0.1), (10, 0.2), (20, 0.1), (20, 0.2)
 [scan]
 # Scan beam current using a range specification
-bunch_current = {start = 0.002, stop = 0.02, num = 10}
-n_macroparticles = [1_000_000, 5_000_000, 10_000_000, 20_000_000]
-include_Zlong = [false]
-n_bin = [256, 512, 1024]
+bunch_current = [0.0005, 0.001, 0.0015, 0.002, 0.0025, 0.003, 0.0035, 0.004, 0.0045, 0.005, 0.0055, 0.006, 0.008, 0.010]
+n_macroparticles = [1_000_000, 5_000_000, 10_000_000]
+n_bin = [256, 512]
 
 

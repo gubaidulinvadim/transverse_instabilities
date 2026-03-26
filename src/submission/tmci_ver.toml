@@ -18,7 +18,7 @@ title = "vertical TMCI scan"
 # Environment Configuration
 # =============================================================================
 [environment]
-container = "soleil-pa:mbtrack2dev"
+container = "mbtrack2-csr"
 mount_source = ["/ccc/work/cont003/soleil/gubaiduv/transverse_instabilities/", "/ccc/work/cont003/soleil/gubaiduv/facilities_mbtrack2/"]
 mount_destination = ["/home/dockeruser/transverse_instabilities/", "/home/dockeruser/facilities_mbtrack2/"]
 server = "ccrt"

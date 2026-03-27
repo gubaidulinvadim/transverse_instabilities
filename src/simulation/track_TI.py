@@ -137,7 +137,7 @@ def run_mbtrack2(config: dict) -> None:
     if emittance_ratio == 1.0:
         print('Skew quadrupole is on and the tunes are set to a Qx-Qy=n \
               resonance.')
-        tracking_elements.append(SkewQuadrupole(strength=0.05))
+        tracking_elements.append(SkewQuadrupole(strength=0.001))
 
     monitor_count = 0
     track_wake_monitor = False

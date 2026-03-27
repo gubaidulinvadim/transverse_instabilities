@@ -41,7 +41,7 @@ is_gpu = false
 # =============================================================================
 [script]
 name = "/home/dockeruser/transverse_instabilities/src/simulation/track_TI.py"
-folder = '/home/dockeruser/transverse_instabilities/data/raw/tmci_ver/'
+folder = '/home/dockeruser/transverse_instabilities/data/raw/tmci_ver_coupl/'
 n_turns = 50000
 n_macroparticles = 500_000
 n_bin = 100

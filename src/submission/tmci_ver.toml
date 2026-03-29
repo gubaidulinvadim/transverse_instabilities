@@ -53,7 +53,7 @@ harmonic_cavity = false
 ibs = true
 feedback_tau = 0
 emittance_ratio = 1.0
-wake_types = ["Wydip", "Wyquad", "Wxquad"]
+wake_types = ["Wydip", "Wxdip", "Wyquad", "Wxquad"]
 
 # =============================================================================
 # Scan Parameters

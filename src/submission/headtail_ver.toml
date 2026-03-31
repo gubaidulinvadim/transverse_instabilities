@@ -41,7 +41,7 @@ is_gpu = false
 # =============================================================================
 [script]
 name = "/home/dockeruser/transverse_instabilities/src/simulation/track_TI.py"
-folder = '/home/dockeruser/transverse_instabilities/data/raw/headtail_ver/'
+folder = '/home/dockeruser/transverse_instabilities/data/raw/headtail_ver_coupl/'
 n_turns = 50000
 n_macroparticles = 500_000
 n_bin = 100
@@ -52,7 +52,8 @@ id_state = 'open'
 harmonic_cavity = false
 ibs = true
 feedback_tau = 0
-
+emittance_ratio = 1.0
+wake_types = ["Wydip", "Wyquad", "Wxdip", "Wxquad"]
 # =============================================================================
 # Scan Parameters
 # =============================================================================
@@ -72,5 +73,4 @@ bunch_current = [0.0006, 0.0009, 0.0012, 0.0015, 0.0018, 0.0021, 0.0024, 0.0027,
        0.0078, 0.0081, 0.0084, 0.0087, 0.009 , 0.0093, 0.0096, 0.0099,
        0.011, 0.012, 0.013, 0.014, 0.015, 0.016, 0.018, 0.02]
 sc = [false, true]
-wake_types = [["Wydip"], ["Wydip", "Wyquad"]]
 

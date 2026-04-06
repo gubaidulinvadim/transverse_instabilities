@@ -100,7 +100,7 @@ def run_mbtrack2(config: dict) -> None:
                                                              include_Zlong,
                                                              n_bin,
                                                              wake_types,
-                                                             csr=False)
+                                                             csr_flag=False)
 
     if id_state == "open":
         x3 = 6.62e-3

@@ -8,7 +8,7 @@ from mbtrack2.tracking import (Beam, LongitudinalMap,
 from mbtrack2.tracking.monitors import BeamMonitor, WakePotentialMonitor
 import argparse
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from config import load_toml_config, merge_config_and_args
+from config import load_toml_config
 from setup_tracking import setup_fbt, setup_wakes, setup_dual_rf
 from mbtrack2.tracking.spacecharge import TransverseSpaceCharge
 from mbtrack2.tracking.ibs import IntrabeamScattering
@@ -66,17 +66,17 @@ def run_mbtrack2(config: dict) -> None:
         f",ID_state={id_state:}"+
         f",include_Zlong={include_Zlong:}"+
         f",harmonic_cavity={harmonic_cavity:}"+
-        f",n_turns_wake={n_turns_wake:}"
+        # f",n_turns_wake={n_turns_wake:}"
         f",feedback_tau={feedback_tau:.1e}"+
         f",sc={sc:}"+
         f",ibs={ibs:}"+
         f",wake_types={wake_types_str:}"+
-        f",{emittance_ratio=:}"
+        # f",{emittance_ratio=:}"
         ")")
     beam_monitor = BeamMonitor(
         ring.h,
         save_every=10,
-        buffer_size=1000,
+        buffer_size=500,
         file_name=monitor_filename,
         total_size=n_turns//10,
         mpi_mode=is_mpi,

@@ -76,7 +76,7 @@ def run_mbtrack2(config: dict) -> None:
     beam_monitor = BeamMonitor(
         ring.h,
         save_every=10,
-        buffer_size=500,
+        buffer_size=100,
         file_name=monitor_filename,
         total_size=n_turns//10,
         mpi_mode=is_mpi,

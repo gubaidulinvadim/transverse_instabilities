@@ -224,11 +224,9 @@ def setup_dual_rf(ring, beam, harmonic_cavity, bunch_current, wakemodel,
     Vc = 1.7e6
     if harmonic_cavity:
         Itot = ring.h * bunch_current  # Use for fixed detuning or CT
-        HC_det = 110e3  # Use for fixed detuning or CT
-        HC_det_end = 3e3
+        HC_det = 85e3  # Use for fixed detuning or CT
         MC_det = -35e3
-        xi_start = 1.15
-        xi_end = 1.2
+        xi_start = 1.18
         estimated_bunch_length = 40e-12
     
         # DFB Settings
@@ -240,41 +238,34 @@ def setup_dual_rf(ring, beam, harmonic_cavity, bunch_current, wakemodel,
         fb_delay = 704  # int(2e-6/ring.T1)
         directFB_gain = 0.2
         directFB_phaseShift = 0 / 180 * np.pi
-        tuner_gain = 0.01
-        PFB_gainA = 0.01
-        PFB_gainP = 0.01
-        PFB_delay = 1
 
-        m = 1
-        Rs = 5e6
-        Q = 35.7e3
-        QL = 6e3
-        detune = MC_det
-        Ncav = 4
-        rf = CavityResonator(ring, m, Rs, Q, QL, detune, Ncav=Ncav)
-    
-        m = 4
-        Rs = 30
-        Q = 36e3
-        QL = 36e3
-        Ncav = 2
-        hrf = CavityResonator(ring, m, Rs, Q, QL, detune, Ncav=Ncav)
+        rf = CavityResonator(ring,
+                             m=1,
+                             Rs=5e6,
+                             Q=35.7e3,
+                             QL=6e3,
+                             detune=MC_det,
+                             Ncav=4)
+        
+        hrf = CavityResonator(ring,
+                              m=4,
+                              Rs=30*31e3,
+                              Q=31e3,
+                              QL=31e3,
+                              detune=HC_det,
+                              Ncav=2)
         hrf.Vg = 0
         hrf.theta_g = 0
         hrf.detune = HC_det
     
         HC_det = Itot * hrf.Rs / hrf.Q * ring.f1 / Vc * hrf.m**2 / xi_start
         hrf.detune = HC_det
-        HC_det_end = Itot * hrf.Rs / hrf.Q * ring.f1 / Vc * hrf.m**2 / xi_end
     
         delta = 0
         delta += hrf.Vb(Itot) * np.cos(hrf.psi)
-        delta += beam[0].charge * wakemodel.Wlong.loss_factor(
-            estimated_bunch_length)
     
         rf.Vc = Vc
         rf.theta = np.arccos((ring.U0 + delta) / Vc)
-        # rf.set_optimal_detune(Itot)
         rf.set_generator(Itot)
     
         dfb = DirectFeedback(

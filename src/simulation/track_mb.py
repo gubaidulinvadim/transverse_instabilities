@@ -179,7 +179,6 @@ def run_mbtrack2(config: dict) -> None:
             if i > 25_000:
                 wakefield_tr.track(beam)
                 long_wakefield.track(beam)
-                long_wakefield_quad.track(beam)
                 
             if (monitor_count < 2500 and (np.mean(beam.bunch_mean[:][0]) > 0.1 * stdx or np.mean(beam.bunch_mean[:][2]) > 0.1 * stdy)):
                 track_wake_monitor=True

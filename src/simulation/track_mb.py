@@ -105,41 +105,36 @@ def run_mbtrack2(config: dict) -> None:
     if id_state == "open":
         x3 = 6.62e-3
         y3 = 6.70e-3
-    else:
+    elif id_state == 'close':
         x3 = 5.78e-3
         y3 = 5.61e-3
-    wake_types_dip = [item for item in wake_types if item.endswith('dip')]
-    wake_types_quad = [item for item in wake_types if item.endswith('quad')]
+    else:
+        x3 = None
+        y3 = None
+    if id_state == "open":
+        x3_quad = -15.01e-3
+        y3_quad = 15.63e-3
+    elif id_state == 'close':
+        x3_quad = -7.90e-3
+        y3_quad = 8.87e-3
+    else:
+        x3_quad = None
+        y3_quad = None
+    wake_types = [item for item in wake_types if (item.endswith('dip') or
+                      item.endswith('quad'))]
     long_wakefield = LongRangeResistiveWall(
         ring=ring,
         beam=beam,
         length=ring.L,
         rho=2.135e-8,
         radius=8e-3,
-        types=wake_types_dip,
+        types=wake_types,
         nt=n_turns_wake,
-        x3=x3,
-        y3=y3,
+        x3 = x3,
+        y3 = y3,
+        x3_quad = x3_quad,
+        y3_quad = y3_quad
     )
-    
-    if id_state == "open":
-        x3_quad = -15.01e-3
-        y3_quad = 15.63e-3
-    else:
-        x3_quad = -7.90e-3
-        y3_quad = 8.87e-3
-    long_wakefield_quad = LongRangeResistiveWall(
-        ring=ring,
-        beam=beam,
-        length=ring.L,
-        rho=2.135e-8,
-        radius=8e-3,
-        types=wake_types_quad,
-        nt=n_turns_wake,
-        x3_quad=x3_quad,
-        y3_quad=y3_quad,
-        )
-
 
     rf, hrf = setup_dual_rf(ring, beam, harmonic_cavity, bunch_current,
                             wakemodel, n_bunches)

@@ -164,7 +164,7 @@ def run_mbtrack2(config: dict) -> None:
     monitor_count = 0
     try:
         for i in range(n_turns):
-            if i % 1000 == 0:
+            if i % 100 == 0:
                 if is_mpi and beam.mpi.rank == 0:
                     print(f"mpi Turn {i:}")
                 elif not is_mpi:

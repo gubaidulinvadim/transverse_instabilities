@@ -226,8 +226,7 @@ def setup_dual_rf(ring, beam, harmonic_cavity, bunch_current, wakemodel,
         Itot = ring.h * bunch_current  # Use for fixed detuning or CT
         HC_det = 85e3  # Use for fixed detuning or CT
         MC_det = -35e3
-        xi_start = 1.18
-        estimated_bunch_length = 40e-12
+        xi_start = 1.15
     
         # DFB Settings
         fb_gain = [0.01, 1000]  # fb Gain for IQ components of Vc
@@ -266,6 +265,7 @@ def setup_dual_rf(ring, beam, harmonic_cavity, bunch_current, wakemodel,
     
         rf.Vc = Vc
         rf.theta = np.arccos((ring.U0 + delta) / Vc)
+        rf.set_optimal_detune(Itot)
         rf.set_generator(Itot)
     
         dfb = DirectFeedback(

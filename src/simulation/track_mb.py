@@ -13,6 +13,7 @@ from setup_tracking import setup_fbt, setup_wakes, setup_dual_rf
 from mbtrack2.tracking.spacecharge import TransverseSpaceCharge
 from mbtrack2.tracking.ibs import IntrabeamScattering
 from facilities_mbtrack2 import v3633
+from tqdm import tqdm
 
 
 def run_mbtrack2(config: dict) -> None:
@@ -75,7 +76,7 @@ def run_mbtrack2(config: dict) -> None:
         ")")
     beam_monitor = BeamMonitor(
         ring.h,
-        save_every=10,
+        save_every=1,
         buffer_size=100,
         file_name=monitor_filename,
         total_size=n_turns//10,
@@ -83,16 +84,16 @@ def run_mbtrack2(config: dict) -> None:
     )
     monitored_wake_types = ['Wlong']
     monitored_wake_types += wake_types
-    wakepotential_monitor = WakePotentialMonitor(
-        bunch_number=0,
-        wake_types=monitored_wake_types,
-        n_bin=n_bin,
-        save_every=1,
-        buffer_size=600,
-        total_size=2400,
-        file_name=None,
-        mpi_mode=is_mpi,
-    )
+    # wakepotential_monitor = WakePotentialMonitor(
+    #     bunch_number=0,
+    #     wake_types=monitored_wake_types,
+    #     n_bin=n_bin,
+    #     save_every=1,
+    #     buffer_size=600,
+    #     total_size=2400,
+    #     file_name=None,
+    #     mpi_mode=is_mpi,
+    # )
     long_map = LongitudinalMap(ring)
     sr = SynchrotronRadiation(ring, switch=[1, 1, 1])
     trans_map = TransverseMap(ring)
@@ -165,10 +166,7 @@ def run_mbtrack2(config: dict) -> None:
     try:
         for i in range(n_turns):
             if i % 100 == 0:
-                if is_mpi and beam.mpi.rank == 0:
-                    print(f"mpi Turn {i:}")
-                elif not is_mpi:
-                    print(f"Turn {i:}")
+                print(f"Turn {i:}")
             if is_mpi:
                 beam.mpi.share_distributions(beam, n_bin=n_bin)
                 beam.mpi.share_means(beam)
@@ -176,7 +174,7 @@ def run_mbtrack2(config: dict) -> None:
             for el in tracking_elements:
                 el.track(beam)
 
-            if i > 25_000:
+            if i > 20_000:
                 wakefield_tr.track(beam)
                 long_wakefield.track(beam)
                 

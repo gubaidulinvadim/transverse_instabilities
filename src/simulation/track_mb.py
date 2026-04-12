@@ -79,7 +79,7 @@ def run_mbtrack2(config: dict) -> None:
         save_every=1,
         buffer_size=100,
         file_name=monitor_filename,
-        total_size=n_turns//10,
+        total_size=n_turns,
         mpi_mode=is_mpi,
     )
     monitored_wake_types = ['Wlong']

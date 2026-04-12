@@ -13,7 +13,6 @@ from setup_tracking import setup_fbt, setup_wakes, setup_dual_rf
 from mbtrack2.tracking.spacecharge import TransverseSpaceCharge
 from mbtrack2.tracking.ibs import IntrabeamScattering
 from facilities_mbtrack2 import v3633
-from tqdm import tqdm
 
 
 def run_mbtrack2(config: dict) -> None:
@@ -37,7 +36,7 @@ def run_mbtrack2(config: dict) -> None:
     n_bunches = config.get('n_bunches', 416)
 
     Vc = 1.7e6
-    HC_power = 2e3 if n_bunches == 416 else 15e3
+    HC_power = 0e3 if n_bunches == 416 else 0e3
     ring = v3633(IDs=id_state, HC_power=HC_power, V_RF=Vc, load_lattice=True)
     ring.tune = np.array([54.23, 18.21])
     ring.chro = [Qp_x, Qp_y]

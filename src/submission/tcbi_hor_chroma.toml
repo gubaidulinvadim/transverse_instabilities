@@ -44,13 +44,13 @@ is_gpu = false
 name = "/home/dockeruser/transverse_instabilities/src/simulation/track_mb.py"
 folder = '/home/dockeruser/transverse_instabilities/data/raw/tcbi_hor/'
 n_turns = 30000
-n_macroparticles = 50_000
+n_macroparticles = 100_000
 n_bin = 100
 include_Zlong = true
 id_state = 'open'
 ibs = true
-bunch_current = 0.0012
-wake_types = ["Wxdip"]
+bunch_current = 0.00120192307692
+wake_types = ["Wxdip", "Wxquad"]
 n_bunches = 416
 # =============================================================================
 # Scan Parameters
@@ -66,7 +66,7 @@ n_bunches = 416
 #          generates 4 jobs: (10, 0.1), (10, 0.2), (20, 0.1), (20, 0.2)
 [scan]
 sc = [false]
-harmonic_cavity = [false, true]
+harmonic_cavity = [true]
 feedback_tau = [0]
 Qp_y = 1.4
 Qp_x = [-1.0, -0.5, -0.1, 0.1, 0.5, 1.0, 1.4, 1.6, 1.8, 2.0, 2.5]

@@ -11,7 +11,7 @@ from facilities_mbtrack2.SOLEIL.IMPEDANCE_MODEL.load import load_soleil_wf
 from facilities_mbtrack2.SOLEIL_II.IMPEDANCE_MODEL.load import load_soleil_ii_wf
 def setup_wakes(ring, id_state, include_Zlong, n_bin, wake_types='Wydip',
                 csr_flag=False):
-    wakemodel = load_soleil_ii_wf(f'wf_CP1_IDgap_{id_state}_varyNEG_False', ring)
+    wakemodel = load_soleil_ii_wf(f'wf_CP1_IDgap_{id_state}_varyNEG_True', ring)
     wakemodels = []
     for wake_type in wake_types:
         if wake_type == 'Wydip':
@@ -226,7 +226,7 @@ def setup_dual_rf(ring, beam, harmonic_cavity, bunch_current, wakemodel,
         Itot = ring.h * bunch_current  # Use for fixed detuning or CT
         HC_det = 85e3  # Use for fixed detuning or CT
         MC_det = -35e3
-        xi_start = 1.17
+        xi_start = 1.18
     
         # DFB Settings
         fb_gain = [0.01, 1000]  # fb Gain for IQ components of Vc

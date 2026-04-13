@@ -37,8 +37,7 @@ def run_mbtrack2(config: dict) -> None:
     n_bunches = config.get('n_bunches', 416)
 
     Vc = 1.7e6
-    HC_power = 0e3 if n_bunches == 416 else 0e3
-    ring = v3633(IDs=id_state, HC_power=HC_power, V_RF=Vc, load_lattice=True)
+    ring = v3633(IDs=id_state, HC_power=0, V_RF=Vc, load_lattice=True)
     ring.tune = np.array([54.23, 18.21])
     ring.chro = [Qp_x, Qp_y]
     ring.emit[1] = emittance_ratio * ring.emit[0]
@@ -148,16 +147,16 @@ def run_mbtrack2(config: dict) -> None:
     fbtx, fbty = setup_fbt(ring, feedback_tau)
     tracking_elements = [rf, trans_map, long_map, sr, beam_monitor]
     
-    if harmonic_cavity == 'True':
+    if harmonic_cavity:
         tracking_elements.insert(0, hrf)
     besc = TransverseSpaceCharge(ring=ring,
                                 interaction_length=ring.L,
                                 n_bins=n_bin)
     ibs_cimp = IntrabeamScattering(ring, model="CIMP", n_points=100, n_bin=100)
-    if ibs == 'True':
+    if ibs:
         print('IBS included')
         tracking_elements.append(ibs_cimp)
-    if sc == 'True':
+    if sc:
         if is_mpi and beam.mpi.rank == 0:
             print('space charge included')
         tracking_elements.append(besc)
@@ -181,7 +180,7 @@ def run_mbtrack2(config: dict) -> None:
             for el in tracking_elements:
                 el.track(beam)
                 maincavmon.track(beam, rf)
-                if harmonic_cavity == 'True':
+                if harmonic_cavity:
                     harmcavmon.track(beam, hrf)
 
             if i > 20_000:

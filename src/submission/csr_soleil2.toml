@@ -41,7 +41,7 @@ is_gpu = false
 # =============================================================================
 [script]
 name = "/home/dockeruser/transverse_instabilities/src/simulation/track_TI.py"
-folder = '/home/dockeruser/transverse_instabilities/data/raw/csr_halfgap/'
+folder = '/home/dockeruser/transverse_instabilities/data/raw/csr_finemesh/'
 n_turns = 25000
 n_macroparticles = 10_000_000
 n_bin = 256

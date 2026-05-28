@@ -1,41 +1,140 @@
-import matplotlib.pyplot as plt
 import numpy as np
 from mbtrack2 import BeamLoadingEquilibrium, CavityResonator
-from mbtrack2.tracking.feedback import ExponentialDamper, FIRDamper
+from mbtrack2.tracking.feedback import TransverseExponentialDamper
+from mbtrack2.tracking.feedback import FIRDamper
 from mbtrack2.impedance.wakefield import WakeField
-from machine_data.TDR2 import *
-from mbtrack2.tracking import (RFCavity, WakePotential)
+from mbtrack2.impedance.csr import FreeSpaceCSR, ParallelPlatesCSR
+from mbtrack2.tracking import (RFCavity, WakePotential, DirectFeedback)
+import os
+os.environ["PYTHONPATH"] += os.pathsep + "/home/dockeruser/facilities_mbtrack2"
+from facilities_mbtrack2.SOLEIL.IMPEDANCE_MODEL.load import load_soleil_wf
+from facilities_mbtrack2.SOLEIL_II.IMPEDANCE_MODEL.load import load_soleil_ii_wf
+def setup_wakes(ring, id_state, include_Zlong, n_bin, wake_types='Wydip',
+                csr_flag=False):
+    wakemodel = load_soleil_ii_wf(f'wf_CP1_IDgap_{id_state}_varyNEG_True', ring)
+    wakemodels = []
+    for wake_type in wake_types:
+        if wake_type == 'Wydip':
+            wakemodels.append(wakemodel.Wydip)
+        elif wake_type == 'Wxdip':
+            wakemodels.append(wakemodel.Wxdip)
+        elif wake_type == 'Wxquad':
+            wakemodels.append(wakemodel.Wxquad)
+        elif wake_type == 'Wyquad':
+            wakemodels.append(wakemodel.Wyquad)
+        elif wake_type == 'Wcsr':
+            try:
+                wakemodels.append(wakemodel.Wcsr)
+            except:
+                print("No CSR in the wake model")
+        else:
+            raise ValueError(f"Unknown wake type: {wake_type}")
 
-def setup_wakes(ring, id_state, include_Zlong, n_bin):
-    wakemodel = load_TDR2_wf(version=("TDR2.1_ID" + id_state))
-    
-    if include_Zlong == 'True':
-        wakefield_tr = WakePotential(ring,
-                                     wakefield=WakeField(
-                                         [wakemodel.Wydip, wakemodel.Wlong]),
-                                     n_bin=n_bin)
-    else:
-        wakefield_tr = WakePotential(ring,
-                                     wakefield=WakeField([wakemodel.Wydip]),
-                                     n_bin=n_bin)
-    
+    csr = []
+    csr_long = []
+    if csr_flag:
+        try:
+            wakemodels.append(wakemodel.Wcsr)
+        except:
+            print(f"No CSR found in the model. Including CSR wakes from \
+                    analytical model.")
+        f = np.linspace(1, 100e9, 10)
+        sampling = 1e-14
+        t = np.arange(-100*ring.sigma_0, 100*ring.sigma_0, sampling)
+        # CSR bending radius, shielding gap and corresponding length
+        # based on MAC08 presentation of A. Gamelin
+        csr_parameters = [(10.74, 8e-3, 40*0.44),
+                          (12.80, 8e-3, 64*0.88),
+                          (12.68, 4e-3, 12*0.87) ]
+        for (R, h, L) in csr_parameters:
+            csr.append(FreeSpaceCSR(time=t, frequency=f, length=L,
+                                       radius=R, ring=ring))
+            csr_long.append(ParallelPlatesCSR(time=t, frequency=f, length=L,
+                                            radius=R, distance=h,
+                                            ring=ring))
+
+    wakefield_tr = WakePotential(ring,
+                                 wakefield=WakeField(
+                                 wakemodels),
+                                 n_bin=n_bin)
     wakefield_long = WakePotential(ring,
                                    wakefield=WakeField([wakemodel.Wlong]),
                                    n_bin=n_bin)
-    return wakefield_tr, wakefield_long, wakemodel
+    if csr_flag:
+        wlong_csr = sum([c.Wlong for c in csr_long])
+        wcsr_csr = sum([c.Wcsr for c in csr])
+        wakefield_csr = WakePotential(ring,
+                                      wakefield=WakeField([wlong_csr, wcsr_csr]),
+                                      n_bin=n_bin)
+    else:
+        wakefield_csr = None
+    return wakefield_tr, wakefield_long, wakemodel, wakefield_csr
+
+def setup_wakes_soleil(ring, id_state, include_Zlong, n_bin, wake_types='Wydip',
+                csr_flag=False):
+    wakemodel = load_soleil_wf(f'wf_{id_state}_ID_new_formula_final', ring)
+    wakemodels = []
+    for wake_type in wake_types:
+        if wake_type == 'Wydip':
+            wakemodels.append(wakemodel.Wydip)
+        elif wake_type == 'Wxdip':
+            wakemodels.append(wakemodel.Wxdip)
+        elif wake_type == 'Wxquad':
+            wakemodels.append(wakemodel.Wxquad)
+        elif wake_type == 'Wyquad':
+            wakemodels.append(wakemodel.Wyquad)
+        elif wake_type == 'Wcsr':
+            try:
+                wakemodels.append(wakemodel.Wcsr)
+            except:
+                print("No CSR in the wake model")
+        else:
+            raise ValueError(f"Unknown wake type: {wake_type}")
+
+    csr = []
+    csr_long = []
+    if csr_flag:
+        try:
+            wakemodels.append(wakemodel.Wcsr)
+        except:
+            print(f"No CSR found in the model. Including CSR wakes from \
+                    analytical model.")
+        f = np.linspace(1, 100e9, 10)
+        sampling = 1e-13
+        t = np.arange(-100*ring.sigma_0, 100*ring.sigma_0, sampling)
+        # CSR bending radius, shielding gap and corresponding length
+        # based on MAC08 presentation of A. Gamelin
+        R, h, L =  1.05243/0.1963495, 0.0125, 32*1.05243
+        csr.append(FreeSpaceCSR(time=t, frequency=f, length=L,
+                                radius=R, ring=ring))
+        csr_long.append(ParallelPlatesCSR(time=t, frequency=f, length=L,
+                                          radius=R, distance=h,
+                                          ring=ring))
+
+    wakefield_tr = WakePotential(ring,
+                                 wakefield=WakeField(
+                                 wakemodels),
+                                 n_bin=n_bin)
+    wakefield_long = WakePotential(ring,
+                                   wakefield=WakeField([wakemodel.Wlong]),
+                                   n_bin=n_bin)
+    if csr_flag:
+        wlong_csr = sum([c.Wlong for c in csr_long])
+        wcsr_csr = sum([c.Wcsr for c in csr])
+        wakefield_csr = WakePotential(ring,
+                                      wakefield=WakeField([wlong_csr, wcsr_csr]),
+                                      n_bin=n_bin)
+    # else:
+    # wakefield_csr = None
+    return wakefield_tr, wakefield_long, wakemodel, wakefield_csr
 
 
-def setup_fbt(ring, max_kick, kind='exp'):
+def setup_fbt(ring, feedback_tau, kind='exp'):
     if kind == 'exp':
-        feedback_tau = max_kick / 1.8e-6 * 50
-        fbty = ExponentialDamper(ring,
-                                plane='y',
-                                damping_time=ring.T0 * feedback_tau,
-                                phase_diff=np.pi / 2)
-        fbtx = ExponentialDamper(ring,
-                                plane='x',
-                                damping_time=ring.T0 * feedback_tau,
-                                phase_diff=np.pi / 2)
+        fbty = TransverseExponentialDamper(ring,
+                                damping_time=[feedback_tau, feedback_tau],
+                                phase_diff=[90, 90])
+        fbtx = fbty
     else:
         fbty = FIRDamper(ring,
                         plane='y',
@@ -45,7 +144,7 @@ def setup_fbt(ring, max_kick, kind='exp'):
                         gain=1,
                         phase=90,
                         bpm_error=None,
-                        max_kick=max_kick)
+                        max_kick=None)
         fbtx = FIRDamper(ring,
                         plane='x',
                         tune=ring.tune[0],
@@ -54,30 +153,30 @@ def setup_fbt(ring, max_kick, kind='exp'):
                         gain=1,
                         phase=90,
                         bpm_error=None,
-                        max_kick=max_kick)
+                        max_kick=None)
     return fbtx, fbty
 
 
-def get_active_cavity_params(ring):
-    I0 = 0.2
-    xi = 1.1
+def get_active_cavity_params(ring, I0=0.2):
+    xi = 1.027 if I0==0.2 else 1.18
     Vc = 1.7e6
-
+    
+    
     HC = CavityResonator(ring,
                          m=4,
-                         Rs=60 * 31e3,
+                         Rs=30 * 31e3,
                          Q=31e3,
                          QL=31e3,
                          detune=1e6,
-                         Ncav=1)
+                         Ncav=2)
     HC.Vg = 0
     HC.theta_g = 0
-
+    
     HC_det = I0 * HC.Rs / HC.Q * ring.f1 / Vc * HC.m**2 / xi
     HC.detune = HC_det
-
+    
     delta = HC.Vb(I0) * np.cos(HC.psi)
-
+    
     MC = CavityResonator(ring,
                          m=1,
                          Rs=5e6,
@@ -89,91 +188,84 @@ def get_active_cavity_params(ring):
     MC.theta = np.arccos((ring.U0 + delta) / MC.Vc)
     MC.set_optimal_detune(I0)
     MC.set_generator(I0)
-
+    
     BLE = BeamLoadingEquilibrium(ring, [MC, HC], I0, auto_set_MC_theta=True)
     BLE.beam_equilibrium(CM=True, plot=False)
     print(BLE.std_rho() / 3e8 * 1e12)
-
+    
     print("Form factors", BLE.F, BLE.PHI)
-
+    
     for i, cavity in enumerate([MC, HC]):
         Vc_phasor = -1 * cavity.Vb(I0) * BLE.F[i] * np.exp(1j * (
             cavity.psi - BLE.PHI[i])) + cavity.Vg * np.exp(1j * cavity.theta_g)
         cavity.Vc = np.abs(Vc_phasor)
         cavity.theta = np.angle(Vc_phasor)
-
+    
     return MC.Vc, MC.theta, HC.Vc, HC.theta
 
 
-def setup_rf(ring, harmonic_cavity, Vc):
-    if harmonic_cavity == "False":
-        main_rf = RFCavity(ring, m=1, Vc=Vc, theta=np.arccos(ring.U0 / Vc))
-        harmonic_rf = None
-    if harmonic_cavity == "True":
-        V_main, theta_main, V_harmonic, theta_harmonic = get_active_cavity_params(
-            ring)
+def setup_rf(ring, harmonic_cavity, Vc, n_bunches, bunch_current):
+    if harmonic_cavity:
+        I0 = n_bunches * bunch_current
+        V_main, theta_main, V_harmonic, theta_harmonic = get_active_cavity_params(ring, I0)
         main_rf = RFCavity(ring, m=1, Vc=V_main, theta=theta_main)
         harmonic_rf = RFCavity(ring,
                                m=4,
                                Vc=V_harmonic,
                                theta=theta_harmonic)
+    else:
+        main_rf = RFCavity(ring, m=1, Vc=Vc, theta=np.arccos(ring.U0 / Vc))
+        harmonic_rf = None
     return main_rf, harmonic_rf
 
 
-def setup_dual_rf(ring, beam, harmonic_cavity, bunch_current, wakemodel):
+def setup_dual_rf(ring, beam, harmonic_cavity, bunch_current, wakemodel,
+                  n_bunches):
     Vc = 1.7e6
-    if harmonic_cavity == "True":
+    if harmonic_cavity:
         Itot = ring.h * bunch_current  # Use for fixed detuning or CT
-        HC_det = 110e3  # Use for fixed detuning or CT
-        HC_det_end = 3e3
+        HC_det = 85e3  # Use for fixed detuning or CT
         MC_det = -35e3
-        xi_start = 1.15
-        xi_end = 1.2
-        estimated_bunch_length = 40e-12
+        xi_start = 1.18
     
-        # FB Settings
+        # DFB Settings
         fb_gain = [0.01, 1000]  # fb Gain for IQ components of Vc
         fb_sample_num = (
             208  # 2*2*2*2*3*3*3, mean Vc value of this number is used for Vg control
         )
         fb_every = 208  # 192ns (assumption),corresponding to process speed of the Feedback system
         fb_delay = 704  # int(2e-6/ring.T1)
-        directFB_gain = 0.1
+        directFB_gain = 0.2
         directFB_phaseShift = 0 / 180 * np.pi
-        tuner_gain = 0.01
-        PFB_gainA = 0.01
-        PFB_gainP = 0.01
-        PFB_delay = 1
-        m = 1
-        Rs = 5e6
-        Q = 35.7e3
-        QL = 6e3
-        detune = MC_det
-        Ncav = 4
-        rf = CavityResonator(ring, m, Rs, Q, QL, detune, Ncav=Ncav)
-    
-        m = 4
-        Rs = 2.358e6
-        Q = 36e3
-        QL = 36e3
-        Ncav = 1
-        hrf = CavityResonator(ring, m, Rs, Q, QL, detune, Ncav=Ncav)
+
+        rf = CavityResonator(ring,
+                             m=1,
+                             Rs=5e6,
+                             Q=35.7e3,
+                             QL=6e3,
+                             detune=MC_det,
+                             Ncav=4)
+        
+        hrf = CavityResonator(ring,
+                              m=4,
+                              Rs=30*31e3,
+                              Q=31e3,
+                              QL=31e3,
+                              detune=HC_det,
+                              Ncav=2)
         hrf.Vg = 0
         hrf.theta_g = 0
         hrf.detune = HC_det
     
         HC_det = Itot * hrf.Rs / hrf.Q * ring.f1 / Vc * hrf.m**2 / xi_start
         hrf.detune = HC_det
-        HC_det_end = Itot * hrf.Rs / hrf.Q * ring.f1 / Vc * hrf.m**2 / xi_end
     
         delta = 0
         delta += hrf.Vb(Itot) * np.cos(hrf.psi)
-        delta += beam[0].charge * wakemodel.Wlong.loss_factor(
-            estimated_bunch_length)
     
         rf.Vc = Vc
         rf.theta = np.arccos((ring.U0 + delta) / Vc)
-        # rf.set_optimal_detune(Itot)
+        rf.set_optimal_detune(Itot)
         rf.set_generator(Itot)
     
         dfb = DirectFeedback(

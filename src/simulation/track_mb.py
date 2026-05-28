@@ -1,38 +1,46 @@
-import os
+import os, sys
 import numpy as np
-from mbtrack2 import DirectFeedback
-from mbtrack2.tracking import (Beam, Bunch, CavityResonator, LongitudinalMap,
-                               LongRangeResistiveWall, RFCavity,
-                               SynchrotronRadiation, TransverseMap,
-                               WakePotential)
-from mbtrack2.tracking.monitors import BeamMonitor, WakePotentialMonitor
-from tqdm import tqdm
-from utils import get_parser_for_multibunch
+os.environ["PYTHONPATH"] += os.pathsep + "/home/dockeruser/facilities_mbtrack2/"
+sys.path.append('/home/dockeruser/facilities_mbtrack2')
+from mbtrack2.tracking import (Beam, LongitudinalMap,
+                               LongRangeResistiveWall,
+                               SynchrotronRadiation, TransverseMap)
+from mbtrack2.tracking.monitors import (BeamMonitor, WakePotentialMonitor,
+                                    CavityMonitor)
+import argparse
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from config import load_toml_config
 from setup_tracking import setup_fbt, setup_wakes, setup_dual_rf
 from mbtrack2.tracking.spacecharge import TransverseSpaceCharge
 from mbtrack2.tracking.ibs import IntrabeamScattering
-from machine_data.soleil import v2366_v3, v3588
+from facilities_mbtrack2 import v3633
 
 
-def run_mbtrack2(folder,
-                 n_turns=100_000,
-                 n_macroparticles=int(1e5),
-                 n_bin=100,
-                 bunch_current=1.2e-3,
-                 Qp_x=1.6,
-                 Qp_y=1.6,
-                 id_state="open",
-                 include_Zlong="False",
-                 harmonic_cavity="False",
-                 n_turns_wake=1,
-                 max_kick=1.6e-6,
-                 sc="False",
-                 ibs='False'):
+def run_mbtrack2(config: dict) -> None:
+
+    folder = config['folder']
+    n_turns = config.get('n_turns', 75_000)
+    n_macroparticles = config.get('n_macroparticles', int(1e5))
+    n_bin = config.get('n_bin', 100)
+    bunch_current = config.get('bunch_current', 1.2e-3)
+    Qp_x = config.get('Qp_x', 1.8)
+    Qp_y = config.get('Qp_y', 1.4)
+    id_state = config.get('id_state', "open")
+    include_Zlong = config.get('include_Zlong', False)
+    harmonic_cavity = config.get('harmonic_cavity', False)
+    n_turns_wake = config.get('n_turns_wake', 50)
+    feedback_tau = config.get('feedback_tau', 100)
+    sc = config.get('sc', False)
+    ibs = config.get('ibs', False)
+    wake_types = config.get('wake_types', ['Wydip'])
+    emittance_ratio = config.get('emittance_ratio', 0.3)
+    n_bunches = config.get('n_bunches', 416)
+
     Vc = 1.7e6
-    ring = v3588(IDs=id_state, V_RF=Vc, load_lattice=True)
+    ring = v3633(IDs=id_state, HC_power=0, V_RF=Vc, load_lattice=True)
     ring.tune = np.array([54.23, 18.21])
     ring.chro = [Qp_x, Qp_y]
-    ring.emit[1] = 0.3 * ring.emit[0]
+    ring.emit[1] = emittance_ratio * ring.emit[0]
     np.random.seed(42)
     beam = Beam(ring)
     is_mpi = True
@@ -43,6 +51,10 @@ def run_mbtrack2(folder,
         track_alive=False,
         mpi=is_mpi,
     )
+    sanitized_list = [str(v).replace("'", "").replace('"', '') for v in
+                      wake_types]
+    wake_types_str = "-".join(sanitized_list)
+
     monitor_filename = (
         folder +
         f"monitors(n_mp={n_macroparticles:.1e}"+
@@ -54,118 +66,171 @@ def run_mbtrack2(folder,
         f",ID_state={id_state:}"+
         f",include_Zlong={include_Zlong:}"+
         f",harmonic_cavity={harmonic_cavity:}"+
-        f",n_turns_wake={n_turns_wake:}"
-        f",max_kick={max_kick:.1e}"+
-        f",sc={sc:}"+\
-        f",ibs={ibs:}"+")")
+        # f",n_turns_wake={n_turns_wake:}"
+        f",feedback_tau={feedback_tau:.1e}"+
+        f",sc={sc:}"+
+        f",ibs={ibs:}"+
+        f",wake_types={wake_types_str:}"+
+        # f",{emittance_ratio=:}"
+        ")")
     beam_monitor = BeamMonitor(
         ring.h,
-        save_every=10,
-        buffer_size=1000,
-        file_name=monitor_filename,
-        total_size=n_turns//10,
-        mpi_mode=is_mpi,
-    )
-    wakepotential_monitor = WakePotentialMonitor(
-        bunch_number=0,
-        wake_types="Wydip",
-        n_bin=n_bin,
         save_every=1,
-        buffer_size=600,
-        total_size=2400,
-        file_name=None,
+        buffer_size=100,
+        file_name=monitor_filename,
+        total_size=n_turns,
         mpi_mode=is_mpi,
     )
+    monitored_wake_types = ['Wlong']
+    monitored_wake_types += wake_types
+    # wakepotential_monitor = WakePotentialMonitor(
+    #     bunch_number=0,
+    #     wake_types=monitored_wake_types,
+    #     n_bin=n_bin,
+    #     save_every=1,
+    #     buffer_size=600,
+    #     total_size=2400,
+    #     file_name=None,
+    #     mpi_mode=is_mpi,
+    # )
+    maincavmon = CavityMonitor("rf", ring, file_name=None, save_every=100,
+                 buffer_size=100, total_size=n_turns/100, mpi_mode=is_mpi)
+
+    harmcavmon = CavityMonitor("hrf", ring, file_name=None, save_every=100,
+                 buffer_size=100, total_size=n_turns/100, mpi_mode=is_mpi)
+
     long_map = LongitudinalMap(ring)
     sr = SynchrotronRadiation(ring, switch=[1, 1, 1])
     trans_map = TransverseMap(ring)
-    wakefield_tr, wakefield_long, wakemodel = setup_wakes(ring, id_state, include_Zlong, n_bin)
+    wakefield_tr, wakefield_long, wakemodel, _ = setup_wakes(ring, id_state,
+                                                             include_Zlong,
+                                                             n_bin,
+                                                             wake_types,
+                                                             csr_flag=False)
 
-    x3 = 6.38e-3
     if id_state == "open":
-        y3 = 6.73e-3
-    if id_state == "close":
-        y3 = 5.50e-3
+        x3 = 6.62e-3
+        y3 = 6.70e-3
+    elif id_state == 'close':
+        x3 = 5.78e-3
+        y3 = 5.61e-3
+    else:
+        x3 = None
+        y3 = None
+    if id_state == "open":
+        x3_quad = -15.01e-3
+        y3_quad = 15.63e-3
+    elif id_state == 'close':
+        x3_quad = -7.90e-3
+        y3_quad = 8.87e-3
+    else:
+        x3_quad = None
+        y3_quad = None
+    wake_types = [item for item in wake_types if (item.endswith('dip') or
+                      item.endswith('quad'))]
     long_wakefield = LongRangeResistiveWall(
         ring=ring,
         beam=beam,
-        length=350.749,
+        length=ring.L,
         rho=2.135e-8,
         radius=8e-3,
-        types=["Wydip"],
+        types=wake_types,
         nt=n_turns_wake,
-        x3=x3,
-        y3=y3,
+        x3 = x3,
+        y3 = y3,
+        x3_quad = x3_quad,
+        y3_quad = y3_quad
     )
 
-    rf, hrf = setup_dual_rf(ring, beam, harmonic_cavity, bunch_current,  wakemodel)
-    fbtx, fbty = setup_fbt(ring, max_kick)
-    tracking_elements = [trans_map, long_map, sr, beam_monitor, rf]
+    rf, hrf = setup_dual_rf(ring, beam, harmonic_cavity, bunch_current,
+                            wakemodel, n_bunches)
+    fbtx, fbty = setup_fbt(ring, feedback_tau)
+    tracking_elements = [rf, trans_map, long_map, sr, beam_monitor]
+    
+    if harmonic_cavity:
+        tracking_elements.insert(0, hrf)
     besc = TransverseSpaceCharge(ring=ring,
                                 interaction_length=ring.L,
                                 n_bins=n_bin)
-    ibs_cimp = IntrabeamScattering(ring, beam, model="CIMP", n_points=100, n_bin=100)
-    if ibs == 'True':
+    ibs_cimp = IntrabeamScattering(ring, model="CIMP", n_points=100, n_bin=100)
+    if ibs:
         print('IBS included')
         tracking_elements.append(ibs_cimp)
-    if sc == 'True':
+    if sc:
         if is_mpi and beam.mpi.rank == 0:
             print('space charge included')
         tracking_elements.append(besc)
-    if harmonic_cavity == 'True':
-        tracking_elements.append(hrf)
-    if max_kick != 0:
+    if feedback_tau != 0:
         tracking_elements.append(fbtx)
         tracking_elements.append(fbty)
+    if include_Zlong:
+        tracking_elements.append(wakefield_long)
 
     stdx, stdy = np.mean(beam.bunch_std[:][0]), np.mean(beam.bunch_std[:][2])
     track_wake_monitor = False
     monitor_count = 0
     try:
         for i in range(n_turns):
-            if i % 1000 == 0:
-                if is_mpi and beam.mpi.rank == 0:
-                    print(f"mpi Turn {i:}")
-                elif not is_mpi:
-                    print(f"Turn {i:}")
+            if i % 100 == 0:
+                print(f"Turn {i:}")
             if is_mpi:
                 beam.mpi.share_distributions(beam, n_bin=n_bin)
                 beam.mpi.share_means(beam)
                 beam.mpi.share_stds(beam)
             for el in tracking_elements:
                 el.track(beam)
+                maincavmon.track(beam, rf)
+                if harmonic_cavity:
+                    harmcavmon.track(beam, hrf)
 
-            if i > 25_000:
+            if i > 20_000:
                 wakefield_tr.track(beam)
                 long_wakefield.track(beam)
-            elif include_Zlong == 'True':
-                wakefield_long.track(beam)
                 
-            if (monitor_count < 2500 and (np.mean(beam.bunch_mean[:][0]) > 0.1 * stdx or np.mean(beam.bunch_mean[:][2]) > 0.1 * stdy)):
-                track_wake_monitor=True
-            if monitor_count < 2500 and (i > (n_turns - 2500) or track_wake_monitor):
-                wakepotential_monitor.track(beam, wakefield_tr)
-                monitor_count += 1
+            # if (monitor_count < 2500 and (np.mean(beam.bunch_mean[:][0]) > 0.1 * stdx or np.mean(beam.bunch_mean[:][2]) > 0.1 * stdy)):
+                # track_wake_monitor=True
+            # if monitor_count < 2500 and (i > (n_turns - 2500) or track_wake_monitor):
+                # wakepotential_monitor.track(beam, wakefield_tr)
+                # monitor_count += 1
         
     finally:
         beam_monitor.close()
 
 
 if __name__ == "__main__":
-    parser = get_parser_for_multibunch()
+    parser = argparse.ArgumentParser(
+    description="""Track beam-ion instability in a light source storage ring.
+
+    Supports both CLI arguments and TOML configuration files. CLI arguments
+    override values from the config file. If no config file is provided,
+    all simulation parameters must be specified via CLI or will use defaults.
+
+    Example usage:
+      # Using config file only:
+      python track_TI.py --config config.toml
+
+    """,
+            formatter_class=argparse.RawDescriptionHelpFormatter
+        )
+
+    # Config file argument (optional, for backward compatibility)
+    parser.add_argument('-c', '--config_file', metavar='CONFIG_FILE', type=str,
+                        default=None,
+                        help='Path to TOML configuration file. CLI args override config values.')
     args = parser.parse_args()
-    folder = "/home/dockeruser/transverse_instabilities/data/raw/tcbi/"
-    run_mbtrack2(folder=folder,
-                 n_turns=args.n_turns,
-                 n_macroparticles=args.n_macroparticles,
-                 n_bin=args.n_bin,
-                 bunch_current=args.bunch_current,
-                 Qp_x=args.Qp_x,
-                 Qp_y=args.Qp_y,
-                 id_state=args.id_state,
-                 include_Zlong=args.include_Zlong,
-                 harmonic_cavity=args.harmonic_cavity,
-                 n_turns_wake=args.n_turns_wake,
-                 max_kick=args.max_kick,
-                 sc=args.sc,
-                 ibs=args.ibs)
+
+
+    
+    config_path = args.config_file
+    if config_path:
+        full_config = load_toml_config(config_path)
+
+    # Support both 'script' section (for backward compatibility) and flat structure
+        if 'script' in full_config:
+            config = full_config['script']
+        else:
+           config = full_config
+    else:
+        config = {}
+
+    run_mbtrack2(config)

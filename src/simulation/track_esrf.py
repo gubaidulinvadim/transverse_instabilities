@@ -1,9 +1,8 @@
 import numpy as np
-from mbtrack2.impedance.wakefield import WakeField
+from mbtrack2.impedance.wakefield import WakeField, WakeFunction
 from mbtrack2.tracking import (Bunch, LongitudinalMap, RFCavity,
                                SynchrotronRadiation, TransverseMap,
                                WakePotential)
-from mbtrack2.impedance.wakefield import WakeField, WakeFunction
 from mbtrack2.tracking.monitors import BunchMonitor, WakePotentialMonitor
 from mbtrack2.tracking.spacecharge import TransverseSpaceCharge
 from tqdm import tqdm

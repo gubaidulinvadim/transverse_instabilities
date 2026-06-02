@@ -12,7 +12,7 @@ from scipy.constants import c
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import load_toml_config
-from facilities_mbtrack2 import esrf_ebs
+from facilities_mbtrack2.ESRF_EBS import esrf_ebs
 
 def run_mbtrack2(config: dict) -> None:
     folder = config['folder']

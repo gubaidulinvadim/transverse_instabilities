@@ -12,22 +12,23 @@ from scipy.constants import c
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import load_toml_config
-from esrf_ebs import esrf_ebs
+from facilities_mbtrack2 import esrf_ebs
 
 def run_mbtrack2(config: dict) -> None:
     folder = config['folder']
     n_turns = config.get('n_turns', 100_000)
-    n_macroparticles = config.get('n_macroparticles', int(1e5))
+    n_macroparticles = config.get('n_macroparticles', int(1e6))
     n_bin = config.get('n_bin', 100)
     bunch_current = config.get('bunch_current', 1e-3)
     Qp_x = config.get('Qp_x', 1.6)
     Qp_y = config.get('Qp_y', 1.6)
     sc = config.get('sc', False)
+    emittance_y = config.get('emittance_v', 10e-12)
 
     Vc = 6e6
     ring = esrf_ebs()
     ring.chro = np.array([Qp_x, Qp_y])
-    ring.emit[1] = 10e-12
+    ring.emit[1] = emittance_y
     mybunch = Bunch(ring,
                     mp_number=n_macroparticles,
                     current=bunch_current,
@@ -40,6 +41,7 @@ def run_mbtrack2(config: dict) -> None:
         f"bunch_current={bunch_current:.2e},"+\
         f"Qp_x={Qp_x:.2f},"+\
         f"Qp_y={Qp_y:.2f},"+\
+        f"emit_y={emittance_y:.1e}"+\
         f"sc={sc:}"+\
         ")"
     bunch_monitor = BunchMonitor(
@@ -58,10 +60,12 @@ def run_mbtrack2(config: dict) -> None:
     esrf_wakedata = np.loadtxt('../../data/input/full_wake.txt', delimiter=',')
     Wz = WakeFunction(esrf_wakedata[:,0]/c, esrf_wakedata[:,1], component_type='long')
     Wdy = WakeFunction(esrf_wakedata[:,0]/c,
-                       esrf_wakedata[:,3], component_type='ydip')
+                       -esrf_wakedata[:,3], component_type='ydip')
     Wqy = WakeFunction(esrf_wakedata[:,0]/c,
-                       esrf_wakedata[:,5], component_type='yquad')
-    wakefield_tr = WakePotential(ring, WakeField([Wz, Wdy, Wqy]))
+                       -esrf_wakedata[:,5], component_type='yquad')
+    Wqx = WakeFunction(esrf_wakedata[:,0]/c,
+                       -esrf_wakedata[:,4]
+    wakefield_tr = WakePotential(ring, WakeField([Wz, Wdy, Wqy, Wqx]))
     wakefield_long = WakePotential(ring, WakeField([Wz]))
 
     wakepotential_monitor = WakePotentialMonitor(
@@ -83,12 +87,7 @@ def run_mbtrack2(config: dict) -> None:
         print('space charge included')
         tracking_elements.append(besc)
     else:
-        ring.emit[1] = 40e-12
-        besc = TransverseSpaceCharge(ring=ring,
-                                     interaction_length=ring.L,
-                                     n_bins=100)
         print('space-charge weakened')
-        tracking_elements.append(besc)
     print("Harmonic cavity is off.")
     tracking_elements.append(main_rf)
 

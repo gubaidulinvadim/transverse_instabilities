@@ -12,6 +12,9 @@ from scipy.constants import c
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import load_toml_config
+
+os.environ["PYTHONPATH"] += os.pathsep + "/home/dockeruser/facilities_mbtrack2/"
+sys.path.append('/home/dockeruser/facilities_mbtrack2')
 from facilities_mbtrack2.ESRF_EBS import esrf_ebs
 
 def run_mbtrack2(config: dict) -> None:

@@ -60,7 +60,7 @@ def run_mbtrack2(config: dict) -> None:
     sr = SynchrotronRadiation(ring, switch=[1, 1, 1])
     trans_map = TransverseMap(ring)
 
-    esrf_wakedata = np.loadtxt('../../data/input/full_wake.txt', delimiter=',')
+    esrf_wakedata = np.loadtxt(folder + 'full_wake.txt', delimiter=',')
     Wz = WakeFunction(esrf_wakedata[:,0]/c, esrf_wakedata[:,1], component_type='long')
     Wdy = WakeFunction(esrf_wakedata[:,0]/c,
                        -esrf_wakedata[:,3], component_type='ydip')

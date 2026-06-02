@@ -41,7 +41,7 @@ is_gpu = false
 # =============================================================================
 [script]
 name = "/home/dockeruser/transverse_instabilities/src/simulation/track_esrf.py"
-folder = '/home/dockeruser/transverse_instabilities/data/raw/headtail_ver_coupl/'
+folder = '/home/dockeruser/transverse_instabilities/data/raw/esrf_headtail/'
 n_turns = 75_000
 n_macroparticles = 1_000_000
 n_bin = 100

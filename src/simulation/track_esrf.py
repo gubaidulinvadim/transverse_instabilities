@@ -64,7 +64,7 @@ def run_mbtrack2(config: dict) -> None:
     Wqy = WakeFunction(esrf_wakedata[:,0]/c,
                        -esrf_wakedata[:,5], component_type='yquad')
     Wqx = WakeFunction(esrf_wakedata[:,0]/c,
-                       -esrf_wakedata[:,4]
+                       -esrf_wakedata[:,4])
     wakefield_tr = WakePotential(ring, WakeField([Wz, Wdy, Wqy, Wqx]))
     wakefield_long = WakePotential(ring, WakeField([Wz]))
 

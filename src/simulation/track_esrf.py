@@ -26,7 +26,7 @@ def run_mbtrack2(config: dict) -> None:
     Qp_x = config.get('Qp_x', 1.6)
     Qp_y = config.get('Qp_y', 1.6)
     sc = config.get('sc', False)
-    emittance_y = config.get('emittance_v', 10e-12)
+    emittance_y = config.get('emittance_y', 10e-12)
 
     Vc = 6e6
     ring = esrf_ebs()

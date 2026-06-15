@@ -63,11 +63,11 @@ def run_mbtrack2(config: dict) -> None:
     esrf_wakedata = np.loadtxt(folder + 'full_wake.txt', delimiter=',')
     Wz = WakeFunction(esrf_wakedata[:,0]/c, esrf_wakedata[:,1], component_type='long')
     Wdy = WakeFunction(esrf_wakedata[:,0]/c,
-                       -esrf_wakedata[:,3], component_type='ydip')
+                       -esrf_wakedata[:,3]/ring.optics.beta(1), component_type='ydip')
     Wqy = WakeFunction(esrf_wakedata[:,0]/c,
-                       -esrf_wakedata[:,5], component_type='yquad')
+                       -esrf_wakedata[:,5]/ring.optics.beta(1), component_type='yquad')
     Wqx = WakeFunction(esrf_wakedata[:,0]/c,
-                       -esrf_wakedata[:,4], component_type='xquad')
+                       -esrf_wakedata[:,4]/ring.optics.beta(0), component_type='xquad')
     wakefield_tr = WakePotential(ring, WakeField([Wz, Wdy, Wqy, Wqx]))
     wakefield_long = WakePotential(ring, WakeField([Wz]))
 

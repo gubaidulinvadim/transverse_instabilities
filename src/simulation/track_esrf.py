@@ -69,7 +69,7 @@ def run_mbtrack2(config: dict) -> None:
     Wqx = WakeFunction(esrf_wakedata[:,0]/c,
                        -esrf_wakedata[:,4]/ring.optics.beta(0), component_type='xquad')
     wakefield_tr = WakePotential(ring, WakeField([Wz, Wdy, Wqy, Wqx]))
-    wakefield_long = WakePotential(ring, WakeField([Wz]))
+    wakefield_long = WakePotential(ring, WakeField([Wz, Wqy, Wqx]))
 
     wakepotential_monitor = WakePotentialMonitor(
         bunch_number=0,

@@ -4,8 +4,7 @@ os.environ["PYTHONPATH"] += os.pathsep + "/home/dockeruser/facilities_mbtrack2/"
 sys.path.append('/home/dockeruser/facilities_mbtrack2')
 from facilities_mbtrack2.SOLEIL_II import v3633
 from mbtrack2.tracking import (Bunch, LongitudinalMap, 
-                               SynchrotronRadiation, TransverseMap,
-                               SkewQuadrupole
+                               SynchrotronRadiation, TransverseMap
                                )
 from mbtrack2.tracking.monitors import BunchMonitor, WakePotentialMonitor
 from mbtrack2.tracking.spacecharge import TransverseSpaceCharge
@@ -15,6 +14,7 @@ import argparse
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import load_toml_config
+from emittance_control import setup_emittance_control
 from setup_tracking import setup_fbt, setup_wakes, setup_rf
 
 def run_mbtrack2(config: dict) -> None:
@@ -41,11 +41,9 @@ def run_mbtrack2(config: dict) -> None:
     ring = v3633(IDs=id_state, HC_power=HC_power, V_RF=Vc, load_lattice=True)
     ring.tune = np.array([54.23, 18.21])
     ring.chro = np.array([Qp_x, Qp_y])  
-    ring.emit[1] = emittance_ratio * ring.emit[0]
-    if emittance_ratio == 1.0:
-        ring.emit[1] = 0.02*ring.emit[0]
-        ring.tune[0] = 54.2
-        ring.tune[1] = 18.2
+    emittance_control_method, emittance_control_element = (
+        setup_emittance_control(ring, config)
+    )
     mybunch = Bunch(ring,
                     mp_number=n_macroparticles,
                     current=bunch_current,
@@ -56,6 +54,23 @@ def run_mbtrack2(config: dict) -> None:
     sanitized_list = [str(v).replace("'", "").replace('"', '') for v in
                       wake_types]
     wake_types_str = "-".join(sanitized_list)
+    if emittance_control_method == "white_noise":
+        emittance_control_details = ""
+    elif emittance_control_method == "skew_quadrupole":
+        emittance_control_details = (
+            f",base_emittance_ratio={ring.emit[1] / ring.emit[0]:.3f}"
+            f",skew_strength={emittance_control_element.strength:.2e}"
+            f",skew_Qx={ring.tune[0]:.3f}"
+            f",skew_Qy={ring.tune[1]:.3f}"
+        )
+    else:
+        emittance_control_details = (
+            f",base_emittance_ratio={ring.emit[1] / ring.emit[0]:.3f}"
+            f",ac_skew_strength={emittance_control_element.strength:.2e}"
+            f",ac_skew_frequency={emittance_control_element.frequency:.4f}"
+            f",ac_skew_phase={emittance_control_element.initial_phase:.4f}"
+            f",ac_skew_jitter={emittance_control_element.frequency_jitter:.2e}"
+        )
 
     monitor_filename = folder + f"monitors(n_mp={n_macroparticles:.1e}," + \
         f"n_turns={n_turns:.1e}," +\
@@ -70,7 +85,9 @@ def run_mbtrack2(config: dict) -> None:
         f"sc={sc:},"+\
         f"ibs={ibs:},"+\
         f"wake_types={wake_types_str:},"\
-        f"{emittance_ratio=:}"\
+        f"emittance_control={emittance_control_method},"\
+        f"{emittance_ratio=:}" +\
+        emittance_control_details +\
         ")"
     bunch_monitor = BunchMonitor(
         0,
@@ -134,10 +151,21 @@ def run_mbtrack2(config: dict) -> None:
     if include_Zlong:
         print('Longitudinal impedance is included in tracking')
         tracking_elements.append(wakefield_long)
-    if emittance_ratio == 1.0:
+    if emittance_control_method == "white_noise":
+        print("Vertical emittance is controlled by quantum-excitation noise.")
+    elif emittance_control_method == "skew_quadrupole":
         print('Skew quadrupole is on and the tunes are set to a Qx-Qy=n \
               resonance.')
-        tracking_elements.append(SkewQuadrupole(strength=0.001))
+        tracking_elements.append(emittance_control_element)
+    else:
+        print(
+            "AC skew quadrupole is on "
+            f"(strength={emittance_control_element.strength}, "
+            f"frequency={emittance_control_element.frequency}, "
+            f"phase={emittance_control_element.initial_phase}, "
+            f"frequency_jitter={emittance_control_element.frequency_jitter})."
+        )
+        tracking_elements.append(emittance_control_element)
 
     monitor_count = 0
     track_wake_monitor = False

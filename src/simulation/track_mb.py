@@ -10,6 +10,7 @@ from mbtrack2.tracking.monitors import (BeamMonitor, WakePotentialMonitor,
 import argparse
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import load_toml_config
+from fill_patterns import build_filling_pattern
 from setup_tracking import setup_fbt, setup_wakes, setup_dual_rf
 from mbtrack2.tracking.spacecharge import TransverseSpaceCharge
 from mbtrack2.tracking.ibs import IntrabeamScattering
@@ -34,7 +35,6 @@ def run_mbtrack2(config: dict) -> None:
     ibs = config.get('ibs', False)
     wake_types = config.get('wake_types', ['Wydip'])
     emittance_ratio = config.get('emittance_ratio', 0.3)
-    n_bunches = config.get('n_bunches', 416)
 
     Vc = 1.7e6
     ring = v3633(IDs=id_state, HC_power=0, V_RF=Vc, load_lattice=True)
@@ -44,7 +44,14 @@ def run_mbtrack2(config: dict) -> None:
     np.random.seed(42)
     beam = Beam(ring)
     is_mpi = True
-    filling_pattern = np.ones(ring.h) * bunch_current
+    filling_pattern = build_filling_pattern(ring.h, bunch_current, config)
+    n_bunches = int(np.count_nonzero(filling_pattern))
+    total_current = float(np.sum(filling_pattern))
+    fill_pattern_name = config.get('fill_pattern', 'full')
+    print(
+        f"Fill pattern: {fill_pattern_name}, {n_bunches} bunches, "
+        f"total current={total_current:.6g} A"
+    )
     beam.init_beam(
         filling_pattern,
         mp_per_bunch=n_macroparticles,
@@ -61,6 +68,8 @@ def run_mbtrack2(config: dict) -> None:
         f",n_turns={n_turns:.1e}"+
         f",n_bin={n_bin}"+
         f",bunch_current={bunch_current:.1e}"+
+        f",n_bunches={n_bunches}"+
+        f",fill_pattern={fill_pattern_name}"+
         f",Qp_x={Qp_x:.2f}"+
         f",Qp_y={Qp_y:.2f}"+
         f",ID_state={id_state:}"+
@@ -142,8 +151,8 @@ def run_mbtrack2(config: dict) -> None:
         y3_quad = y3_quad
     )
 
-    rf, hrf = setup_dual_rf(ring, beam, harmonic_cavity, bunch_current,
-                            wakemodel, n_bunches)
+    rf, hrf = setup_dual_rf(ring, beam, harmonic_cavity, total_current,
+                            wakemodel)
     fbtx, fbty = setup_fbt(ring, feedback_tau)
     tracking_elements = [rf, trans_map, long_map, sr, beam_monitor]
     

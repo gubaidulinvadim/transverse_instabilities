@@ -45,14 +45,92 @@ python track_TI.py --n_macroparticles 500000 \
                    --id_state close
 ```
 
+The vertical-emittance control method can be selected in a TOML
+configuration. White-noise control uses synchrotron-radiation quantum
+excitation and `emittance_ratio`:
+
+```toml
+[script]
+emittance_control_method = "white_noise"
+emittance_ratio = 0.3
+```
+
+For the skew-quadrupole methods, `coupling_base_emittance_ratio` sets the
+uncoupled vertical quantum excitation before coupling is applied. The static
+skew quadrupole defaults to the previous 100% coupling setup:
+
+```toml
+[script]
+emittance_control_method = "skew_quadrupole"
+coupling_base_emittance_ratio = 0.02
+skew_strength = 0.001
+skew_tune_x = 54.2
+skew_tune_y = 18.2
+```
+
+The AC skew quadrupole defaults to the distance from the configured tune
+difference to the nearest integer resonance. Its parameters can be overridden:
+
+```toml
+[script]
+emittance_control_method = "ac_skew_quadrupole"
+coupling_base_emittance_ratio = 0.02
+ac_skew_strength = 0.001
+ac_skew_frequency = 0.02
+ac_skew_phase = 0.0
+ac_skew_frequency_jitter = 0.0
+ac_skew_seed = 42
+```
+
+Ready-to-submit AC-skew variants are provided in
+`src/submission/tmci_ver_ac_skew.toml` and
+`src/submission/headtail_ver_ac_skew.toml`.
+
+If `emittance_control_method` is omitted, ratios below 1 use white noise and a
+ratio of 1 uses the legacy static skew-quadrupole setup. The same selection can
+be requested explicitly with `emittance_control_method = "auto"`, which is
+useful when scanning `emittance_ratio`.
+
 #### Multi-Bunch Tracking
 
+Multi-bunch simulations are configured with TOML files:
+
 ```bash
-cd src/simulation
-python track_mb.py --n_macroparticles 100000 \
-                   --n_turns 100000 \
-                   --bunch_current 1.2e-3 \
-                   --n_turns_wake 50
+python src/simulation/track_mb.py \
+    --config_file src/submission/tcbi_hor_chroma_32b.toml
+```
+
+If `fill_pattern` is omitted, all RF buckets are filled. To distribute 32
+bunches equidistantly around the 416-bucket ring:
+
+```toml
+[script]
+bunch_current = 0.0012
+fill_pattern = "uniform"
+n_bunches = 32
+```
+
+This places bunches in buckets `0, 13, 26, ..., 403`. To use four trains of
+102 bunches with two empty buckets after every train:
+
+```toml
+[script]
+bunch_current = 0.0012
+fill_pattern = "trains"
+n_trains = 4
+bunches_per_train = 102
+gap_buckets = 2
+n_bunches = 408
+```
+
+An arbitrary pattern can be specified with zero-based bucket indices:
+
+```toml
+[script]
+bunch_current = 0.0012
+fill_pattern = "explicit"
+filled_buckets = [0, 13, 26, 39]
+n_bunches = 4
 ```
 
 ### Job Submission with jobsmith

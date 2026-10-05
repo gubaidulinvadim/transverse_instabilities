@@ -1,0 +1,40 @@
+# 32 equidistant bunches, one bunch every 13 RF buckets.
+
+title = "horizontal coupled-bunch instability 32-bunch scan"
+
+[environment]
+container = "soleil-pa:mbtrack2"
+mount_source = ["/ccc/work/cont003/soleil/gubaiduv/transverse_instabilities/", "/ccc/work/cont003/soleil/gubaiduv/facilities_mbtrack2/"]
+mount_destination = ["/home/dockeruser/transverse_instabilities/", "/home/dockeruser/facilities_mbtrack2/"]
+server = "ccrt"
+
+[job]
+name = "tcbi_try_32b"
+time = 86000
+n_cpu = 1
+n_tasks = 32
+partition = "milan"
+err_folder = "/ccc/work/cont003/soleil/gubaiduv/err/"
+out_folder = "/ccc/work/cont003/soleil/gubaiduv/out/"
+is_gpu = false
+
+[script]
+name = "/home/dockeruser/transverse_instabilities/src/simulation/track_mb.py"
+folder = "/home/dockeruser/transverse_instabilities/data/raw/tcbi_try_32b/"
+n_turns = 30000
+n_macroparticles = 5_000
+n_bin = 100
+include_Zlong = false
+id_state = "open"
+ibs = true
+bunch_current = 0.0012
+wake_types = ["Wxdip", "Wxquad"]
+fill_pattern = "uniform"
+n_bunches = 32
+harmonic_cavity = true
+
+[scan]
+sc = [false]
+feedback_tau = [0]
+Qp_y = 1.4
+Qp_x = [0.0]

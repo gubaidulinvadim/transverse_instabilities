@@ -1,0 +1,49 @@
+# Vertical head-tail scan using an AC skew quadrupole for transverse coupling.
+
+title = "vertical head-tail AC skew quadrupole threshold scan"
+
+[environment]
+container = "mbtrack2-csr"
+mount_source = ["/ccc/work/cont003/soleil/gubaiduv/transverse_instabilities/", "/ccc/work/cont003/soleil/gubaiduv/facilities_mbtrack2/"]
+mount_destination = ["/home/dockeruser/transverse_instabilities/", "/home/dockeruser/facilities_mbtrack2/"]
+server = "ccrt"
+
+[job]
+name = "ht_ver_ac_skew"
+time = 86000
+n_cpu = 8
+partition = "milan"
+err_folder = "/ccc/work/cont003/soleil/gubaiduv/err/"
+out_folder = "/ccc/work/cont003/soleil/gubaiduv/out/"
+is_gpu = false
+
+[script]
+name = "/home/dockeruser/transverse_instabilities/src/simulation/track_TI.py"
+folder = "/home/dockeruser/transverse_instabilities/data/raw/headtail_ver_ac_skew/"
+n_turns = 50000
+n_macroparticles = 500_000
+n_bin = 100
+Qp_x = 1.8
+Qp_y = 1.4
+include_Zlong = true
+id_state = "close"
+harmonic_cavity = false
+ibs = true
+feedback_tau = 0
+emittance_ratio = 1.0
+emittance_control_method = "ac_skew_quadrupole"
+coupling_base_emittance_ratio = 0.02
+ac_skew_strength = 0.001
+ac_skew_frequency = 0.02
+ac_skew_phase = 0.0
+ac_skew_frequency_jitter = 0.0
+ac_skew_seed = 42
+wake_types = ["Wydip", "Wyquad", "Wxdip", "Wxquad"]
+
+[scan]
+bunch_current = [0.0006, 0.0009, 0.0012, 0.0015, 0.0018, 0.0021, 0.0024, 0.0027,
+       0.003, 0.0033, 0.0036, 0.0039, 0.0042, 0.0045, 0.0048, 0.0051,
+       0.0054, 0.0057, 0.006, 0.0063, 0.0066, 0.0069, 0.0072, 0.0075,
+       0.0078, 0.0081, 0.0084, 0.0087, 0.009, 0.0093, 0.0096, 0.0099,
+       0.011, 0.012, 0.013, 0.014, 0.015, 0.016, 0.018, 0.02]
+sc = [false, true]

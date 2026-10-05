@@ -219,11 +219,10 @@ def setup_rf(ring, harmonic_cavity, Vc, n_bunches, bunch_current):
     return main_rf, harmonic_rf
 
 
-def setup_dual_rf(ring, beam, harmonic_cavity, bunch_current, wakemodel,
-                  n_bunches):
+def setup_dual_rf(ring, beam, harmonic_cavity, total_current, wakemodel):
     Vc = 1.7e6
     if harmonic_cavity:
-        Itot = ring.h * bunch_current  # Use for fixed detuning or CT
+        Itot = total_current
         HC_det = 85e3  # Use for fixed detuning or CT
         MC_det = -35e3
         xi_start = 1.18

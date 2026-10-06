@@ -15,7 +15,8 @@ import argparse
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import load_toml_config
 from emittance_control import setup_emittance_control
-from setup_tracking import setup_fbt, setup_wakes, setup_rf
+from setup_tracking import (setup_bunch_by_bunch_feedback, setup_rf,
+                            setup_wakes)
 
 def run_mbtrack2(config: dict) -> None:
     folder = config['folder']
@@ -140,7 +141,7 @@ def run_mbtrack2(config: dict) -> None:
         tracking_elements.append(main_rf)
     if feedback_tau != 0:
         print("Feedback system is included in tracking.")
-        fbtx, fbty = setup_fbt(ring, feedback_tau)
+        fbtx, fbty = setup_bunch_by_bunch_feedback(ring, feedback_tau)
         tracking_elements.append(fbtx)
         tracking_elements.append(fbty)
     if wakefield_csr:

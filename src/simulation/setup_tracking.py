@@ -1,7 +1,6 @@
 import numpy as np
-from mbtrack2 import BeamLoadingEquilibrium, CavityResonator
-from mbtrack2.tracking.feedback import TransverseExponentialDamper
-from mbtrack2.tracking.feedback import FIRDamper
+from mbtrack2 import (BeamLoadingEquilibrium, BunchByBunchFB, CavityResonator,
+                      FIRFilter)
 from mbtrack2.impedance.wakefield import WakeField
 from mbtrack2.impedance.csr import FreeSpaceCSR, ParallelPlatesCSR
 from mbtrack2.tracking import (RFCavity, WakePotential, DirectFeedback)
@@ -129,32 +128,30 @@ def setup_wakes_soleil(ring, id_state, include_Zlong, n_bin, wake_types='Wydip',
     return wakefield_tr, wakefield_long, wakemodel, wakefield_csr
 
 
-def setup_fbt(ring, feedback_tau, kind='exp'):
-    if kind == 'exp':
-        fbty = TransverseExponentialDamper(ring,
-                                damping_time=[feedback_tau, feedback_tau],
-                                phase_diff=[90, 90])
-        fbtx = fbty
-    else:
-        fbty = FIRDamper(ring,
-                        plane='y',
-                        tune=ring.tune[1],
-                        turn_delay=1,
-                        tap_number=7,
-                        gain=1,
-                        phase=90,
-                        bpm_error=None,
-                        max_kick=None)
-        fbtx = FIRDamper(ring,
-                        plane='x',
-                        tune=ring.tune[0],
-                        turn_delay=1,
-                        tap_number=7,
-                        gain=1,
-                        phase=90,
-                        bpm_error=None,
-                        max_kick=None)
-    return fbtx, fbty
+def setup_bunch_by_bunch_feedback(ring, feedback_tau):
+    turn_delay = 1
+    tap_number = 7
+
+    def setup_plane(plane, tune):
+        fir_filter = FIRFilter(
+            tune=tune % 1,
+            gain=2 / feedback_tau,
+            phase=-90,
+            tap_number=tap_number,
+            turn_delay=turn_delay,
+        )
+        fir_filter.get_fir_nakamura(order=0)
+        return BunchByBunchFB(
+            ring=ring,
+            plane=plane,
+            coef=fir_filter.coefs,
+            turn_delay=turn_delay,
+        )
+
+    return (
+        setup_plane("x", ring.tune[0]),
+        setup_plane("y", ring.tune[1]),
+    )
 
 
 def get_active_cavity_params(ring, I0=0.2):

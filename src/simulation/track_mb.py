@@ -11,7 +11,8 @@ import argparse
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import load_toml_config
 from fill_patterns import build_filling_pattern
-from setup_tracking import setup_fbt, setup_wakes, setup_dual_rf
+from setup_tracking import (setup_bunch_by_bunch_feedback, setup_dual_rf,
+                            setup_wakes)
 from mbtrack2.tracking.spacecharge import TransverseSpaceCharge
 from mbtrack2.tracking.ibs import IntrabeamScattering
 from facilities_mbtrack2 import v3633
@@ -102,11 +103,11 @@ def run_mbtrack2(config: dict) -> None:
     #     file_name=None,
     #     mpi_mode=is_mpi,
     # )
-    maincavmon = CavityMonitor("rf", ring, file_name=None, save_every=100,
-                 buffer_size=100, total_size=n_turns/100, mpi_mode=is_mpi)
-
-    harmcavmon = CavityMonitor("hrf", ring, file_name=None, save_every=100,
-                 buffer_size=100, total_size=n_turns/100, mpi_mode=is_mpi)
+    # maincavmon = CavityMonitor("rf", ring, file_name=None, save_every=100,
+    #              buffer_size=100, total_size=n_turns/100, mpi_mode=is_mpi)
+    #
+    # harmcavmon = CavityMonitor("hrf", ring, file_name=None, save_every=100,
+    #              buffer_size=100, total_size=n_turns/100, mpi_mode=is_mpi)
 
     long_map = LongitudinalMap(ring)
     sr = SynchrotronRadiation(ring, switch=[1, 1, 1])
@@ -153,7 +154,6 @@ def run_mbtrack2(config: dict) -> None:
 
     rf, hrf = setup_dual_rf(ring, beam, harmonic_cavity, total_current,
                             wakemodel)
-    fbtx, fbty = setup_fbt(ring, feedback_tau)
     tracking_elements = [rf, trans_map, long_map, sr, beam_monitor]
     
     if harmonic_cavity:
@@ -170,6 +170,7 @@ def run_mbtrack2(config: dict) -> None:
             print('space charge included')
         tracking_elements.append(besc)
     if feedback_tau != 0:
+        fbtx, fbty = setup_bunch_by_bunch_feedback(ring, feedback_tau)
         tracking_elements.append(fbtx)
         tracking_elements.append(fbty)
     if include_Zlong:
@@ -188,9 +189,9 @@ def run_mbtrack2(config: dict) -> None:
                 beam.mpi.share_stds(beam)
             for el in tracking_elements:
                 el.track(beam)
-                maincavmon.track(beam, rf)
-                if harmonic_cavity:
-                    harmcavmon.track(beam, hrf)
+                # maincavmon.track(beam, rf)
+                # if harmonic_cavity:
+                    # harmcavmon.track(beam, hrf)
 
             if i > 20_000:
                 wakefield_tr.track(beam)

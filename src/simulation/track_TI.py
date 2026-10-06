@@ -58,35 +58,33 @@ def run_mbtrack2(config: dict) -> None:
         emittance_control_details = ""
     elif emittance_control_method == "skew_quadrupole":
         emittance_control_details = (
-            f",base_emittance_ratio={ring.emit[1] / ring.emit[0]:.3f}"
-            f",skew_strength={emittance_control_element.strength:.2e}"
-            f",skew_Qx={ring.tune[0]:.3f}"
-            f",skew_Qy={ring.tune[1]:.3f}"
+            f",base_er={ring.emit[1] / ring.emit[0]:.3f}"
+            f",skew_k={emittance_control_element.strength:.2e}"
+            f",skew_qx={ring.tune[0]:.3f}"
+            f",skew_qy={ring.tune[1]:.3f}"
         )
     else:
         emittance_control_details = (
-            f",base_emittance_ratio={ring.emit[1] / ring.emit[0]:.3f}"
-            f",ac_skew_strength={emittance_control_element.strength:.2e}"
-            f",ac_skew_frequency={emittance_control_element.frequency:.4f}"
-            f",ac_skew_phase={emittance_control_element.initial_phase:.4f}"
-            f",ac_skew_jitter={emittance_control_element.frequency_jitter:.2e}"
+            f",base_er={ring.emit[1] / ring.emit[0]:.3f}"
+            f",ac_k={emittance_control_element.strength:.2e}"
+            f",ac_f={emittance_control_element.frequency:.4f}"
         )
 
-    monitor_filename = folder + f"monitors(n_mp={n_macroparticles:.1e}," + \
-        f"n_turns={n_turns:.1e}," +\
-        f"n_bin={n_bin:},"+\
-        f"bunch_current={bunch_current:.2e},"+\
-        f"Qp_x={Qp_x:.2f},"+\
-        f"Qp_y={Qp_y:.2f},"+\
-        f"id_state={id_state:},"+\
-        f"Zlong={include_Zlong:},"+\
-        f"cavity={harmonic_cavity:},"+\
-        f"feedback_tau={feedback_tau:.1e},"+\
+    monitor_filename = folder + f"mon(nmp={n_macroparticles:.1e}," + \
+        f"nt={n_turns:.1e}," +\
+        f"nb={n_bin:},"+\
+        f"I={bunch_current:.2e},"+\
+        f"Qpx={Qp_x:.2f},"+\
+        f"Qpy={Qp_y:.2f},"+\
+        f"id={id_state:},"+\
+        f"Zl={include_Zlong:},"+\
+        f"HC={harmonic_cavity:},"+\
+        f"fb_tau={feedback_tau:.1e},"+\
         f"sc={sc:},"+\
         f"ibs={ibs:},"+\
-        f"wake_types={wake_types_str:},"\
-        f"emittance_control={emittance_control_method},"\
-        f"{emittance_ratio=:}" +\
+        f"wakes={wake_types_str:},"\
+        f"emit_ctrl={emittance_control_method},"\
+        f"er={emittance_ratio:}" +\
         emittance_control_details +\
         ")"
     bunch_monitor = BunchMonitor(

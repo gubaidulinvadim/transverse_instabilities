@@ -100,13 +100,6 @@ def setup_emittance_control(
         default_frequency,
         minimum=0.0,
     )
-    phase = _finite_number(config, "ac_skew_phase", 0.0)
-    frequency_jitter = _finite_number(
-        config,
-        "ac_skew_frequency_jitter",
-        0.0,
-        minimum=0.0,
-    )
     seed = config.get("ac_skew_seed", 42)
     if isinstance(seed, bool) or not isinstance(seed, int) or seed < 0:
         raise ValueError("ac_skew_seed must be a non-negative integer.")
@@ -114,8 +107,8 @@ def setup_emittance_control(
     element = ACSkewQuadrupole(
         strength=strength,
         frequency=frequency,
-        phase=phase,
-        frequency_jitter=frequency_jitter,
+        phase=0.0,
+        frequency_jitter=0.0,
         rng=np.random.default_rng(seed),
     )
     return method, element

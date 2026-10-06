@@ -69,7 +69,8 @@ skew_tune_y = 18.2
 ```
 
 The AC skew quadrupole defaults to the distance from the configured tune
-difference to the nearest integer resonance. Its parameters can be overridden:
+difference to the nearest integer resonance. Its phase and frequency jitter
+are fixed at zero for now; the remaining parameters can be overridden:
 
 ```toml
 [script]
@@ -77,8 +78,6 @@ emittance_control_method = "ac_skew_quadrupole"
 coupling_base_emittance_ratio = 0.02
 ac_skew_strength = 0.001
 ac_skew_frequency = 0.02
-ac_skew_phase = 0.0
-ac_skew_frequency_jitter = 0.0
 ac_skew_seed = 42
 ```
 

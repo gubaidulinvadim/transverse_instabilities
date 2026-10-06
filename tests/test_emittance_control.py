@@ -115,7 +115,7 @@ class SetupEmittanceControlTest(unittest.TestCase):
         self.assertAlmostEqual(element.frequency, 0.02)
         np.testing.assert_allclose(ring.tune, [54.23, 18.21])
 
-    def test_ac_skew_parameters_are_configurable(self):
+    def test_ac_skew_strength_and_frequency_are_configurable(self):
         ring = FakeRing()
 
         method, element = setup_emittance_control(
@@ -125,8 +125,6 @@ class SetupEmittanceControlTest(unittest.TestCase):
                 "coupling_base_emittance_ratio": 0.01,
                 "ac_skew_strength": 0.004,
                 "ac_skew_frequency": 0.025,
-                "ac_skew_phase": 0.5,
-                "ac_skew_frequency_jitter": 0.001,
                 "ac_skew_seed": 7,
             },
         )
@@ -135,8 +133,8 @@ class SetupEmittanceControlTest(unittest.TestCase):
         self.assertEqual(ring.emit[1], 1.0)
         self.assertEqual(element.strength, 0.004)
         self.assertEqual(element.frequency, 0.025)
-        self.assertEqual(element.initial_phase, 0.5)
-        self.assertEqual(element.frequency_jitter, 0.001)
+        self.assertEqual(element.initial_phase, 0.0)
+        self.assertEqual(element.frequency_jitter, 0.0)
 
     def test_unknown_method_is_rejected(self):
         with self.assertRaisesRegex(ValueError, "Unsupported"):

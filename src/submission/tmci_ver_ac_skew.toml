@@ -35,8 +35,6 @@ emittance_control_method = "ac_skew_quadrupole"
 coupling_base_emittance_ratio = 0.02
 ac_skew_strength = 0.001
 ac_skew_frequency = 0.02
-ac_skew_phase = 0.0
-ac_skew_frequency_jitter = 0.0
 ac_skew_seed = 42
 wake_types = ["Wydip", "Wxdip", "Wyquad", "Wxquad"]
 

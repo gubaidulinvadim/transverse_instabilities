@@ -26,15 +26,15 @@ n_macroparticles = 50_000
 n_bin = 100
 include_Zlong = true
 id_state = "open"
-ibs = false
-bunch_current = 0.00120192307692
+ibs = true
+bunch_current = 0.00625
 wake_types = ["Wydip", "Wyquad"]
 fill_pattern = "uniform"
 n_bunches = 32
 
 [scan]
 sc = [false]
-harmonic_cavity = [true]
-feedback_tau = [0]
+harmonic_cavity = [false]
+feedback_tau = [0, 100]
 Qp_x = 1.8
 Qp_y = [-1.0, -0.5, -0.1, 0.1, 0.5, 1.0, 1.4, 1.6, 1.8, 2.0, 2.5]

@@ -36,7 +36,7 @@ class GetMonitorFilenameTest(unittest.TestCase):
             filename,
             "/data/mon(nmp=5.0e+05,nt=5.0e+04,nb=100,I=1.20e-03,"
             "Qpx=0.00,Qpy=0.00,id=close,Zl=True,HC=False,fb_tau=0.0e+00,"
-            "fb_phase=-75,sc=True,ibs=True,wakes=Wydip-Wxdip,"
+            "phi=-75,sc=True,ibs=True,wakes=Wydip-Wxdip,"
             "emit_ctrl=skew_quadrupole,"
             "er=1.0,base_er=0.020,skew_k=1.00e-03,skew_qx=54.200,"
             "skew_qy=18.200)",
@@ -63,7 +63,7 @@ class GetMonitorFilenameTest(unittest.TestCase):
             "bunch_current=6.3e-03,n_bunches=32,fill_pattern=uniform,"
             "Qp_x=1.80,Qp_y=1.40,ID_state=open,include_Zlong=False,"
             "harmonic_cavity=False,feedback_tau=1.0e+02,"
-            "feedback_phase=-90,sc=False,ibs=False,"
+            "phi=-90,sc=False,ibs=False,"
             "wake_types=Wxdip-Wxquad)",
         )
 

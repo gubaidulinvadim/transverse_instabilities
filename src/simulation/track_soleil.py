@@ -63,7 +63,7 @@ def run_mbtrack2(config: dict) -> None:
         f"Zlong={include_Zlong:},"+\
         f"cavity={harmonic_cavity:},"+\
         f"feedback_tau={feedback_tau:.1e},"+\
-        f"feedback_phase={feedback_phase:g},"+\
+        f"phi={feedback_phase:g},"+\
         f"sc={sc:},"+\
         f"ibs={ibs:},"+\
         f"wake_types={wake_types_str:},"\

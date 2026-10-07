@@ -111,6 +111,9 @@ monitor_file = get_monitor_filename(
 )
 ```
 
+Monitor filenames label the feedback phase as `phi`; the configuration key
+remains `feedback_phase`.
+
 If `fill_pattern` is omitted, all RF buckets are filled. To distribute 32
 bunches equidistantly around the 416-bucket ring:
 

@@ -4,7 +4,8 @@ os.environ["PYTHONPATH"] += os.pathsep + "/home/dockeruser/facilities_mbtrack2/"
 sys.path.append('/home/dockeruser/facilities_mbtrack2')
 from mbtrack2.tracking import (Beam, LongitudinalMap,
                                LongRangeResistiveWall,
-                               SynchrotronRadiation, TransverseMap)
+                               SynchrotronRadiation, TransverseMap,
+                               TransverseResonator)
 from mbtrack2.tracking.monitors import (BeamMonitor, WakePotentialMonitor,
                                     CavityMonitor)
 import argparse
@@ -133,6 +134,16 @@ def run_mbtrack2(config: dict) -> None:
         x3_quad = x3_quad,
         y3_quad = y3_quad
     )
+    vertical_tune_fraction = ring.tune[1] % 1
+    resonator_harmonic = round(1.4e9 / ring.f0 + vertical_tune_fraction)
+    transverse_resonator = TransverseResonator(
+        ring=ring,
+        Rs=48.5e3 * 12,
+        Q=942,
+        fr=ring.f0 * (resonator_harmonic - vertical_tune_fraction),
+        n_bin=n_bin,
+        plane='y',
+    )
 
     rf, hrf = setup_dual_rf(ring, beam, harmonic_cavity, total_current,
                             wakemodel)
@@ -182,6 +193,13 @@ def run_mbtrack2(config: dict) -> None:
             if i > 20_000:
                 wakefield_tr.track(beam)
                 long_wakefield.track(beam)
+                if is_mpi:
+                    beam.mpi.share_distributions(
+                        beam,
+                        dipole_plane=transverse_resonator.plane,
+                        n_bin=n_bin,
+                    )
+                transverse_resonator.track(beam)
                 
             # if (monitor_count < 2500 and (np.mean(beam.bunch_mean[:][0]) > 0.1 * stdx or np.mean(beam.bunch_mean[:][2]) > 0.1 * stdy)):
                 # track_wake_monitor=True

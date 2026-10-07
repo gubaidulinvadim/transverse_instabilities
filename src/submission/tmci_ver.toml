@@ -52,6 +52,7 @@ id_state = 'close'
 harmonic_cavity = false
 ibs = true
 feedback_tau = 0
+feedback_phase = -90
 emittance_ratio = 1.0
 emittance_control_method = "skew_quadrupole"
 skew_strength = 0.001

@@ -51,6 +51,7 @@ include_Zlong = true
 ibs = true
 sc = false
 feedback_tau = 0
+feedback_phase = -90
 wake_types = ['Wxdip']
 n_bunches = 416
 emittance_control_method = "auto"
@@ -74,5 +75,4 @@ bunch_current = [0.0012]
 harmonic_cavity = [false, true]
 id_state = ['open', 'close']
 emittance_ratio = [0.1, 0.3, 1.0]
-
 

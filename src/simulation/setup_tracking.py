@@ -128,7 +128,11 @@ def setup_wakes_soleil(ring, id_state, include_Zlong, n_bin, wake_types='Wydip',
     return wakefield_tr, wakefield_long, wakemodel, wakefield_csr
 
 
-def setup_bunch_by_bunch_feedback(ring, feedback_tau):
+def setup_bunch_by_bunch_feedback(
+    ring,
+    feedback_tau,
+    feedback_phase=-90,
+):
     turn_delay = 1
     tap_number = 7
 
@@ -136,7 +140,7 @@ def setup_bunch_by_bunch_feedback(ring, feedback_tau):
         fir_filter = FIRFilter(
             tune=tune % 1,
             gain=2 / feedback_tau,
-            phase=-90,
+            phase=feedback_phase,
             tap_number=tap_number,
             turn_delay=turn_delay,
         )

@@ -51,6 +51,7 @@ wake_types = []
 id_state = 'open'
 sc = false
 feedback_tau = 0
+feedback_phase = -90
 emittance_control_method = "white_noise"
 
 # =============================================================================
@@ -71,4 +72,3 @@ bunch_current = {start = 0.0006, stop = 0.012, num = 20}
 n_macroparticles = [2_000_000]
 ibs = [true, false]
 harmonic_cavity = [true, false]
-

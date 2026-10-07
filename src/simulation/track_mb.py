@@ -11,6 +11,7 @@ import argparse
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import load_toml_config
 from fill_patterns import build_filling_pattern
+from monitor_filenames import get_monitor_filename
 from setup_tracking import (setup_bunch_by_bunch_feedback, setup_dual_rf,
                             setup_wakes)
 from mbtrack2.tracking.spacecharge import TransverseSpaceCharge
@@ -20,7 +21,6 @@ from facilities_mbtrack2 import v3633
 
 def run_mbtrack2(config: dict) -> None:
 
-    folder = config['folder']
     n_turns = config.get('n_turns', 75_000)
     n_macroparticles = config.get('n_macroparticles', int(1e5))
     n_bin = config.get('n_bin', 100)
@@ -32,6 +32,7 @@ def run_mbtrack2(config: dict) -> None:
     harmonic_cavity = config.get('harmonic_cavity', False)
     n_turns_wake = config.get('n_turns_wake', 50)
     feedback_tau = config.get('feedback_tau', 100)
+    feedback_phase = config.get('feedback_phase', -90)
     sc = config.get('sc', False)
     ibs = config.get('ibs', False)
     wake_types = config.get('wake_types', ['Wydip'])
@@ -59,30 +60,11 @@ def run_mbtrack2(config: dict) -> None:
         track_alive=False,
         mpi=is_mpi,
     )
-    sanitized_list = [str(v).replace("'", "").replace('"', '') for v in
-                      wake_types]
-    wake_types_str = "-".join(sanitized_list)
-
-    monitor_filename = (
-        folder +
-        f"monitors(n_mp={n_macroparticles:.1e}"+
-        f",n_turns={n_turns:.1e}"+
-        f",n_bin={n_bin}"+
-        f",bunch_current={bunch_current:.1e}"+
-        f",n_bunches={n_bunches}"+
-        f",fill_pattern={fill_pattern_name}"+
-        f",Qp_x={Qp_x:.2f}"+
-        f",Qp_y={Qp_y:.2f}"+
-        f",ID_state={id_state:}"+
-        f",include_Zlong={include_Zlong:}"+
-        f",harmonic_cavity={harmonic_cavity:}"+
-        # f",n_turns_wake={n_turns_wake:}"
-        f",feedback_tau={feedback_tau:.1e}"+
-        f",sc={sc:}"+
-        f",ibs={ibs:}"+
-        f",wake_types={wake_types_str:}"+
-        # f",{emittance_ratio=:}"
-        ")")
+    monitor_filename = get_monitor_filename(
+        config,
+        tracking_script="track_mb.py",
+        harmonic_number=ring.h,
+    )
     beam_monitor = BeamMonitor(
         ring.h,
         save_every=1,
@@ -170,7 +152,11 @@ def run_mbtrack2(config: dict) -> None:
             print('space charge included')
         tracking_elements.append(besc)
     if feedback_tau != 0:
-        fbtx, fbty = setup_bunch_by_bunch_feedback(ring, feedback_tau)
+        fbtx, fbty = setup_bunch_by_bunch_feedback(
+            ring,
+            feedback_tau,
+            feedback_phase,
+        )
         tracking_elements.append(fbtx)
         tracking_elements.append(fbty)
     if include_Zlong:

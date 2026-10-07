@@ -36,5 +36,6 @@ harmonic_cavity = true
 [scan]
 sc = [false]
 feedback_tau = [0]
+feedback_phase = [-90]
 Qp_y = 1.4
 Qp_x = [0.0]

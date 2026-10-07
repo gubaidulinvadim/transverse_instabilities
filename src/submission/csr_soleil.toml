@@ -52,6 +52,7 @@ id_state = 'open'
 sc = false
 ibs = true
 feedback_tau = 0
+feedback_phase = -90
 csr = true
 harmonic_cavity = false
 include_Zlong = true
@@ -70,5 +71,4 @@ include_Zlong = true
 [scan]
 # Scan beam current using a range specification
 bunch_current = {start = 0.001, stop = 0.02, num = 20}
-
 

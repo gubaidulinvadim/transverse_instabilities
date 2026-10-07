@@ -15,11 +15,11 @@ import argparse
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import load_toml_config
 from emittance_control import setup_emittance_control
+from monitor_filenames import get_monitor_filename
 from setup_tracking import (setup_bunch_by_bunch_feedback, setup_rf,
                             setup_wakes)
 
 def run_mbtrack2(config: dict) -> None:
-    folder = config['folder']
     n_turns = config.get('n_turns', 100_000)
     n_macroparticles = config.get('n_macroparticles', 100_000)
     n_bin = config.get('n_bin', 100)
@@ -30,10 +30,10 @@ def run_mbtrack2(config: dict) -> None:
     include_Zlong = config.get('include_Zlong', False)
     harmonic_cavity = config.get('harmonic_cavity', False)
     feedback_tau = config.get('feedback_tau', 0)
+    feedback_phase = config.get('feedback_phase', -90)
     sc = config.get('sc', False)
     ibs = config.get('ibs', False)
     wake_types = config.get('wake_types', ['Wydip'])
-    emittance_ratio = config.get('emittance_ratio', 0.3)
     n_bunches = config.get('n_bunches', 32)
     csr_flag = config.get('csr', False)
 
@@ -52,42 +52,10 @@ def run_mbtrack2(config: dict) -> None:
     np.random.seed(42)
     mybunch.init_gaussian()
     stdx, stdy = np.std(mybunch['x']), np.std(mybunch['y'])
-    sanitized_list = [str(v).replace("'", "").replace('"', '') for v in
-                      wake_types]
-    wake_types_str = "-".join(sanitized_list)
-    if emittance_control_method == "white_noise":
-        emittance_control_details = ""
-    elif emittance_control_method == "skew_quadrupole":
-        emittance_control_details = (
-            f",base_er={ring.emit[1] / ring.emit[0]:.3f}"
-            f",skew_k={emittance_control_element.strength:.2e}"
-            f",skew_qx={ring.tune[0]:.3f}"
-            f",skew_qy={ring.tune[1]:.3f}"
-        )
-    else:
-        emittance_control_details = (
-            f",base_er={ring.emit[1] / ring.emit[0]:.3f}"
-            f",ac_k={emittance_control_element.strength:.2e}"
-            f",ac_f={emittance_control_element.frequency:.4f}"
-        )
-
-    monitor_filename = folder + f"mon(nmp={n_macroparticles:.1e}," + \
-        f"nt={n_turns:.1e}," +\
-        f"nb={n_bin:},"+\
-        f"I={bunch_current:.2e},"+\
-        f"Qpx={Qp_x:.2f},"+\
-        f"Qpy={Qp_y:.2f},"+\
-        f"id={id_state:},"+\
-        f"Zl={include_Zlong:},"+\
-        f"HC={harmonic_cavity:},"+\
-        f"fb_tau={feedback_tau:.1e},"+\
-        f"sc={sc:},"+\
-        f"ibs={ibs:},"+\
-        f"wakes={wake_types_str:},"\
-        f"emit_ctrl={emittance_control_method},"\
-        f"er={emittance_ratio:}" +\
-        emittance_control_details +\
-        ")"
+    monitor_filename = get_monitor_filename(
+        config,
+        tracking_script="track_TI.py",
+    )
     bunch_monitor = BunchMonitor(
         0,
         save_every=1,
@@ -141,7 +109,11 @@ def run_mbtrack2(config: dict) -> None:
         tracking_elements.append(main_rf)
     if feedback_tau != 0:
         print("Feedback system is included in tracking.")
-        fbtx, fbty = setup_bunch_by_bunch_feedback(ring, feedback_tau)
+        fbtx, fbty = setup_bunch_by_bunch_feedback(
+            ring,
+            feedback_tau,
+            feedback_phase,
+        )
         tracking_elements.append(fbtx)
         tracking_elements.append(fbty)
     if wakefield_csr:

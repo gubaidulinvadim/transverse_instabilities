@@ -30,6 +30,7 @@ def run_mbtrack2(config: dict) -> None:
     include_Zlong = config.get('include_Zlong', False)
     harmonic_cavity = config.get('harmonic_cavity', False)
     feedback_tau = config.get('feedback_tau', 0)
+    feedback_phase = config.get('feedback_phase', -90)
     sc = config.get('sc', False)
     ibs = config.get('ibs', False)
     wake_types = config.get('wake_types', ['Wydip'])
@@ -62,6 +63,7 @@ def run_mbtrack2(config: dict) -> None:
         f"Zlong={include_Zlong:},"+\
         f"cavity={harmonic_cavity:},"+\
         f"feedback_tau={feedback_tau:.1e},"+\
+        f"feedback_phase={feedback_phase:g},"+\
         f"sc={sc:},"+\
         f"ibs={ibs:},"+\
         f"wake_types={wake_types_str:},"\
@@ -120,7 +122,11 @@ def run_mbtrack2(config: dict) -> None:
         tracking_elements.append(main_rf)
     if feedback_tau != 0:
         print("Feedback system is included in tracking.")
-        fbtx, fbty = setup_bunch_by_bunch_feedback(ring, feedback_tau)
+        fbtx, fbty = setup_bunch_by_bunch_feedback(
+            ring,
+            feedback_tau,
+            feedback_phase,
+        )
         tracking_elements.append(fbtx)
         tracking_elements.append(fbty)
     if wakefield_csr:

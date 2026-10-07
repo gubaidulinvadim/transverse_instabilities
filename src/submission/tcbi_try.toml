@@ -69,5 +69,6 @@ harmonic_cavity=true
 sc = [false]
 # harmonic_cavity = [true]
 feedback_tau = [0]
+feedback_phase = [-90]
 Qp_y = 1.4
 Qp_x = [0.0]

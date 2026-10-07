@@ -52,6 +52,7 @@ id_state = 'close'
 harmonic_cavity = true
 ibs = true
 feedback_tau = 0
+feedback_phase = -90
 emittance_control_method = "white_noise"
 
 # =============================================================================

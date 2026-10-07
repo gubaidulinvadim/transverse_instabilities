@@ -52,6 +52,7 @@ id_state = 'close'
 harmonic_cavity = false
 ibs = true
 feedback_tau = 0
+feedback_phase = -90
 emittance_control_method = "white_noise"
 
 # =============================================================================
@@ -75,5 +76,4 @@ bunch_current = [0.0006, 0.0009, 0.0012, 0.0015, 0.0018, 0.0021, 0.0024, 0.0027,
        0.012]
 sc = [false, true]
 wake_types = [["Wxdip"], ["Wxdip", "Wxquad", "Wyquad"]]
-
 

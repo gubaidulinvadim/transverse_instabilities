@@ -35,8 +35,8 @@ n_bunches = 32
 [scan]
 sc = [false]
 harmonic_cavity = [false]
-feedback_tau = [100]
-feedback_phase = [-135, -90, -45, 0, 45, 90, 180]
+feedback_tau = [0, 100]
+feedback_phase = [-90]
 Qp_x = 1.8
-# Qp_y = [-1.0, -0.5, -0.1, 0.1, 0.5, 1.0, 1.4, 1.6, 1.8, 2.0, 2.5]
-Qp_y = [-1.0]
+Qp_y = [-1.0, -0.5, -0.1, 0.1, 0.5, 1.0, 1.4, 1.6, 1.8, 2.0, 2.5]
+# Qp_y = [-1.0]

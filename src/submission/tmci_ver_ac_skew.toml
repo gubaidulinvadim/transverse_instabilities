@@ -37,16 +37,15 @@ coupling_base_emittance_ratio = 0.02
 # ac_skew_strength = 0.001
 # ac_skew_frequency = 0.02
 ac_skew_seed = 42
-wake_types = ["Wydip", "Wxdip", "Wyquad", "Wxquad"]
+wake_types = ["Wydip", "Wyquad"]
 
 [scan]
-# bunch_current = [0.0006, 0.0009, 0.0012, 0.0015, 0.0018, 0.0021, 0.0024, 0.0027,
-#        0.003, 0.0033, 0.0036, 0.0039, 0.0042, 0.0045, 0.0048, 0.0051,
-#        0.0054, 0.0057, 0.006, 0.0063, 0.0066, 0.0069, 0.008, 0.009, 0.010,
-#        0.012]
-bunch_current = [0.008]
-ac_skew_frequency = [0.013, 0.014, 0.015, 0.016, 0.017]
-ac_skew_strength = [0.01]
+bunch_current = [0.0006, 0.0009, 0.0012, 0.0015, 0.0018, 0.0021, 0.0024, 0.0027,
+       0.003, 0.0033, 0.0036, 0.0039, 0.0042, 0.0045, 0.0048, 0.0051,
+       0.0054, 0.0057, 0.006, 0.0063, 0.0066, 0.0069, 0.008, 0.009, 0.010,
+       0.012]
+# bunch_current = [0 .008]
+ac_skew_strength = [0.01, 0]
 feedback_tau = 0
 feedback_phase = -90
-sc = [true]
+sc = [false, true]
